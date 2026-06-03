@@ -145,6 +145,7 @@ All requests also send `Accept-Language`.
 
 #### 🔓 `GET /api/opportunities/{id}/`
 - **Response:** a single `Opportunity` object (full shape, §4.1).
+- **Verified live (2026-06-03):** `images[]` = `{ id, image_url, caption_en, caption_ar, is_primary, order }`. `cim_verification`/`cim_rating`/`hcc_insurance` are objects `{ enabled, link (nullable), code, display_text }` (also exposed as flat `*_enabled`/`*_link`/`*_code`). `roi_percentage` is a **string** (e.g. `"18.00"`). Also present: `total_shares`, `purchased_shares`, `account_manager`, `Investement_Cycle` (sic), `*_en`/`*_ar` localized variants of title/description/profit_payment_system. `description` may contain HTML — render safely. Document URLs are Google-Drive share links.
 
 ### 2.3 Fees
 
