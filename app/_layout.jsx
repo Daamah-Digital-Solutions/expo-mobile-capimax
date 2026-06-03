@@ -6,19 +6,22 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import "../src/i18n"; // initialize i18next
+import { ThemeProvider, useTheme } from "../src/context/ThemeContext";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
 import { LanguageProvider, useLanguage } from "../src/context/LanguageContext";
-import colors from "../src/theme/colors";
 
-// Auth gate: keep unauthenticated users in the (auth) group, authenticated users out of it.
+// Auth gate + themed Stack. Reads theme/auth/language from context (must be inside providers).
 function RootNavigator() {
   const { isLoading, isAuthenticated } = useAuth();
-  const { isReady } = useLanguage();
+  const { isReady: langReady } = useLanguage();
+  const { isReady: themeReady, theme, statusBarStyle } = useTheme();
   const segments = useSegments();
   const router = useRouter();
 
+  const booting = isLoading || !langReady || !themeReady;
+
   useEffect(() => {
-    if (isLoading || !isReady) return;
+    if (booting) return;
     const inAuthGroup = segments[0] === "(auth)";
     // Funds/opportunities are public (matching the web), so we don't force logged-out
     // users to login here. Protected actions/screens prompt for login per-flow.
@@ -26,24 +29,28 @@ function RootNavigator() {
     if (isAuthenticated && inAuthGroup) {
       router.replace("/(tabs)/funds");
     }
-  }, [isLoading, isReady, isAuthenticated, segments]);
+  }, [booting, isAuthenticated, segments]);
 
-  if (isLoading || !isReady) {
+  if (booting) {
     return (
-      <View style={styles.splash}>
-        <ActivityIndicator size="large" color={colors.primaryLight} />
+      <View style={[styles.splash, { backgroundColor: theme.bg }]}>
+        <StatusBar style={statusBarStyle} />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.bg },
-        animation: "fade",
-      }}
-    />
+    <>
+      <StatusBar style={statusBarStyle} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: theme.bg },
+          animation: "fade",
+        }}
+      />
+    </>
   );
 }
 
@@ -51,22 +58,18 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
-        <LanguageProvider>
-          <AuthProvider>
-            <RootNavigator />
-          </AuthProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  splash: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  splash: { flex: 1, alignItems: "center", justifyContent: "center" },
 });

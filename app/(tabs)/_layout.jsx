@@ -2,12 +2,13 @@ import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import colors from "../../src/theme/colors";
+import { useTheme } from "../../src/context/ThemeContext";
 
 // Bottom tabs (CLAUDE.md §4): Funds, MyFunds, Wallet, Portfolio, Market, More.
 // Labels come from the web's sidebar.* translation keys (RTL handled by I18nManager).
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const { theme } = useTheme();
 
   const icon = (name) => ({ color, size }) => <Ionicons name={name} size={size} color={color} />;
 
@@ -15,15 +16,15 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primaryLight,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarActiveTintColor: theme.primaryLight,
+        tabBarInactiveTintColor: theme.textSecondary,
         tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
+          backgroundColor: theme.surface,
+          borderTopColor: theme.border,
           borderTopWidth: 1,
         },
         tabBarLabelStyle: { fontSize: 11 },
-        sceneContainerStyle: { backgroundColor: colors.bg },
+        sceneContainerStyle: { backgroundColor: theme.bg },
       }}
     >
       <Tabs.Screen

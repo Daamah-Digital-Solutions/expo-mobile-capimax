@@ -3,15 +3,16 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Screen from "./Screen";
-import colors from "../theme/colors";
+import { useTheme } from "../context/ThemeContext";
 
 export default function PlaceholderScreen({ title, icon = "construct-outline", note }) {
+  const { theme } = useTheme();
   return (
     <Screen>
       <View style={styles.center}>
-        <Ionicons name={icon} size={48} color={colors.primaryLight} />
-        <Text style={styles.title}>{title}</Text>
-        {note ? <Text style={styles.note}>{note}</Text> : null}
+        <Ionicons name={icon} size={48} color={theme.primaryLight} />
+        <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
+        {note ? <Text style={[styles.note, { color: theme.textSecondary }]}>{note}</Text> : null}
       </View>
     </Screen>
   );
@@ -19,6 +20,6 @@ export default function PlaceholderScreen({ title, icon = "construct-outline", n
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, gap: 10 },
-  title: { color: colors.text, fontSize: 22, fontWeight: "700", textAlign: "center" },
-  note: { color: colors.textSecondary, fontSize: 14, textAlign: "center" },
+  title: { fontSize: 22, fontWeight: "700", textAlign: "center" },
+  note: { fontSize: 14, textAlign: "center" },
 });

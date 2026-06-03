@@ -5,11 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "capimax",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#0B0C18",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0b2928",
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#0B0C18"
+      "backgroundColor": "#0b2928"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,7 +21,7 @@
     "android": {
       "package": "com.capimax.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#0B0C18"
+        "backgroundColor": "#0b2928"
       }
     },
     "web": {

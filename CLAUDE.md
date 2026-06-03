@@ -161,18 +161,39 @@ Same backend endpoints, different UI surface:
 
 ---
 
-## 9) Theme tokens
+## 9) Theme tokens — light + dark (teal/green brand)
 
-Dashboard palette (dark navy + indigo). Put in `src/theme/colors.js`:
+**Source of truth:** `src/theme/palettes.js` (two palettes, IDENTICAL token names) exposed via
+`src/context/ThemeContext.jsx`. **Every component reads colors from `useTheme().theme` — never
+a static color import.** Mode: `auto` (follow OS via Appearance) | `light` | `dark`, persisted in
+AsyncStorage (`app.themeMode`), live re-render on change (no reload). StatusBar + native
+background flip with the mode.
+
+**RULE #4 (contrast):** text/icons on a `primary` (#2ead6f) fill are **always** `onPrimary`
+(`#0b2928`) in BOTH modes — never white. Use `theme.onPrimary`. (For an `error`/red fill, use
+white for contrast.)
+
+**DARK palette (teal/green):**
 ```
-bg #0B0C18 · surface #0F101E · surfaceAlt #1a1b31 · card #141528
-border rgba(255,255,255,.10) · primary #4f46e5 · primaryLight #818cf8
-text #FFFFFF · textSecondary #92939E
-success #4CAF50 · warning #FFA726 · error #f44336 · info #2196F3
-gradient brand: [#4f46e5 → #818cf8]
+bg #0b2928 · surface #103634 · surfaceAlt #14403d · card #0f312f
+border rgba(255,255,255,.10) · borderStrong rgba(255,255,255,.18)
+primary #2ead6f · primaryLight #54c98a · primaryDark #1f8a54 · onPrimary #0b2928
+text #FFFFFF · textSecondary #9bbab2 · textMuted #6f8d86
+success #2ead6f · warning #FFA726 · error #f44336 · info #2196F3
+gradient brand: [#2ead6f → #54c98a] · gradient card: [#14403d → #0b2928 → #14403d]
 ```
-Cards: gradient bg `linear(135deg, #1a1b31, #0F101E, #1a1b31)` + subtle border + 12–16 radius.
-Keep a premium feel (soft shadows, comfortable spacing).
+
+**LIGHT palette (teal/green):**
+```
+bg #F2F7F4 · surface #FFFFFF · surfaceAlt #E8F1EC · card #FFFFFF
+border rgba(11,41,40,.10) · borderStrong rgba(11,41,40,.18)
+primary #2ead6f · primaryLight #54c98a · primaryDark #1f8a54 · onPrimary #0b2928
+text #0b2928 · textSecondary #4f6f67 · textMuted #7d9a92
+success #1f9d5f · warning #E08600 · error #d32f2f · info #1976D2
+gradient brand: [#2ead6f → #54c98a] · gradient card: [#FFFFFF → #F2F7F4 → #FFFFFF]
+```
+Cards: gradient `card` bg (135deg) + subtle border + 12–16 radius (`radius.card` = 14).
+Keep a premium feel (soft shadows, comfortable spacing) in BOTH modes.
 
 ---
 
