@@ -1,5 +1,5 @@
-// Themed text input with label + inline error. Used by all forms.
-// Handles RTL text alignment and a show/hide toggle for password fields.
+// Field (DESIGN.md §7) — label + input (height 52, radius 14), 1.5px primary focus ring,
+// negative error text, show/hide for passwords. RTL-aware.
 import React, { useMemo, useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,17 +21,21 @@ export default function Field({
   onSubmitEditing,
   returnKeyType,
 }) {
-  const { theme } = useTheme();
+  const { theme, radii, type } = useTheme();
   const { isRTL } = useLanguage();
   const [hidden, setHidden] = useState(secureTextEntry);
-  const styles = useMemo(() => makeStyles(theme, isRTL), [theme, isRTL]);
+  const [focused, setFocused] = useState(false);
+  const styles = useMemo(() => makeStyles(theme, radii, isRTL), [theme, radii, isRTL]);
+
+  const borderColor = error ? theme.negative : focused ? theme.primary : theme.border;
+  const borderWidth = error || focused ? 1.5 : StyleSheet.hairlineWidth;
 
   return (
     <View style={styles.wrap}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
-      <View style={[styles.inputRow, error && styles.inputRowError, !editable && styles.inputDisabled]}>
+      {label ? <Text style={[type.label, styles.label]}>{label}</Text> : null}
+      <View style={[styles.inputRow, { borderColor, borderWidth }, !editable && styles.disabled]}>
         <TextInput
-          style={styles.input}
+          style={[type.body, styles.input]}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
@@ -44,6 +48,8 @@ export default function Field({
           maxLength={maxLength}
           onSubmitEditing={onSubmitEditing}
           returnKeyType={returnKeyType}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
         />
         {secureTextEntry ? (
           <Pressable onPress={() => setHidden((h) => !h)} hitSlop={10} style={styles.eye}>
@@ -51,33 +57,25 @@ export default function Field({
           </Pressable>
         ) : null}
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={[type.caption, styles.error]}>{error}</Text> : null}
     </View>
   );
 }
 
-const makeStyles = (theme, isRTL) =>
+const makeStyles = (theme, radii, isRTL) =>
   StyleSheet.create({
     wrap: { gap: 6 },
-    label: { color: theme.textSecondary, fontSize: 13, fontWeight: "600", textAlign: isRTL ? "right" : "left" },
+    label: { color: theme.textSecondary, textAlign: isRTL ? "right" : "left" },
     inputRow: {
       flexDirection: isRTL ? "row-reverse" : "row",
       alignItems: "center",
       backgroundColor: theme.surfaceAlt,
-      borderWidth: 1,
-      borderColor: theme.border,
-      borderRadius: 10,
-      paddingHorizontal: 12,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      height: 52,
     },
-    inputRowError: { borderColor: theme.error },
-    inputDisabled: { opacity: 0.6 },
-    input: {
-      flex: 1,
-      color: theme.text,
-      fontSize: 15,
-      paddingVertical: 12,
-      textAlign: isRTL ? "right" : "left",
-    },
+    disabled: { opacity: 0.6 },
+    input: { flex: 1, color: theme.text, textAlign: isRTL ? "right" : "left", height: "100%" },
     eye: { paddingHorizontal: 4 },
-    error: { color: theme.error, fontSize: 12, textAlign: isRTL ? "right" : "left" },
+    error: { color: theme.negative, textAlign: isRTL ? "right" : "left" },
   });

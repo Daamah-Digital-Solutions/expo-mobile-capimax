@@ -7,7 +7,8 @@ import React, { createContext, useContext, useEffect, useMemo, useState, useCall
 import { Appearance } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SystemUI from "expo-system-ui";
-import { palettes, radius } from "../theme/palettes";
+import { palettes } from "../theme/palettes";
+import { spacing, radii, radius, type, motion, makeElevation } from "../theme/tokens";
 
 const MODE_KEY = "app.themeMode"; // sits alongside the language preference
 export const THEME_MODES = ["auto", "light", "dark"];
@@ -51,9 +52,24 @@ export function ThemeProvider({ children }) {
     await AsyncStorage.setItem(MODE_KEY, next);
   }, []);
 
+  const elevation = useCallback((level) => makeElevation(scheme, theme, level), [scheme, theme]);
+
   const value = useMemo(
-    () => ({ mode, scheme, theme, radius, statusBarStyle, setMode, isReady }),
-    [mode, scheme, theme, statusBarStyle, setMode, isReady]
+    () => ({
+      mode,
+      scheme,
+      theme,
+      radius,
+      radii,
+      spacing,
+      type,
+      motion,
+      elevation,
+      statusBarStyle,
+      setMode,
+      isReady,
+    }),
+    [mode, scheme, theme, elevation, statusBarStyle, setMode, isReady]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

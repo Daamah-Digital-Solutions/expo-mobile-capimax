@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import AuthCard from "../../src/components/AuthCard";
 import Field from "../../src/components/Field";
-import Button from "../../src/components/Button";
+import AppButton from "../../src/components/AppButton";
 import Banner from "../../src/components/Banner";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useAuth } from "../../src/context/AuthContext";
@@ -113,7 +113,7 @@ export default function VerifyScreen() {
         returnKeyType="go"
       />
 
-      <Button title={t("verifyEmail.verifyEmail", "Verify Email")} onPress={onSubmit} loading={loading} disabled={!email} />
+      <AppButton title={t("verifyEmail.verifyEmail", "Verify Email")} onPress={onSubmit} loading={loading} disabled={!email} />
 
       <Pressable onPress={onResend} disabled={cooldown > 0 || resending || !email} style={styles.resend}>
         <Text style={[styles.link, (cooldown > 0 || !email) && styles.linkDisabled]}>

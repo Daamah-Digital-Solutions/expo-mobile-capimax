@@ -523,15 +523,16 @@ total_listings, total_volume, average_price, active_traders
 
 ---
 
-## 5) Theme tokens — light + dark (for reference; full spec in CLAUDE.md §9)
+## 5) Theme tokens — light (Stake) + dark (navy + green) — full spec in DESIGN.md & CLAUDE.md §9
 
-**Source of truth:** `src/theme/palettes.js` (two palettes, identical token names) via
-`useTheme()` (`src/context/ThemeContext.jsx`). Components never import colors statically.
-Mode `auto`/`light`/`dark` persisted in AsyncStorage; live re-render. **Rule #4:** content on a
-`primary` (#2ead6f) fill is always `onPrimary` (#0b2928), never white.
+**Source of truth:** `src/theme/palettes.js` (colors) + `src/theme/tokens.js` (spacing/radii/type/
+motion/elevation) via `useTheme()`. Components never import colors statically. Mode
+`auto`/`light`/`dark` persisted in AsyncStorage; live re-render. **Rule #4:** content on a `primary`
+(#2ead6f) fill is always `onPrimary` (#0b2928), never white. Elevation: shadow (light) / surface +
+hairline border (dark).
 
-- **DARK:** `bg #0b2928 · surface #103634 · surfaceAlt #14403d · card #0f312f · border rgba(255,255,255,.10) · borderStrong rgba(255,255,255,.18) · primary #2ead6f · primaryLight #54c98a · primaryDark #1f8a54 · onPrimary #0b2928 · text #FFFFFF · textSecondary #9bbab2 · textMuted #6f8d86 · success #2ead6f · warning #FFA726 · error #f44336 · info #2196F3`.
-- **LIGHT:** `bg #F2F7F4 · surface #FFFFFF · surfaceAlt #E8F1EC · card #FFFFFF · border rgba(11,41,40,.10) · borderStrong rgba(11,41,40,.18) · primary #2ead6f · primaryLight #54c98a · primaryDark #1f8a54 · onPrimary #0b2928 · text #0b2928 · textSecondary #4f6f67 · textMuted #7d9a92 · success #1f9d5f · warning #E08600 · error #d32f2f · info #1976D2`.
+- **DARK (navy):** `bg #121c30 · surface #1a2942 · surfaceAlt #223457 · card #18243c · border rgba(255,255,255,.10) · borderStrong rgba(255,255,255,.18) · primary #2ead6f · primaryLight #54c98a · primaryDark #1f8a54 · onPrimary #0b2928 · text #FFFFFF · textSecondary #9fb0c9 · textMuted #6b7a93 · positive #3ddb86 · negative #ff6b6b · warning #FFA726 · error #f44336 · info #2196F3`.
+- **LIGHT (Stake):** `bg #F4F7F5 · surface #FFFFFF · surfaceAlt #EEF3F0 · card #FFFFFF · border rgba(11,41,40,.08) · borderStrong rgba(11,41,40,.14) · primary #2ead6f · primaryLight #54c98a · primaryDark #1f8a54 · onPrimary #0b2928 · text #0b2928 · textSecondary #5a7a72 · textMuted #93aaa3 · positive #1f9d5f · negative #d64545 · warning #E08600 · error #d32f2f · info #1976D2`.
 
 ---
 

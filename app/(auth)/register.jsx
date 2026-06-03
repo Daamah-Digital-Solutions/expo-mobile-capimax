@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import AuthCard from "../../src/components/AuthCard";
 import Field from "../../src/components/Field";
-import Button from "../../src/components/Button";
+import AppButton from "../../src/components/AppButton";
 import Banner from "../../src/components/Banner";
 import GoogleSignInButton from "../../src/components/GoogleSignInButton";
 import { useTheme } from "../../src/context/ThemeContext";
@@ -105,7 +105,7 @@ export default function RegisterScreen() {
       />
       <Text style={styles.hint}>{t("resetPassword.passwordLengthError", "Password must be at least 8 characters long.")}</Text>
 
-      <Button title={t("form.sign_up", "Sign Up")} onPress={onSubmit} loading={loading} />
+      <AppButton title={t("form.sign_up", "Sign Up")} onPress={onSubmit} loading={loading} />
 
       <View style={styles.orRow}>
         <View style={styles.line} />

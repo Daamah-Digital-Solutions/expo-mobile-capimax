@@ -1,12 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, Pressable, ScrollView, StyleSheet, RefreshControl } from "react-native";
+import { View, Text, FlatList, ScrollView, StyleSheet, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import Constants from "expo-constants";
 import Screen from "../../src/components/Screen";
 import Banner from "../../src/components/Banner";
-import Button from "../../src/components/Button";
-import OpportunityCard from "../../src/components/OpportunityCard";
+import AppButton from "../../src/components/AppButton";
+import Chip from "../../src/components/Chip";
+import Card from "../../src/components/Card";
+import Skeleton from "../../src/components/Skeleton";
+import EmptyState from "../../src/components/EmptyState";
+import AssetCard from "../../src/components/AssetCard";
+import FadeInView from "../../src/components/motion/FadeInView";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { opportunityService } from "../../src/api/services";
@@ -16,9 +21,9 @@ const COUNTRIES = ["all", "UAE", "Saudi Arabia", "USA", "UK"];
 
 export default function FundsTab() {
   const { t } = useTranslation();
-  const { theme, radius } = useTheme();
+  const { theme, radii, type, spacing } = useTheme();
   const { language } = useLanguage();
-  const styles = useMemo(() => makeStyles(theme, radius), [theme, radius]);
+  const styles = useMemo(() => makeStyles(theme, radii, spacing), [theme, radii, spacing]);
 
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -50,14 +55,7 @@ export default function FundsTab() {
       setItems([]);
       const status = err?.response?.status ?? "network-error";
       setError(err?.response?.data?.message || err?.message || t("common.error", "Error"));
-      setDebug({
-        status,
-        count: null,
-        parsed: 0,
-        url: err?.config?.url,
-        lang: err?.config?.headers?.["Accept-Language"],
-        error: err?.message,
-      });
+      setDebug({ status, count: null, parsed: 0, url: err?.config?.url, lang: err?.config?.headers?.["Accept-Language"], error: err?.message });
     }
   }, [category, country, t]);
 
@@ -84,12 +82,15 @@ export default function FundsTab() {
   }, [fetchOpportunities]);
 
   const DebugPanel = (
-    <View style={styles.debug}>
+    <Card padded style={styles.debug} level="none">
       <View style={styles.debugHeader}>
-        <Text style={styles.debugTitle}>DEBUG · data path</Text>
-        <Pressable onPress={() => setShowDebug((s) => !s)} hitSlop={10}>
-          <Ionicons name={showDebug ? "chevron-up" : "chevron-down"} size={16} color={theme.textSecondary} />
-        </Pressable>
+        <Text style={[type.micro, styles.debugTitle]}>DEBUG · data path</Text>
+        <Ionicons
+          name={showDebug ? "chevron-up" : "chevron-down"}
+          size={16}
+          color={theme.textSecondary}
+          onPress={() => setShowDebug((s) => !s)}
+        />
       </View>
       {showDebug ? (
         <View style={{ gap: 2 }}>
@@ -104,33 +105,21 @@ export default function FundsTab() {
           <Text style={[styles.debugLine, debug.error && { color: theme.error }]}>error: {String(debug.error ?? "—")}</Text>
         </View>
       ) : null}
-    </View>
+    </Card>
   );
 
-  const FilterChips = (
+  const Filters = (
     <View style={{ gap: 8 }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipScroll}>
         {COUNTRIES.map((c) => (
-          <FilterChip
-            key={c}
-            label={c === "all" ? t("common.all", "All") : c}
-            active={country === c}
-            onPress={() => setCountry(c)}
-            styles={styles}
-          />
+          <Chip key={c} label={c === "all" ? t("common.all", "All") : c} selected={country === c} onPress={() => setCountry(c)} />
         ))}
       </ScrollView>
       {categories.length ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipScroll}>
-          <FilterChip label={t("common.all", "All")} active={category === "all"} onPress={() => setCategory("all")} styles={styles} />
+          <Chip label={t("common.all", "All")} selected={category === "all"} onPress={() => setCategory("all")} />
           {categories.map((cat) => (
-            <FilterChip
-              key={cat.id ?? cat.name_en}
-              label={cat.name}
-              active={category === cat.name_en}
-              onPress={() => setCategory(cat.name_en)}
-              styles={styles}
-            />
+            <Chip key={cat.id ?? cat.name_en} label={cat.name} selected={category === cat.name_en} onPress={() => setCategory(cat.name_en)} />
           ))}
         </ScrollView>
       ) : null}
@@ -140,16 +129,15 @@ export default function FundsTab() {
   const Header = (
     <View style={styles.header}>
       <View style={styles.counterRow}>
-        <Text style={styles.heading}>{t("sidebar.funds", "Assets")}</Text>
-        <Text style={styles.counter}>
+        <Text style={[type.h1, { color: theme.text }]}>{t("sidebar.funds", "Assets")}</Text>
+        <Text style={[type.caption, { color: theme.textSecondary }]}>
           {items.length} {t("common.opportunities", "Assets")}
         </Text>
       </View>
-      {FilterChips}
+      {Filters}
       {error ? (
         <View style={{ gap: 10, marginTop: 4 }}>
-          <Banner type="error" message={error} />
-          <Button title={t("common.submit", "Retry")} variant="outline" onPress={onRefresh} icon="refresh" />
+          <Banner type="error" message={error} actionLabel={t("common.submit", "Retry")} onAction={onRefresh} />
         </View>
       ) : null}
       {DebugPanel}
@@ -159,13 +147,11 @@ export default function FundsTab() {
   if (loading) {
     return (
       <Screen>
-        {/* still show the debug panel so a hang/blank is never silent */}
-        <View style={styles.centerWrap}>
+        <View style={styles.listContent}>
           {Header}
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color={theme.primary} />
-            <Text style={styles.muted}>{t("common.loading", "Loading...")}</Text>
-          </View>
+          {[0, 1, 2].map((i) => (
+            <SkeletonCard key={i} styles={styles} radii={radii} />
+          ))}
         </View>
       </Screen>
     );
@@ -176,16 +162,27 @@ export default function FundsTab() {
       <FlatList
         data={items}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => <OpportunityCard opportunity={item} />}
+        renderItem={({ item, index }) => (
+          <FadeInView index={index} style={{ marginBottom: 14 }}>
+            <AssetCard opportunity={item} />
+          </FadeInView>
+        )}
         ListHeaderComponent={Header}
         contentContainerStyle={styles.listContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} />}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} colors={[theme.primary]} />}
         ListEmptyComponent={
           !error ? (
-            <View style={styles.center}>
-              <Ionicons name="albums-outline" size={44} color={theme.textMuted} />
-              <Text style={styles.muted}>{t("common.opportunities", "No assets found")}</Text>
-            </View>
+            <EmptyState
+              icon="albums-outline"
+              title={t("common.opportunities", "No assets")}
+              message={t("form.please_fill_in_information", "Try adjusting your filters.")}
+              actionLabel={t("common.all", "Clear filters")}
+              onAction={() => {
+                setCategory("all");
+                setCountry("all");
+              }}
+            />
           ) : null
         }
       />
@@ -193,47 +190,31 @@ export default function FundsTab() {
   );
 }
 
-function FilterChip({ label, active, onPress, styles }) {
+function SkeletonCard({ styles, radii }) {
   return (
-    <Pressable onPress={onPress} style={[styles.filterChip, active && styles.filterChipActive]}>
-      <Text style={[styles.filterChipText, active && styles.filterChipTextActive]} numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
+    <Card padded={false} style={{ marginBottom: 14 }}>
+      <Skeleton width="100%" height={0} radius={0} style={{ aspectRatio: 16 / 10 }} />
+      <View style={{ padding: 16, gap: 10 }}>
+        <Skeleton width="70%" height={20} radius={6} />
+        <Skeleton width="40%" height={14} radius={6} />
+        <View style={{ flexDirection: "row", gap: 16, marginTop: 6 }}>
+          <Skeleton width={90} height={28} radius={8} />
+          <Skeleton width={90} height={28} radius={8} />
+        </View>
+        <Skeleton width="100%" height={52} radius={radii.button} />
+      </View>
+    </Card>
   );
 }
 
-const makeStyles = (theme, radius) =>
+const makeStyles = (theme, radii, spacing) =>
   StyleSheet.create({
-    listContent: { padding: 16 },
-    centerWrap: { flex: 1, padding: 16 },
-    header: { gap: 12, marginBottom: 8 },
+    listContent: { padding: spacing.xl, gap: 0 },
+    header: { gap: 14, marginBottom: 14 },
     counterRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" },
-    heading: { color: theme.text, fontSize: 24, fontWeight: "800" },
-    counter: { color: theme.textSecondary, fontSize: 13, fontWeight: "600" },
     chipScroll: { gap: 8, paddingVertical: 2 },
-    filterChip: {
-      paddingHorizontal: 14,
-      paddingVertical: 8,
-      borderRadius: 999,
-      borderWidth: 1,
-      borderColor: theme.border,
-      backgroundColor: theme.surfaceAlt,
-    },
-    filterChipActive: { backgroundColor: theme.primary, borderColor: theme.primary },
-    filterChipText: { color: theme.textSecondary, fontSize: 13, fontWeight: "600" },
-    filterChipTextActive: { color: theme.onPrimary },
-    center: { alignItems: "center", justifyContent: "center", paddingVertical: 48, gap: 10, flexGrow: 1 },
-    muted: { color: theme.textSecondary, fontSize: 14 },
-    debug: {
-      backgroundColor: theme.surface,
-      borderColor: theme.borderStrong,
-      borderWidth: 1,
-      borderRadius: radius.sm,
-      padding: 10,
-      gap: 6,
-    },
+    debug: { backgroundColor: theme.surface, borderColor: theme.borderStrong, borderWidth: StyleSheet.hairlineWidth, gap: 6 },
     debugHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-    debugTitle: { color: theme.textSecondary, fontSize: 11, fontWeight: "800", letterSpacing: 1 },
-    debugLine: { color: theme.textMuted, fontSize: 11, fontFamily: undefined },
+    debugTitle: { color: theme.textSecondary, fontWeight: "800", letterSpacing: 1 },
+    debugLine: { color: theme.textMuted, fontSize: 11 },
   });

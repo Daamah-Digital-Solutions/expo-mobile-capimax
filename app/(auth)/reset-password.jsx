@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import AuthCard from "../../src/components/AuthCard";
 import Field from "../../src/components/Field";
-import Button from "../../src/components/Button";
+import AppButton from "../../src/components/AppButton";
 import Banner from "../../src/components/Banner";
 import { useTheme } from "../../src/context/ThemeContext";
 import { authService } from "../../src/api/services";

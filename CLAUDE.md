@@ -161,39 +161,44 @@ Same backend endpoints, different UI surface:
 
 ---
 
-## 9) Theme tokens — light + dark (teal/green brand)
+## 9) Theme tokens — light (Stake-style) + dark (navy + green)
 
-**Source of truth:** `src/theme/palettes.js` (two palettes, IDENTICAL token names) exposed via
-`src/context/ThemeContext.jsx`. **Every component reads colors from `useTheme().theme` — never
-a static color import.** Mode: `auto` (follow OS via Appearance) | `light` | `dark`, persisted in
-AsyncStorage (`app.themeMode`), live re-render on change (no reload). StatusBar + native
+> Full design language in **DESIGN.md** (read it alongside this file). This section is the
+> color source-of-truth summary.
+
+**Source of truth:** `src/theme/palettes.js` (two palettes, IDENTICAL token names) + design tokens
+in `src/theme/tokens.js` (spacing, radii, type, motion, elevation), all exposed via
+`src/context/ThemeContext.jsx` → `useTheme()`. **Every component reads colors/spacing/type/elevation
+from `useTheme()` — never a static import.** Mode: `auto` (follow OS via Appearance) | `light` |
+`dark`, persisted in AsyncStorage (`app.themeMode`), live re-render (no reload). StatusBar + native
 background flip with the mode.
 
 **RULE #4 (contrast):** text/icons on a `primary` (#2ead6f) fill are **always** `onPrimary`
-(`#0b2928`) in BOTH modes — never white. Use `theme.onPrimary`. (For an `error`/red fill, use
-white for contrast.)
+(`#0b2928`) in BOTH modes — never white. (For an `error`/red fill, use white for contrast.)
 
-**DARK palette (teal/green):**
+**DARK palette (navy base + green accent — brand identity):**
 ```
-bg #0b2928 · surface #103634 · surfaceAlt #14403d · card #0f312f
+bg #121c30 · surface #1a2942 · surfaceAlt #223457 · card #18243c
 border rgba(255,255,255,.10) · borderStrong rgba(255,255,255,.18)
 primary #2ead6f · primaryLight #54c98a · primaryDark #1f8a54 · onPrimary #0b2928
-text #FFFFFF · textSecondary #9bbab2 · textMuted #6f8d86
-success #2ead6f · warning #FFA726 · error #f44336 · info #2196F3
-gradient brand: [#2ead6f → #54c98a] · gradient card: [#14403d → #0b2928 → #14403d]
+text #FFFFFF · textSecondary #9fb0c9 · textMuted #6b7a93
+positive #3ddb86 · negative #ff6b6b · warning #FFA726 · error #f44336 · info #2196F3
+gradient brand: [#2ead6f → #1f8a54]
 ```
 
-**LIGHT palette (teal/green):**
+**LIGHT palette (Stake-style, primary experience):**
 ```
-bg #F2F7F4 · surface #FFFFFF · surfaceAlt #E8F1EC · card #FFFFFF
-border rgba(11,41,40,.10) · borderStrong rgba(11,41,40,.18)
+bg #F4F7F5 · surface #FFFFFF · surfaceAlt #EEF3F0 · card #FFFFFF
+border rgba(11,41,40,.08) · borderStrong rgba(11,41,40,.14)
 primary #2ead6f · primaryLight #54c98a · primaryDark #1f8a54 · onPrimary #0b2928
-text #0b2928 · textSecondary #4f6f67 · textMuted #7d9a92
-success #1f9d5f · warning #E08600 · error #d32f2f · info #1976D2
-gradient brand: [#2ead6f → #54c98a] · gradient card: [#FFFFFF → #F2F7F4 → #FFFFFF]
+text #0b2928 · textSecondary #5a7a72 · textMuted #93aaa3
+positive #1f9d5f · negative #d64545 · warning #E08600 · error #d32f2f · info #1976D2
+gradient brand: [#2ead6f → #1f8a54]
 ```
-Cards: gradient `card` bg (135deg) + subtle border + 12–16 radius (`radius.card` = 14).
-Keep a premium feel (soft shadows, comfortable spacing) in BOTH modes.
+**Elevation (DESIGN.md §3):** light = soft shadow; dark = raised surface + hairline border (no
+shadow). Flat fills — depth from elevation, not gradients (except the one brand gradient for
+hero/CTA). Radii: card 20 · button/input 14 · pill 999 · sheet 28 · badge 8. Splash/adaptive-icon
+background `#121c30`.
 
 ---
 
