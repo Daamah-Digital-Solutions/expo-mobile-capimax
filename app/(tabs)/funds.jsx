@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, FlatList, ScrollView, StyleSheet, RefreshControl } from "react-native";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import Screen from "../../src/components/Screen";
 import Banner from "../../src/components/Banner";
@@ -18,6 +19,7 @@ const COUNTRIES = ["all", "UAE", "Saudi Arabia", "USA", "UK"];
 
 export default function FundsTab() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { theme, radii, type, spacing } = useTheme();
   const { language } = useLanguage();
   const styles = useMemo(() => makeStyles(theme, radii, spacing), [theme, radii, spacing]);
@@ -115,7 +117,8 @@ export default function FundsTab() {
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item, index }) => (
           <FadeInView index={index} style={{ marginBottom: 14 }}>
-            <AssetCard opportunity={item} />
+            {/* "Learn More" / card tap → opportunity detail page (built next phase). */}
+            <AssetCard opportunity={item} onPress={() => router.push(`/opportunity/${item.id}`)} />
           </FadeInView>
         )}
         ListHeaderComponent={Header}

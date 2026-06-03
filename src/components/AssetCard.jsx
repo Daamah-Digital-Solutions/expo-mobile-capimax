@@ -21,7 +21,7 @@ function money(v) {
   return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
-export default function AssetCard({ opportunity, onPress, onInvest }) {
+export default function AssetCard({ opportunity, onPress }) {
   const { t } = useTranslation();
   const { theme, type, radii } = useTheme();
   const { isRTL } = useLanguage();
@@ -115,9 +115,11 @@ export default function AssetCard({ opportunity, onPress, onInvest }) {
             </View>
           </View>
 
-          <PressableScale style={styles.cta} onPress={onInvest || onPress}>
-            <Text style={[type.label, styles.ctaText]}>{t("opportunity.invest", "Invest")}</Text>
-            <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={16} color={theme.onPrimary} />
+          {/* Single card action: "Learn More" → opens the opportunity detail page.
+              The Buy action lives inside the detail page, not on the card. */}
+          <PressableScale style={styles.cta} onPress={onPress}>
+            <Text style={[type.label, styles.ctaText]}>{t("common.learnMore", "Learn More")}</Text>
+            <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={16} color={theme.primaryDark} />
           </PressableScale>
         </View>
       </View>
@@ -154,14 +156,17 @@ const makeStyles = (theme, radii, isRTL) =>
     statLabel: { color: theme.textMuted, textTransform: "uppercase", letterSpacing: 0.4 },
     statValue: { color: theme.text },
 
+    // Secondary (navigational) button — primary outline, not a green money CTA.
     cta: {
       flexDirection: isRTL ? "row-reverse" : "row",
       alignItems: "center",
-      gap: 2,
+      gap: 3,
       height: 40,
       paddingHorizontal: 16,
       borderRadius: radii.button,
-      backgroundColor: theme.primary,
+      borderWidth: 1,
+      borderColor: theme.primary,
+      backgroundColor: "transparent",
     },
-    ctaText: { color: theme.onPrimary, fontWeight: "700" },
+    ctaText: { color: theme.primaryDark, fontWeight: "700" },
   });

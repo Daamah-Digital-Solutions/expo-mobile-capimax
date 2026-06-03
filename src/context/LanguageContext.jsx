@@ -1,51 +1,88 @@
-// LanguageContext — current language + RTL handling (CLAUDE.md §8).
-// Preference is non-sensitive → stored in AsyncStorage (not SecureStore).
-// Switching to Arabic enables RTL via I18nManager. A full native layout flip needs an app
-// reload; the JS direction (`direction`) is exposed so components can adapt immediately.
+// LanguageContext — language + deterministic RTL (CLAUDE.md §8, DESIGN.md §10).
+//
+// RTL correctness rule: English = LTR always, Arabic = RTL always — including after login and
+// after a full reload. The native I18nManager RTL flag only applies after an app reload, so we
+// reconcile it with the saved language at boot (and on change): if native direction != language,
+// force the correct direction and do a ONE-TIME full reload (expo-updates). A persisted guard
+// prevents any reload loop. Preference is non-sensitive → AsyncStorage.
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { I18nManager } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Updates from "expo-updates";
 import i18n, { isRTLLanguage, SUPPORTED_LANGUAGES } from "../i18n";
 
 const STORAGE_KEY = "app.language";
+const RELOAD_GUARD = "app.rtl.reloadGuard";
 const LanguageContext = createContext(null);
 
+async function reloadApp() {
+  try {
+    await Updates.reloadAsync();
+  } catch (e) {
+    // Dev fallback (Updates.reloadAsync can be unavailable in some dev contexts).
+    try {
+      const { DevSettings } = require("react-native");
+      DevSettings.reload();
+    } catch {}
+  }
+}
+
 export function LanguageProvider({ children }) {
-  const [language, setLanguageState] = useState(i18n.language || "en");
+  const [language, setLanguageState] = useState("en");
   const [isReady, setIsReady] = useState(false);
 
-  const applyLanguage = useCallback(async (lng) => {
-    await i18n.changeLanguage(lng);
-    const rtl = isRTLLanguage(lng);
-    I18nManager.allowRTL(rtl);
-    if (I18nManager.isRTL !== rtl) {
-      // Takes full effect after the next app reload; text/labels update immediately.
-      I18nManager.forceRTL(rtl);
-    }
-    setLanguageState(lng);
-  }, []);
-
-  // Load saved preference on mount.
+  // Boot: load saved language, then make sure the NATIVE RTL direction matches it.
   useEffect(() => {
     (async () => {
+      let lng = "en";
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        const lng = SUPPORTED_LANGUAGES.includes(saved) ? saved : "en";
-        await applyLanguage(lng);
-      } finally {
+        if (SUPPORTED_LANGUAGES.includes(saved)) lng = saved;
+      } catch {}
+
+      await i18n.changeLanguage(lng);
+      setLanguageState(lng);
+
+      const desiredRTL = isRTLLanguage(lng); // en → false, ar → true
+      I18nManager.allowRTL(desiredRTL);
+
+      if (I18nManager.isRTL !== desiredRTL) {
+        // Native direction is stale (e.g. English stuck RTL from a previous Arabic session).
+        const guarded = await AsyncStorage.getItem(RELOAD_GUARD);
+        if (guarded) {
+          // We already reloaded once and it still didn't apply — don't loop. Render anyway;
+          // components also mirror via the language-derived isRTL flag.
+          await AsyncStorage.removeItem(RELOAD_GUARD);
+          setIsReady(true);
+        } else {
+          await AsyncStorage.setItem(RELOAD_GUARD, "1");
+          I18nManager.forceRTL(desiredRTL);
+          await reloadApp(); // one-time reload to apply the correct direction; do not mark ready
+        }
+      } else {
+        await AsyncStorage.removeItem(RELOAD_GUARD);
         setIsReady(true);
       }
     })();
-  }, [applyLanguage]);
+  }, []);
 
-  const setLanguage = useCallback(
-    async (lng) => {
-      if (!SUPPORTED_LANGUAGES.includes(lng)) return;
-      await AsyncStorage.setItem(STORAGE_KEY, lng);
-      await applyLanguage(lng);
-    },
-    [applyLanguage]
-  );
+  const setLanguage = useCallback(async (lng) => {
+    if (!SUPPORTED_LANGUAGES.includes(lng)) return;
+    await AsyncStorage.setItem(STORAGE_KEY, lng);
+
+    const desiredRTL = isRTLLanguage(lng);
+    if (I18nManager.isRTL !== desiredRTL) {
+      // Direction actually changes (en↔ar) → must reload to apply the native flip.
+      I18nManager.allowRTL(desiredRTL);
+      I18nManager.forceRTL(desiredRTL);
+      await AsyncStorage.setItem(RELOAD_GUARD, "1"); // boot clears it once applied
+      await reloadApp();
+    } else {
+      // Same direction (shouldn't happen for en↔ar, but safe) → no reload needed.
+      await i18n.changeLanguage(lng);
+      setLanguageState(lng);
+    }
+  }, []);
 
   const value = {
     language,
