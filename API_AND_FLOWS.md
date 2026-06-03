@@ -95,6 +95,7 @@ All requests also send `Accept-Language`.
 - **Request:** `{ username, email, password }` (all `.trim()`ed).
 - **Response read:** `response.data.success` (bool), `response.data.message`, `response.data.errors` (field→messages object on failure).
 - On success the web navigates to verify-email (no token returned here).
+- **Verified live (2026-06-03):** validation failure → `HTTP 400 {success:false, message:"Validation failed", errors:{field:[msg]}}`.
 
 #### 🔓 `POST /api/user/token/`  (LOGIN)
 - **Request:** `{ email, password }`.
@@ -104,6 +105,7 @@ All requests also send `Accept-Language`.
   - `response.data.data.access`, `response.data.data.refresh` (JWTs)
   - `response.data.data.email`
 - See Flow A.
+- **Verified live (2026-06-03):** invalid credentials → `HTTP 401 {status:"error", code:"invalid_credentials", message:"Invalid email or password"}` (error text in `message`). Because `/api/user/token/` is public, a 401 here must NOT force logout. The mobile client treats this as a normal error and surfaces `message`. The "Account not verified" case may likewise arrive as an error envelope (handle `code`/`message` containing "not verified").
 
 #### 🔓 `POST /api/auth/google/`  (Google sign-in)
 - **Request:** `{ credential }` — the Google ID token (web sends `credentialResponse.credential` from `@react-oauth/google`). Mobile: obtain `idToken` via `expo-auth-session` and send it as `credential`.

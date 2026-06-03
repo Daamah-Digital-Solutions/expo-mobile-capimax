@@ -102,17 +102,22 @@ export function AuthProvider({ children }) {
         if (inner?.is_verified === false || data?.error === "Account not verified") {
           return { status: "unverified", email: inner?.email || email };
         }
-        if (inner?.access) {
-          await applyTokens({ access: inner.access, refresh: inner.refresh, email: inner.email || email });
+        const access = inner?.access || data?.access; // contract: data.data.access (fallback to top-level)
+        if (access) {
+          await applyTokens({ access, refresh: inner?.refresh || data?.refresh, email: inner?.email || email });
           return { status: "success" };
         }
-        return { status: "error", message: data?.error || "Login failed" };
+        return { status: "error", message: data?.message || data?.error || "Login failed" };
       } catch (err) {
+        // Live backend returns 401 {status:"error", code, message} for bad creds (public
+        // endpoint → no forced logout). The unverified case may also arrive as an error envelope.
         const apiErr = err?.response?.data;
-        if (apiErr?.error === "Account not verified") {
+        const code = apiErr?.code;
+        const msg = apiErr?.message || apiErr?.error || apiErr?.detail;
+        if (apiErr?.error === "Account not verified" || code === "account_not_verified" || /not\s*verified/i.test(msg || "")) {
           return { status: "unverified", email };
         }
-        return { status: "error", message: apiErr?.error || apiErr?.detail || err.message };
+        return { status: "error", message: msg || err.message };
       }
     },
     [applyTokens]
