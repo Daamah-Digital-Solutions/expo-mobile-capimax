@@ -4,6 +4,11 @@
 > **Goal:** build a professional React Native + Expo mobile app for the CapiMax investment
 > platform that reuses the **exact same backend and the exact same flows** as the existing web
 > dashboard — without inventing any endpoint and without any mock/placeholder data.
+>
+> **Read these companion docs every session too:**
+> - **`STATE.md`** — current project state: what's built, what's next, conventions, deferred items. **Start here to get oriented.**
+> - **`API_AND_FLOWS.md`** — the API contract (endpoints, flows, entity shapes, open questions §6).
+> - **`DESIGN.md`** — the design language (Stake-style, palettes, component library, motion).
 
 ---
 
@@ -152,12 +157,22 @@ Same backend endpoints, different UI surface:
 
 ## 8) i18n / RTL
 
-- Copy the two translation files from the web (`public/locales/en/translation.json`,
-  `public/locales/ar/translation.json`) into `src/locales/`.
-- Reuse the existing translation keys (sidebar.*, wallet.*, account.*, investForm.*,
-  internalMarket.* …). Don't invent new keys unless necessary, and add them to both files.
-- When switching to Arabic, enable RTL (`I18nManager.forceRTL(true)`) and reload if needed.
-  Ensure directional icons/arrows flip.
+- Translation files copied from the web live in `src/locales/{en,ar}.json`. Reuse existing keys
+  (`sidebar.*`, `common.*`, `form.*`, `verifyEmail.*`, `opportunity.*`, `wallet.*`, …). New keys
+  added this project: `tabs.*` (short tab labels) and a few `opportunity.*` badge labels — always
+  add to **both** files.
+- **RTL is implemented in `src/context/LanguageContext.jsx` (working, verified on device):**
+  - **English = LTR always, Arabic = RTL always** — including after login and after any reload.
+  - `I18nManager.forceRTL` only takes effect after a full app reload, so we **reconcile** the native
+    RTL flag with the saved language at boot AND on change: `en` → force LTR, `ar` → force RTL.
+  - On a direction mismatch (native `isRTL` ≠ language) we do a **one-time full reload** via
+    `expo-updates` `reloadAsync()` (dev fallback `DevSettings.reload()`), guarded by a persisted
+    `app.rtl.reloadGuard` so it can never reload-loop.
+  - The saved language is read **before first layout** (render gated by `isReady`) so we never render
+    one direction then flip. Components also mirror via the language-derived `isRTL` from `useLanguage()`.
+  - **Do NOT** call `forceRTL` ad-hoc elsewhere or change this flow without re-verifying both
+    directions across login + cold start. Directional icons/arrows (chevrons) flip via `isRTL`;
+    numbers stay LTR.
 
 ---
 

@@ -412,20 +412,39 @@ All requests also send `Accept-Language`.
 
 ### 4.1 Opportunity
 ```
-id, title, description (may contain HTML), status, country,
-cover_image_url, available_shares, price_per_share, contract_type, insurance (bool),
-total_investment, duration (months), roi_percentage (nullable),
-profit_payment_system (nullable), minimum_shares, code (investment code),
-category: { name, name_en },
+id, title, title_en, title_ar,
+description, description_en, description_ar  (MAY contain HTML → render safely),
+status (e.g. "ACTIVE"), country (e.g. "UAE"),
+cover_image_url, available_shares (number), total_shares, purchased_shares,
+price_per_share (STRING, e.g. "5000.00" → parseFloat),
+contract_type (e.g. "closed"), insurance (bool),
+total_investment (STRING/number), duration (months, number),
+roi_percentage (STRING, e.g. "18.00" → Number; nullable),
+profit_payment_system (+ _en/_ar, nullable), minimum_shares, code (asset code, e.g. "T7MW3JS4"),
+account_manager, Investement_Cycle (sic — backend typo, use the key AS-IS),
+category: { id, name, name_en, name_ar, ... },
 created_at, updated_at,
-cim_verification: { enabled, display_text, link, code },
-cim_rating:       { enabled, display_text, link, code },
-hcc_insurance:    { enabled, display_text, link, code },
+cim_verification: { enabled, display_text, link (nullable), code },   // also flat cim_verification_enabled/_link/_code
+cim_rating:       { enabled, display_text, link (nullable), code },   // also flat cim_rating_*
+hcc_insurance:    { enabled, display_text, link (nullable), code },   // also flat hcc_insurance_*
 request_copy_url, investement_offer_copy_url, acceptance_investement_offer_copy_url,
 investement_document_contract_summary_url, agency_based_investement_agreement_url,
-investement_agreement_url,
-images: [ { id, image_url, caption_en, caption_ar, is_primary, order } ]
+investement_agreement_url,                                            // (all Google-Drive share links)
+images: [ { id, image_url, caption_en, caption_ar, is_primary, order } ]   // sort: is_primary first, then order
 ```
+> **Type warning (verified live):** `price_per_share`, `roi_percentage`, `total_investment` come back
+> as **strings** — `parseFloat`/`Number` before math/formatting. `images[]` is a real gallery.
+
+**Document URL → display-label mapping** (mobile detail page, web labels):
+| field | i18n key (`opportunity.*`) | en label |
+|---|---|---|
+| `request_copy_url` | `requestForm` | Capimax agreement |
+| `investement_offer_copy_url` | `investmentOffer` | Insurance agreement |
+| `acceptance_investement_offer_copy_url` | `investmentOfferAcceptance` | Evaluation report |
+| `investement_document_contract_summary_url` | `investmentContractSummary` | Shareholder agreement |
+| `agency_based_investement_agreement_url` | `agencyBasedInvestmentAgreement` | Presentation |
+| `investement_agreement_url` | `investmentAgreement` | Other |
+
 Card badges/fields: `status`, CIM Verified/Rated (from `cim_verification`/`cim_rating`), HCC Insured (`hcc_insurance`), `country`, `available_shares`, `price_per_share`, `contract_type`, `insurance`, `cover_image_url`.
 
 ### 4.2 User / Profile  (`GET /api/users/me/`)
