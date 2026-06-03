@@ -12,12 +12,13 @@ export default function ReturnPill({ value, suffix = "%", onImage = false, showI
   const n = Number(value) || 0;
   const positive = n >= 0;
   const toneColor = positive ? theme.positive : theme.negative;
-  const bg = onImage ? "rgba(0,0,0,0.45)" : toneColor + "22";
+  const bg = onImage ? "rgba(0,0,0,0.38)" : toneColor + "22";
   const fg = onImage ? (positive ? theme.primaryLight : "#ff9b9b") : toneColor;
+  const onImageBorder = onImage ? { borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.22)" } : null;
   const sign = positive ? "+" : "";
 
   return (
-    <View style={[styles.pill, { backgroundColor: bg }, style]}>
+    <View style={[styles.pill, { backgroundColor: bg }, onImageBorder, style]}>
       {showIcon ? <Ionicons name={positive ? "trending-up" : "trending-down"} size={12} color={fg} /> : null}
       <Text style={[type.micro, { color: fg }]}>
         {sign}

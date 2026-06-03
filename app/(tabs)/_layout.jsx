@@ -11,7 +11,7 @@ export default function TabsLayout() {
   const { t } = useTranslation();
   const { theme, scheme } = useTheme();
 
-  const icon = (name) => ({ color, size }) => <Ionicons name={name} size={size} color={color} />;
+  const icon = (name) => ({ color }) => <Ionicons name={name} size={24} color={color} />;
 
   const elevatedTabBar =
     scheme === "light"
@@ -39,15 +39,16 @@ export default function TabsLayout() {
           ...elevatedTabBar,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        // Short labels so nothing truncates (tabs.* keys, translated in both languages).
         sceneStyle: { backgroundColor: theme.bg },
       }}
     >
-      <Tabs.Screen name="funds" options={{ title: t("sidebar.funds", "Assets"), tabBarIcon: icon("albums-outline") }} />
-      <Tabs.Screen name="myfunds" options={{ title: t("sidebar.myFunds", "My Holdings"), tabBarIcon: icon("briefcase-outline") }} />
-      <Tabs.Screen name="wallet" options={{ title: t("sidebar.wallet", "Wallet"), tabBarIcon: icon("wallet-outline") }} />
-      <Tabs.Screen name="portfolio" options={{ title: t("sidebar.portfolio", "Portfolio"), tabBarIcon: icon("stats-chart-outline") }} />
-      <Tabs.Screen name="market" options={{ title: t("sidebar.internalMarket", "Internal Market"), tabBarIcon: icon("swap-horizontal-outline") }} />
-      <Tabs.Screen name="more" options={{ title: t("sidebar.more", "More"), tabBarIcon: icon("ellipsis-horizontal-outline") }} />
+      <Tabs.Screen name="funds" options={{ title: t("tabs.assets", "Assets"), tabBarIcon: icon("albums-outline") }} />
+      <Tabs.Screen name="myfunds" options={{ title: t("tabs.holdings", "Holdings"), tabBarIcon: icon("briefcase-outline") }} />
+      <Tabs.Screen name="wallet" options={{ title: t("tabs.wallet", "Wallet"), tabBarIcon: icon("wallet-outline") }} />
+      <Tabs.Screen name="portfolio" options={{ title: t("tabs.portfolio", "Portfolio"), tabBarIcon: icon("stats-chart-outline") }} />
+      <Tabs.Screen name="market" options={{ title: t("tabs.market", "Market"), tabBarIcon: icon("swap-horizontal-outline") }} />
+      <Tabs.Screen name="more" options={{ title: t("tabs.more", "More"), tabBarIcon: icon("ellipsis-horizontal-outline") }} />
     </Tabs>
   );
 }

@@ -1,11 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, FlatList, ScrollView, StyleSheet, RefreshControl } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import Constants from "expo-constants";
 import Screen from "../../src/components/Screen";
 import Banner from "../../src/components/Banner";
-import AppButton from "../../src/components/AppButton";
 import Chip from "../../src/components/Chip";
 import Card from "../../src/components/Card";
 import Skeleton from "../../src/components/Skeleton";
@@ -32,10 +29,6 @@ export default function FundsTab() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const [showDebug, setShowDebug] = useState(true);
-  const [debug, setDebug] = useState({});
-
-  const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 
   const fetchOpportunities = useCallback(async () => {
     setError("");
@@ -43,19 +36,9 @@ export default function FundsTab() {
       const res = await opportunityService.getOpportunities({ categoryName: category, country });
       const results = Array.isArray(res?.data?.results) ? res.data.results : [];
       setItems(results);
-      setDebug({
-        status: res?.status,
-        count: res?.data?.count,
-        parsed: results.length,
-        url: res?.config?.url,
-        lang: res?.config?.headers?.["Accept-Language"],
-        error: null,
-      });
     } catch (err) {
       setItems([]);
-      const status = err?.response?.status ?? "network-error";
       setError(err?.response?.data?.message || err?.message || t("common.error", "Error"));
-      setDebug({ status, count: null, parsed: 0, url: err?.config?.url, lang: err?.config?.headers?.["Accept-Language"], error: err?.message });
     }
   }, [category, country, t]);
 
@@ -81,35 +64,8 @@ export default function FundsTab() {
     fetchOpportunities().finally(() => setRefreshing(false));
   }, [fetchOpportunities]);
 
-  const DebugPanel = (
-    <Card padded style={styles.debug} level="none">
-      <View style={styles.debugHeader}>
-        <Text style={[type.micro, styles.debugTitle]}>DEBUG · data path</Text>
-        <Ionicons
-          name={showDebug ? "chevron-up" : "chevron-down"}
-          size={16}
-          color={theme.textSecondary}
-          onPress={() => setShowDebug((s) => !s)}
-        />
-      </View>
-      {showDebug ? (
-        <View style={{ gap: 2 }}>
-          <Text style={styles.debugLine}>baseURL: {String(apiUrl)}</Text>
-          <Text style={styles.debugLine}>Accept-Language: {String(debug.lang ?? i18n.language)}</Text>
-          <Text style={styles.debugLine}>GET url: {String(debug.url ?? "/api/opportunities/")}</Text>
-          <Text style={styles.debugLine}>HTTP status: {String(debug.status ?? "—")}</Text>
-          <Text style={styles.debugLine}>
-            envelope count: {String(debug.count ?? "—")} · parsed results[]: {String(debug.parsed ?? "—")}
-          </Text>
-          <Text style={styles.debugLine}>filters → category: {category} · country: {country}</Text>
-          <Text style={[styles.debugLine, debug.error && { color: theme.error }]}>error: {String(debug.error ?? "—")}</Text>
-        </View>
-      ) : null}
-    </Card>
-  );
-
   const Filters = (
-    <View style={{ gap: 8 }}>
+    <View style={styles.filters}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipScroll}>
         {COUNTRIES.map((c) => (
           <Chip key={c} label={c === "all" ? t("common.all", "All") : c} selected={country === c} onPress={() => setCountry(c)} />
@@ -135,12 +91,7 @@ export default function FundsTab() {
         </Text>
       </View>
       {Filters}
-      {error ? (
-        <View style={{ gap: 10, marginTop: 4 }}>
-          <Banner type="error" message={error} actionLabel={t("common.submit", "Retry")} onAction={onRefresh} />
-        </View>
-      ) : null}
-      {DebugPanel}
+      {error ? <Banner type="error" message={error} actionLabel={t("common.submit", "Retry")} onAction={onRefresh} /> : null}
     </View>
   );
 
@@ -150,7 +101,7 @@ export default function FundsTab() {
         <View style={styles.listContent}>
           {Header}
           {[0, 1, 2].map((i) => (
-            <SkeletonCard key={i} styles={styles} radii={radii} />
+            <SkeletonCard key={i} radii={radii} />
           ))}
         </View>
       </Screen>
@@ -190,18 +141,18 @@ export default function FundsTab() {
   );
 }
 
-function SkeletonCard({ styles, radii }) {
+function SkeletonCard({ radii }) {
   return (
     <Card padded={false} style={{ marginBottom: 14 }}>
       <Skeleton width="100%" height={0} radius={0} style={{ aspectRatio: 16 / 10 }} />
       <View style={{ padding: 16, gap: 10 }}>
-        <Skeleton width="70%" height={20} radius={6} />
-        <Skeleton width="40%" height={14} radius={6} />
-        <View style={{ flexDirection: "row", gap: 16, marginTop: 6 }}>
-          <Skeleton width={90} height={28} radius={8} />
-          <Skeleton width={90} height={28} radius={8} />
+        <Skeleton width="70%" height={18} radius={6} />
+        <Skeleton width="40%" height={13} radius={6} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 16, marginTop: 4 }}>
+          <Skeleton width={80} height={30} radius={8} />
+          <Skeleton width={80} height={30} radius={8} />
+          <Skeleton width={84} height={40} radius={12} style={{ marginLeft: "auto" }} />
         </View>
-        <Skeleton width="100%" height={52} radius={radii.button} />
       </View>
     </Card>
   );
@@ -209,12 +160,10 @@ function SkeletonCard({ styles, radii }) {
 
 const makeStyles = (theme, radii, spacing) =>
   StyleSheet.create({
-    listContent: { padding: spacing.xl, gap: 0 },
-    header: { gap: 14, marginBottom: 14 },
+    listContent: { padding: spacing.xl },
+    // Generous gap between the filter block and the first card (Stake "air").
+    header: { gap: 14, marginBottom: 22 },
     counterRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" },
+    filters: { gap: 10 },
     chipScroll: { gap: 8, paddingVertical: 2 },
-    debug: { backgroundColor: theme.surface, borderColor: theme.borderStrong, borderWidth: StyleSheet.hairlineWidth, gap: 6 },
-    debugHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-    debugTitle: { color: theme.textSecondary, fontWeight: "800", letterSpacing: 1 },
-    debugLine: { color: theme.textMuted, fontSize: 11 },
   });

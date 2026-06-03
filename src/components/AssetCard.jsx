@@ -1,8 +1,8 @@
 // AssetCard (DESIGN.md §7) — the hero card for the Funds list.
-// Full-bleed 16:10 cover + scrim, type chip (top-start), return pill (top-end), body with
-// title/location/trust badges/divider/two stat columns + CTA. Photo-forward, big-number.
+// Photo-forward 16:10 cover + scrim, type chip (top-start), return pill (top-end), compact body
+// with title (h2/600, tight leading), location, ≤2 trust badges (+N), and an inline stats+CTA row.
 import React, { useMemo, useState } from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
@@ -10,8 +10,8 @@ import { useTranslation } from "react-i18next";
 import Card from "./Card";
 import Badge from "./Badge";
 import ReturnPill from "./ReturnPill";
-import AppButton from "./AppButton";
 import Skeleton from "./Skeleton";
+import PressableScale from "./motion/PressableScale";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -21,7 +21,7 @@ function money(v) {
   return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
-export default function AssetCard({ opportunity, onPress, ctaLabel }) {
+export default function AssetCard({ opportunity, onPress, onInvest }) {
   const { t } = useTranslation();
   const { theme, type, radii } = useTheme();
   const { isRTL } = useLanguage();
@@ -31,7 +31,6 @@ export default function AssetCard({ opportunity, onPress, ctaLabel }) {
   const [loaded, setLoaded] = useState(false);
   const imgOpacity = useSharedValue(0);
   const imgStyle = useAnimatedStyle(() => ({ opacity: imgOpacity.value }));
-
   const onImgLoad = () => {
     setLoaded(true);
     imgOpacity.value = withTiming(1, { duration: 200 });
@@ -42,6 +41,15 @@ export default function AssetCard({ opportunity, onPress, ctaLabel }) {
   const hcc = o.hcc_insurance_enabled || o.hcc_insurance?.enabled;
   const roi = o.roi_percentage != null ? Number(o.roi_percentage) : null;
 
+  // Trust badges — priority CIM Verified + Insured, then the rest; show at most 2 (+N).
+  const badgeDefs = [];
+  if (verified) badgeDefs.push({ key: "v", label: t("opportunity.cimVerified", "CIM Verified"), icon: "checkmark-circle-outline", tone: "primary" });
+  if (o.insurance === true) badgeDefs.push({ key: "i", label: t("opportunity.insured", "Insured"), icon: "shield-checkmark-outline", tone: "positive" });
+  if (rated) badgeDefs.push({ key: "r", label: t("opportunity.cimRated", "CIM Rated"), icon: "star-outline", tone: "primary" });
+  if (hcc) badgeDefs.push({ key: "h", label: t("opportunity.hccInsured", "HCC Insured"), icon: "shield-outline", tone: "positive" });
+  const shownBadges = badgeDefs.slice(0, 2);
+  const extraBadges = badgeDefs.length - shownBadges.length;
+
   return (
     <Card pressable onPress={onPress} padded={false}>
       {/* Cover image */}
@@ -49,12 +57,7 @@ export default function AssetCard({ opportunity, onPress, ctaLabel }) {
         {o.cover_image_url ? (
           <>
             {!loaded ? <Skeleton width="100%" height="100%" radius={0} style={StyleSheet.absoluteFill} /> : null}
-            <Animated.Image
-              source={{ uri: o.cover_image_url }}
-              style={[StyleSheet.absoluteFill, imgStyle]}
-              resizeMode="cover"
-              onLoad={onImgLoad}
-            />
+            <Animated.Image source={{ uri: o.cover_image_url }} style={[StyleSheet.absoluteFill, imgStyle]} resizeMode="cover" onLoad={onImgLoad} />
           </>
         ) : (
           <View style={[StyleSheet.absoluteFill, styles.fallback]}>
@@ -62,10 +65,8 @@ export default function AssetCard({ opportunity, onPress, ctaLabel }) {
           </View>
         )}
 
-        {/* bottom scrim for legibility */}
         <LinearGradient colors={["transparent", "rgba(0,0,0,0.35)"]} style={styles.scrim} pointerEvents="none" />
 
-        {/* overlays */}
         <View style={styles.overlayTop}>
           {o.contract_type ? <Badge label={String(o.contract_type).toUpperCase()} icon="document-text-outline" onImage /> : <View />}
           {roi != null ? <ReturnPill value={roi} onImage /> : null}
@@ -79,7 +80,7 @@ export default function AssetCard({ opportunity, onPress, ctaLabel }) {
 
       {/* Body */}
       <View style={styles.body}>
-        <Text style={[type.h2, styles.title]} numberOfLines={2}>
+        <Text style={styles.title} numberOfLines={2}>
           {o.title}
         </Text>
 
@@ -90,36 +91,35 @@ export default function AssetCard({ opportunity, onPress, ctaLabel }) {
           </View>
         ) : null}
 
-        {(verified || rated || hcc || o.insurance) ? (
+        {shownBadges.length ? (
           <View style={styles.badges}>
-            {verified ? <Badge label="CIM Verified" icon="checkmark-circle-outline" tone="primary" /> : null}
-            {rated ? <Badge label="CIM Rated" icon="star-outline" tone="primary" /> : null}
-            {hcc ? <Badge label="HCC Insured" icon="shield-checkmark-outline" tone="positive" /> : null}
-            {o.insurance ? <Badge label={t("common.yes", "Insured")} icon="shield-outline" tone="positive" /> : null}
+            {shownBadges.map((b) => (
+              <Badge key={b.key} label={b.label} icon={b.icon} tone={b.tone} />
+            ))}
+            {extraBadges > 0 ? <Badge label={`+${extraBadges}`} tone="neutral" /> : null}
           </View>
         ) : null}
 
         <View style={styles.divider} />
 
+        {/* Inline stats + CTA (Stake density) */}
         <View style={styles.statsRow}>
-          <View style={styles.stat}>
-            <Text style={[type.caption, styles.statLabel]}>{t("opportunity.pricePerShare", "Price / share")}</Text>
-            <Text style={[type.statNumber, styles.statValue]}>${money(o.price_per_share)}</Text>
+          <View style={styles.statsGroup}>
+            <View style={styles.stat}>
+              <Text style={[type.caption, styles.statLabel]}>{t("opportunity.pricePerShare", "Price / share")}</Text>
+              <Text style={[type.statNumber, styles.statValue]}>${money(o.price_per_share)}</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={[type.caption, styles.statLabel]}>{t("opportunity.available", "Available")}</Text>
+              <Text style={[type.statNumber, styles.statValue]}>{money(o.available_shares)}</Text>
+            </View>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.stat}>
-            <Text style={[type.caption, styles.statLabel]}>{t("common.shares", "Available")}</Text>
-            <Text style={[type.statNumber, styles.statValue]}>{money(o.available_shares)}</Text>
-          </View>
-        </View>
 
-        <AppButton
-          title={ctaLabel || t("common.viewDetails", "View details")}
-          variant="secondary"
-          onPress={onPress}
-          icon={isRTL ? "chevron-back" : "chevron-forward"}
-          style={styles.cta}
-        />
+          <PressableScale style={styles.cta} onPress={onInvest || onPress}>
+            <Text style={[type.label, styles.ctaText]}>{t("opportunity.invest", "Invest")}</Text>
+            <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={16} color={theme.onPrimary} />
+          </PressableScale>
+        </View>
       </View>
     </Card>
   );
@@ -139,22 +139,29 @@ const makeStyles = (theme, radii, isRTL) =>
       justifyContent: "space-between",
       alignItems: "flex-start",
     },
-    overlayBottom: {
-      position: "absolute",
-      bottom: 12,
-      left: 12,
-      right: 12,
-      flexDirection: isRTL ? "row-reverse" : "row",
-    },
-    body: { padding: 16, gap: 10 },
-    title: { color: theme.text, textAlign: isRTL ? "right" : "left" },
+    overlayBottom: { position: "absolute", bottom: 12, left: 12, right: 12, flexDirection: isRTL ? "row-reverse" : "row" },
+
+    body: { padding: 16, gap: 8 },
+    // h2 size but explicitly 600 + tighter leading (~1.25) — the "premium vs generic" lever.
+    title: { color: theme.text, fontSize: 20, fontWeight: "600", lineHeight: 25, textAlign: isRTL ? "right" : "left" },
     metaRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4 },
-    badges: { flexDirection: "row", flexWrap: "wrap", gap: 6, justifyContent: isRTL ? "flex-end" : "flex-start" },
-    divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.border, marginVertical: 2 },
-    statsRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center" },
-    stat: { flex: 1, gap: 3, alignItems: isRTL ? "flex-end" : "flex-start" },
-    statLabel: { color: theme.textMuted, textTransform: "uppercase", letterSpacing: 0.5 },
+    badges: { flexDirection: "row", flexWrap: "nowrap", gap: 6, justifyContent: isRTL ? "flex-end" : "flex-start" },
+    divider: { height: StyleSheet.hairlineWidth, backgroundColor: theme.border, marginTop: 2 },
+
+    statsRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", marginTop: 2 },
+    statsGroup: { flex: 1, flexDirection: isRTL ? "row-reverse" : "row", gap: 22 },
+    stat: { gap: 2, alignItems: isRTL ? "flex-end" : "flex-start" },
+    statLabel: { color: theme.textMuted, textTransform: "uppercase", letterSpacing: 0.4 },
     statValue: { color: theme.text },
-    statDivider: { width: StyleSheet.hairlineWidth, alignSelf: "stretch", backgroundColor: theme.border, marginHorizontal: 12 },
-    cta: { marginTop: 6 },
+
+    cta: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      gap: 2,
+      height: 40,
+      paddingHorizontal: 16,
+      borderRadius: radii.button,
+      backgroundColor: theme.primary,
+    },
+    ctaText: { color: theme.onPrimary, fontWeight: "700" },
   });

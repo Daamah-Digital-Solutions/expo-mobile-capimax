@@ -12,12 +12,13 @@ export default function Badge({ label, icon, tone = "primary", onImage = false, 
   const toneColor =
     tone === "positive" ? theme.positive : tone === "info" ? theme.info : tone === "neutral" ? theme.textSecondary : theme.primary;
 
-  // On an image, use a translucent dark chip with white content for legibility.
-  const bg = onImage ? "rgba(0,0,0,0.45)" : toneColor + "22";
+  // On an image, use a frosted translucent chip (not a solid block) with a hairline light edge.
+  const bg = onImage ? "rgba(0,0,0,0.38)" : toneColor + "22";
   const fg = onImage ? "#FFFFFF" : tone === "primary" ? theme.primaryDark : toneColor;
+  const onImageBorder = onImage ? { borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.22)" } : null;
 
   return (
-    <View style={[styles.badge, { backgroundColor: bg }, style]}>
+    <View style={[styles.badge, { backgroundColor: bg }, onImageBorder, style]}>
       {icon ? <Ionicons name={icon} size={12} color={fg} /> : null}
       <Text style={[type.micro, { color: fg }]} numberOfLines={1}>
         {label}

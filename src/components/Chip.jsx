@@ -31,8 +31,8 @@ const makeStyles = (theme, radii) =>
       borderRadius: radii.pill,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: theme.border,
-      backgroundColor: theme.surfaceAlt,
+      backgroundColor: theme.surface, // unselected = surface (Stake)
     },
-    selected: { backgroundColor: theme.primary + "22", borderColor: theme.primary },
+    selected: { backgroundColor: theme.primary + "22", borderColor: theme.primary }, // selected = green tint
     text: { fontWeight: "600" },
   });

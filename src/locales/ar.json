@@ -94,7 +94,7 @@
     "insurance": "التأمين",
     "shareDetails": "تفاصيل الأسهم",
     "availableShares": "الأسهم المتاحة",
-    "pricePerShare": "سعر السهم",
+    "pricePerShare": "السعر للسهم",
     "lastUpdated": "آخر تحديث",
     "importantDocuments": "المستندات الهامة",
     "requestForm": "اتفاقية كابي ماكس",
@@ -120,7 +120,14 @@
     "gallery": "معرض الصور",
     "previousImage": "الصورة السابقة",
     "nextImage": "الصورة التالية",
-    "closeImage": "إغلاق الصورة"
+    "closeImage": "إغلاق الصورة",
+    "available": "المتاح",
+    "insured": "مؤمَّن",
+    "cimVerified": "موثّق CIM",
+    "cimRated": "مصنّف CIM",
+    "hccInsured": "تأمين HCC",
+    "invest": "استثمر",
+    "viewDetails": "عرض التفاصيل"
   },
   "sidebar": {
     "funds": "الأصول المتاحة",
@@ -645,5 +652,13 @@
     "purchase": "شراء",
     "sharesToSell": "أسهم للبيع",
     "totalListingValue": "إجمالي قيمة الإدراج"
+  },
+  "tabs": {
+    "assets": "الأصول",
+    "holdings": "حيازاتي",
+    "wallet": "المحفظة",
+    "portfolio": "الأداء",
+    "market": "السوق",
+    "more": "المزيد"
   }
 }

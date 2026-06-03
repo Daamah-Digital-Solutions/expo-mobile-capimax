@@ -94,7 +94,7 @@
     "insurance": "Insurance",
     "shareDetails": "Share Details",
     "availableShares": "Available Shares",
-    "pricePerShare": "Price Per Share",
+    "pricePerShare": "Price / share",
     "lastUpdated": "Last Updated",
     "importantDocuments": "Important Documents",
     "requestForm": "Capimax agreement",
@@ -120,7 +120,14 @@
     "gallery": "Gallery",
     "previousImage": "Previous image",
     "nextImage": "Next image",
-    "closeImage": "Close image"
+    "closeImage": "Close image",
+    "available": "Available",
+    "insured": "Insured",
+    "cimVerified": "CIM Verified",
+    "cimRated": "CIM Rated",
+    "hccInsured": "HCC Insured",
+    "invest": "Invest",
+    "viewDetails": "View details"
   },
   "sidebar": {
     "funds": "Assets",
@@ -387,7 +394,7 @@
     "invalidResponse": "Invalid response from server",
     "cryptoPaymentError": "Crypto payment error",
     "payWithCrypto": "Pay with Cryptocurrency",
-    "amountToPay": "Amount to Pay: ${{amount}}",
+    "amountToPay": "Amount to Pay",
     "nowpaymentsDescription": "You will be redirected to NOWPayments secure checkout to complete your payment with cryptocurrency.",
     "cryptoDescription": "You will be redirected to Coinbase Commerce to complete your payment.",
     "continueWithCrypto": "Continue with Crypto",
@@ -397,7 +404,6 @@
     "selectCryptocurrency": "Select Cryptocurrency",
     "nowpaymentsService": "NOWPayments Service",
     "payWithCryptoDescription": "Pay with your preferred cryptocurrency using NOWPayments service",
-    "amountToPay": "Amount to Pay",
     "equivalentAmountCalculated": "The equivalent amount in cryptocurrency will be calculated at the current exchange rate",
     "creatingPayment": "Creating Payment...",
     "continueToPayment": "Continue to Payment",
@@ -665,5 +671,13 @@
     "purchase": "Purchase",
     "sharesToSell": "Shares to Sell",
     "totalListingValue": "Total Listing Value"
+  },
+  "tabs": {
+    "assets": "Assets",
+    "holdings": "Holdings",
+    "wallet": "Wallet",
+    "portfolio": "Portfolio",
+    "market": "Market",
+    "more": "More"
   }
 }
