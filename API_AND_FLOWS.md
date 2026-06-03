@@ -526,16 +526,18 @@ total_listings, total_volume, average_price, active_traders
 
 ---
 
-## 6) Open questions (resolve with owner before relying on these)
+## 6) Open questions
 
-1. **Public-endpoint regex gaps.** `POST /api/auth/google/`, `/api/forgot-password/`, `/api/reset-password/`, `/api/token/refresh/` are used without auth but are **not** in the web's `publicEndpoints` regex list. They work because they don't need a token, but the mobile client should treat them as public (no `Authorization`, and 401/403 on them must **not** trigger a forced logout). Confirm this list.
-2. **Change password has no API in the web.** `pages/change-password` is a UI-only form with no submit handler/endpoint. **What is the real change-password endpoint and payload?** (Phase 8 needs this — do not invent it.)
-3. **Fee endpoint actually used.** InvestForm uses `GET /api/fee-percentage/` + local math; `POST /api/investments/calculate-fee/` and `/validate-fee/` are defined but never called. Should mobile use the server `calculate-fee` for authority, or replicate local math? (Defaulting to local math to match web.)
-4. **Token envelope inconsistency** (`data.data.access` for login/google vs `data.token` for verify vs `data.access` for refresh) — confirm these are intentional and stable.
-5. **90-day source date.** The authoritative gate is backend `can_sell_shares` / `days_until_can_sell`; the web's `90*24h` math is display-only off `first_purchase_date`. Confirm mobile should rely solely on the backend flags (recommended).
-6. **`/api/wallet/` vs `/api/wallet/summary/`.** Web fetches both and merges; confirm which one authoritatively carries `balance`/`profit_balance`/`total_balance`/`last_profit_date` (the summary endpoint appears to).
-7. **Listing vs user-listing schema.** Market `listings` expose `seller_id` (no `status`/`created_at`); `user-listings` expose `status`/`created_at` (no `seller_id`). Confirm the two endpoints' full schemas.
-8. **Manual-payment verification.** Bank/crypto-manual/NovaPay return a pending status with no client polling. How/when does the backend confirm these, and does the contract step still run for them? (Web creates the contract right after `purchase` only for wallet/paypal/crypto-gateway paths, not bank.)
-9. **NOWPayments vs Coinbase.** Both crypto integrations exist; InvestForm/market use NOWPayments. Confirm Coinbase (`create-crypto-charge`/`crypto-status`) is deprecated/unused for mobile.
-10. **Google OAuth client IDs.** Mobile needs iOS/Android (and possibly web) Google OAuth client IDs for `expo-auth-session` — not present in the web `.env`. **Owner to provide.**
-11. **PayPal on mobile.** Reuse the same live client id via a WebView-hosted PayPal SDK page (CLAUDE.md §7). Confirm the hosting approach and that the same `process_paypal_payment` / `paypal-complete` payloads apply.
+> **Owner-reviewed 2026-06-03.** Resolutions below are binding decisions for the mobile build.
+
+1. ✅ **RESOLVED.** Treat `POST /api/auth/google/`, `/api/forgot-password/`, `/api/reset-password/`, `/api/token/refresh/` as **public** (no `Authorization`). A 401/403 on any of them must **not** force logout. (Mobile client public-endpoint list includes these in addition to the web's regex list.)
+2. ⏳ **DEFERRED (do not block, do not invent).** `pages/change-password` is UI-only with no endpoint in the web. The real change-password endpoint/payload will be **provided by the owner before Phase 8**. Until then, do not build or guess it.
+3. ✅ **RESOLVED.** Use **local fee math** to match web: `fee = base * pct / 100`, `total = base + fee`; `pct` from `GET /api/fee-percentage/` (default `2.5`). Do **not** call `calculate-fee` / `validate-fee`.
+4. ✅ **RESOLVED.** Handle the per-endpoint token envelope exactly as documented: login & Google → `response.data.data.access`/`.refresh`; verify-email → `response.data.token`; refresh → `response.data.access`.
+5. ✅ **RESOLVED.** Rely **solely on backend** `can_sell_shares` / `days_until_can_sell` for sell eligibility. The `90*24h` math is **display-only**.
+6. ✅ **RESOLVED.** `GET /api/wallet/summary/` is **authoritative** for `balance`/`profit_balance`/`total_balance`/`last_profit_date`. Still fetch `GET /api/wallet/` for the base object (as the web does).
+7. ✅ **RESOLVED.** Build against the documented listing schemas (market `listings` → `seller_id`; `user-listings` → `status`/`created_at`). **Verify against live responses in Phase 7.**
+8. ⏳ **DEFERRED — match web for now.** Bank/crypto-manual/NovaPay stay pending with no client polling; **no auto-contract for bank transfer** (web creates the contract only on wallet/paypal/crypto-gateway paths). Owner will confirm the verification behavior before Phase 4 is finalized.
+9. ✅ **RESOLVED.** Use **NOWPayments only**. Treat Coinbase (`create-crypto-charge` / `crypto-status`) as **unused — do not build it**.
+10. ⏳ **DEFERRED.** Google OAuth client IDs (iOS/Android/web) to be **provided by owner for Phase 2**. If not ready, build email/password auth first and add Google later. (`POST /api/auth/google/` contract unchanged.)
+11. ✅ **RESOLVED.** PayPal on mobile via a **WebView-hosted PayPal SDK** page reusing the same **live client id**; the same `process_paypal_payment` / `paypal-complete` payloads apply.
