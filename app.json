@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "CapiMax",
+    "slug": "capimax-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "capimax",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0C18",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0C18"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.capimax.mobile"
+    },
+    "android": {
+      "package": "com.capimax.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0C18"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "apiUrl": "https://api.capimaxinvestment.com/",
+      "paypalClientId": "AZHEGDb90rDEPUTjBV5cssSfewEAQrwG8cMy0W6NUdj8hLk_XPedJ_hhsJ0m9AG07AfsbBMbkTKhtwyw"
+    }
+  }
+}
