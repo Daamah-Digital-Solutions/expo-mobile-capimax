@@ -44,6 +44,10 @@ function ensureExt(name, mime) {
 
 const UTI_FOR = { "application/pdf": "com.adobe.pdf", "image/png": "public.png", "image/jpeg": "public.jpeg" };
 
+// Host of the API origin (e.g. "api.capimaxinvestment.com") — same-origin doc URLs are authed.
+const API_HOST = (() => { try { return baseURL.replace(/^https?:\/\//, "").split("/")[0]; } catch { return ""; } })();
+const hostOf = (url = "") => url.replace(/^https?:\/\//, "").split("/")[0];
+
 async function shareFile(uri, mimeType, dialogTitle) {
   const available = await Sharing.isAvailableAsync();
   if (!available) throw dlError("noshare", "Sharing is not available on this device");
@@ -59,23 +63,25 @@ async function openExternally(url) {
   return { mode: "opened" };
 }
 
-// Auth-protected blob (signed contract). `path` begins with /api/...
-export async function downloadAuthedAndShare({ path, fileName, mimeType = "application/pdf" }) {
-  if (!baseURL) throw dlError("failed", "Missing API base URL");
-  const url = baseURL + path;
-  const dest = FileSystem.cacheDirectory + ensureExt(sanitize(fileName), mimeType);
-  const auth = (tk) => ({ headers: { Authorization: `Bearer ${tk}` } });
+function mapStatus(res) {
+  if (res.status === 401 || res.status === 403) throw dlError("expired");
+  if (res.status === 404) throw dlError("notfound");
+  if (res.status === 400) throw dlError("notsigned");
+  if (res.status >= 400) throw dlError("failed");
+}
 
+// Download an authed URL to `dest`, sending the Bearer token; on 401 refresh once + retry
+// (mirrors the axios interceptor). Returns the FileSystem download result (with `.status`).
+async function authedDownload(url, dest) {
+  const auth = (tk) => ({ headers: { Authorization: `Bearer ${tk}` } });
   const token = await getAccessToken();
   if (!token) throw dlError("expired", "Not authenticated");
-
   let res;
   try {
     res = await FileSystem.downloadAsync(url, dest, auth(token));
   } catch (e) {
     throw dlError("failed", e?.message);
   }
-  // Expired access → refresh once + retry (mirrors the axios interceptor).
   if (res.status === 401 || res.status === 403) {
     const newTok = await refreshAccessToken();
     if (newTok) {
@@ -83,31 +89,52 @@ export async function downloadAuthedAndShare({ path, fileName, mimeType = "appli
       catch (e) { throw dlError("failed", e?.message); }
     }
   }
-  if (res.status === 401 || res.status === 403) throw dlError("expired");
-  if (res.status === 404) throw dlError("notfound");
-  if (res.status === 400) throw dlError("notsigned");
-  if (res.status >= 400) throw dlError("failed");
+  return res;
+}
 
+// Auth-protected blob (signed contract). `path` begins with /api/...
+export async function downloadAuthedAndShare({ path, fileName, mimeType = "application/pdf" }) {
+  if (!baseURL) throw dlError("failed", "Missing API base URL");
+  const dest = FileSystem.cacheDirectory + ensureExt(sanitize(fileName), mimeType);
+  const res = await authedDownload(baseURL + path, dest);
+  mapStatus(res);
   await shareFile(res.uri, mimeType, fileName);
   return { mode: "shared" };
 }
 
-// Public document URL. Drive viewer links → open externally; direct files → fetch + share.
+// Document URL — AUTO-DETECTS the right path (the live /api/documents/ is empty on the test
+// account, so all cases are handled defensively):
+//   • Google-Drive viewer link → open externally (view-only, not fetchable).
+//   • Same API origin (api.capimaxinvestment.com) or a relative "/..." path → auth-protected
+//     media → Bearer download → cache → share/save sheet.
+//   • Any other absolute URL → public direct file → fetch + share; fall back to external open.
 export async function downloadUrlAndShare({ url, fileName, mimeType }) {
   if (!url) throw dlError("failed", "No document URL");
   if (isDriveLink(url)) return openExternally(url);
 
+  const isRelative = url.startsWith("/");
+  const sameApiOrigin = isRelative || (API_HOST && hostOf(url) === API_HOST);
+  const fullUrl = isRelative ? baseURL + url : url; // baseURL has no trailing slash; url keeps its leading "/"
+
   const mime = mimeType || mimeFromName(url) || mimeFromName(fileName) || "application/pdf";
   const dest = FileSystem.cacheDirectory + ensureExt(sanitize(fileName), mime);
 
+  // Auth-protected (same origin / relative) → Bearer download with full status mapping.
+  if (sameApiOrigin) {
+    const res = await authedDownload(fullUrl, dest);
+    mapStatus(res);
+    await shareFile(res.uri, mime, fileName);
+    return { mode: "shared" };
+  }
+
+  // Public direct file → fetch without auth; any failure → open externally.
   let res;
   try {
-    res = await FileSystem.downloadAsync(url, dest);
+    res = await FileSystem.downloadAsync(fullUrl, dest);
   } catch (e) {
-    // Not directly fetchable (scheme/CORS/redirect) → open externally instead.
-    return openExternally(url);
+    return openExternally(fullUrl);
   }
-  if (res.status >= 400) return openExternally(url);
+  if (res.status >= 400) return openExternally(fullUrl);
 
   await shareFile(res.uri, mime, fileName);
   return { mode: "shared" };

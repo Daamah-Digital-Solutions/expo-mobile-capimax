@@ -502,11 +502,16 @@ data_points: number
 ```
 
 ### 4.7 Contract (user-contracts item)
+- `GET /api/contracts/user-contracts/` → `response.data.contracts` (array).
 ```
 contract_id, title (nullable), contract_type, total_amount,
-status (web shows only 'signed'), created_at, signed_at (nullable)
+status, created_at, signed_at (nullable)
 ```
-Download URL pattern: `/api/contracts/{contract_id}/download/` (PDF blob).
+**`status` (live, verified):** `'signed'` | `'pending_signature'` (a test account had 7 contracts,
+4 `signed`). **Only `'signed'` contracts are downloadable** — the Document Center filters to those.
+Download: `GET /api/contracts/{contract_id}/download/` is an **auth-protected PDF blob** (requires
+`Authorization: Bearer`; a 401 unauth-probe confirms the route). Mobile downloads it with the Bearer
+header → cache → OS share/save sheet. 400 → "must be signed", 404 → not found, 401 → expired.
 Contract detail (`GET /api/contracts/{id}/`): `contract_summary`, `contract_html`.
 
 ### 4.8 Investment group (`my_investments` item)
