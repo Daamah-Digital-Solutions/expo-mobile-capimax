@@ -147,6 +147,32 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
 
 ---
 
+## 7b) Payment methods are LIVE (real money) — Phase 4
+
+> **Owner decision (binding): ALL FIVE payment methods run against LIVE/production config.
+> There is NO sandbox/test-mode gating in the app — do NOT reintroduce one.**
+
+- `app.json extra`: `paypalEnv: "live"`, `paypalClientId` = the live PayPal client id (same as web
+  `.env.production` / `config/paypal.js`), `paypalCurrency: "USD"`, `webOrigin` for NOWPayments
+  success/cancel URLs.
+- **PayPal** → `src/components/invest/PayPalWebView.jsx` hosts the live PayPal JS SDK (capture intent,
+  card on, paylater/venmo off), captures, posts the capture back; route calls
+  `process_paypal_payment/` (refund on 500). **Real money on buyer approval.**
+- **NOWPayments** → `create-invoice/` → hosted_url in `NowPaymentsWebView.jsx` + poll
+  `status/{invoiceId}` every 5s (30-min cap). Backend holds the live NOWPayments key. **Real crypto.**
+- **Bank / Crypto-manual / NovaPay** → multipart proof upload (`process_bank_transfer` /
+  `process_crypto_transfer` / `process_novapay`); real pending payment records, manual back-office
+  verification. Bank/crypto wallet destinations are REAL (copied verbatim into
+  `src/components/invest/paymentData.js`) — do not edit without confirming against the dashboard.
+- **Contract step (3):** the **web** runs contract-create + e-signature for **ALL five** methods
+  (`handlePaymentSuccess`). Per the owner's explicit Phase-4 instruction the mobile app runs the
+  contract step for **PayPal + NOWPayments only**; bank/crypto-manual/NovaPay end at their pending
+  status (Step 4). ⚠️ If exact web parity is wanted later, route all five through the contract step.
+- **Money:** `price_per_share` is a STRING → `parseFloat`; total carried forward is rounded to 2 dp so
+  the charged amount equals the displayed amount.
+
+---
+
 ## 8) Deferred / open items (decisions locked in API_AND_FLOWS §6)
 
 - **#2 Change-password endpoint** — the web page has **no API**; owner to provide endpoint+payload

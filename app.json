@@ -37,7 +37,10 @@
     },
     "extra": {
       "apiUrl": "https://api.capimaxinvestment.com/",
-      "paypalClientId": "AZHEGDb90rDEPUTjBV5cssSfewEAQrwG8cMy0W6NUdj8hLk_XPedJ_hhsJ0m9AG07AfsbBMbkTKhtwyw"
+      "paypalClientId": "AZHEGDb90rDEPUTjBV5cssSfewEAQrwG8cMy0W6NUdj8hLk_XPedJ_hhsJ0m9AG07AfsbBMbkTKhtwyw",
+      "paypalEnv": "live",
+      "paypalCurrency": "USD",
+      "webOrigin": "https://capimaxinvestment.com"
     }
   }
 }

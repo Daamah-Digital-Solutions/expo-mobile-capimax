@@ -685,6 +685,12 @@
     "soldOut": "لا توجد حصص متاحة",
     "maxReached": "المتاح {{count}} حصة فقط",
     "platformFee": "رسوم المنصة ({{pct}}%)",
-    "totalToPay": "الإجمالي المستحق"
+    "totalToPay": "الإجمالي المستحق",
+    "paypalNote": "ستكمل الدفع بأمان عبر PayPal. الدفع بالبطاقة مدعوم.",
+    "payWithPaypal": "ادفع عبر PayPal",
+    "selectBankAccount": "اختر حساباً، حوّل المبلغ الإجمالي، ثم ارفع إثبات التحويل.",
+    "network": "الشبكة",
+    "sendExactCrypto": "أرسل بالضبط ما يعادل {{amount}} من {{currency}} على شبكة {{network}} فقط.",
+    "transactionHash": "رقم/تجزئة المعاملة"
   }
 }

@@ -14,6 +14,7 @@ import EmptyState from "../../src/components/EmptyState";
 import SectionHeader from "../../src/components/SectionHeader";
 import FadeInView from "../../src/components/motion/FadeInView";
 import AnimatedNumber from "../../src/components/motion/AnimatedNumber";
+import PaymentStep from "../../src/components/invest/PaymentStep";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { useAuth } from "../../src/context/AuthContext";
@@ -51,6 +52,7 @@ export default function InvestScreen() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [shares, setShares] = useState(""); // controlled string; parsed for math
   const [feePercentage, setFeePercentage] = useState(DEFAULT_FEE_PERCENTAGE);
+  const [payment, setPayment] = useState(null); // { transaction_id, paymentMethod, status } from Step 2
 
   const load = useCallback(async () => {
     setError("");
@@ -206,6 +208,21 @@ export default function InvestScreen() {
 
   const o = opp;
 
+  // Shared money math (Steps 1 + 2). price_per_share is a STRING → parseFloat.
+  const price = parseFloat(o.price_per_share) || 0;
+  const minShares = Math.max(1, parseInt(o.minimum_shares, 10) || 1);
+  // Available = total_shares - purchased_shares when both present, else available_shares.
+  const totalSharesN = parseInt(o.total_shares, 10);
+  const purchasedSharesN = parseInt(o.purchased_shares, 10);
+  const fromTotals = Number.isFinite(totalSharesN) && Number.isFinite(purchasedSharesN) ? totalSharesN - purchasedSharesN : NaN;
+  const maxShares = Number.isFinite(fromTotals) ? Math.max(0, fromTotals) : parseInt(o.available_shares, 10) || 0;
+  const sharesNum = parseInt(shares, 10) || 0;
+  const breakdown = calculateFee(sharesNum * price, feePercentage); // { base_amount, fee_amount, total_amount }
+  const totalAmount = Math.round((breakdown.total_amount || 0) * 100) / 100; // carried value == displayed value
+
+  const onGatewaySuccess = (result) => { setPayment(result); setStep(3); };
+  const onManualSuccess = (result) => { setPayment(result); setStep(4); };
+
   // ── Step 0 — Gate ──────────────────────────────────────────────────────────
   if (step === 0) {
     return (
@@ -301,16 +318,6 @@ export default function InvestScreen() {
 
   // ── Step 1 — Amount & fee ──────────────────────────────────────────────────
   if (step === 1) {
-    const price = parseFloat(o.price_per_share) || 0;
-    const minShares = Math.max(1, parseInt(o.minimum_shares, 10) || 1);
-    // Available = total_shares - purchased_shares when both are present, else available_shares.
-    const totalShares = parseInt(o.total_shares, 10);
-    const purchasedShares = parseInt(o.purchased_shares, 10);
-    const fromTotals = Number.isFinite(totalShares) && Number.isFinite(purchasedShares) ? totalShares - purchasedShares : NaN;
-    const maxShares = Number.isFinite(fromTotals) ? Math.max(0, fromTotals) : parseInt(o.available_shares, 10) || 0;
-
-    const sharesNum = parseInt(shares, 10) || 0;
-    const breakdown = calculateFee(sharesNum * price, feePercentage); // base/fee/total, all numeric
     const valid = sharesNum >= minShares && maxShares > 0 && sharesNum <= maxShares;
     const tooFew = sharesNum < minShares;
     const tooMany = maxShares > 0 && sharesNum > maxShares;
@@ -421,15 +428,37 @@ export default function InvestScreen() {
     );
   }
 
-  // ── Steps 2–4 — built in the next turns ────────────────────────────────────
+  // ── Step 2 — Payment (all 5 methods) ───────────────────────────────────────
+  if (step === 2) {
+    return (
+      <Screen edges={["bottom"]}>
+        {Header}
+        <PaymentStep
+          rail={StepRail}
+          opportunityId={id}
+          shares={sharesNum}
+          total={totalAmount}
+          base={breakdown.base_amount}
+          fee={breakdown.fee_amount}
+          feePercentage={feePercentage}
+          onGatewaySuccess={onGatewaySuccess}
+          onManualSuccess={onManualSuccess}
+        />
+      </Screen>
+    );
+  }
+
+  // ── Steps 3–4 — built in the next turns ────────────────────────────────────
   return (
     <Screen edges={["bottom"]}>
       {Header}
       <View style={styles.centerState}>
         <Ionicons name="construct-outline" size={44} color={theme.primary} />
-        <Text style={[type.h2, { color: theme.text, textAlign: "center" }]}>{t(`buyFlow.${STEPS[step]}`, STEPS[step])}</Text>
-        <Text style={[type.body, { color: theme.textSecondary, textAlign: "center" }]}>Phase 4 — step {step + 1} coming next.</Text>
-        <AppButton title={t("opportunity.backToOpportunities", "Back")} variant="secondary" onPress={() => setStep(step - 1)} />
+        <Text style={[type.h2, { color: theme.text, textAlign: "center" }]}>{t(`buyFlow.${STEPS[step]}`, STEPS[step] || "complete")}</Text>
+        <Text style={[type.body, { color: theme.textSecondary, textAlign: "center" }]}>
+          {payment ? `${payment.paymentMethod} · ${payment.status} · #${payment.transaction_id}` : `Phase 4 — step ${step + 1} coming next.`}
+        </Text>
+        <AppButton title={t("opportunity.backToOpportunities", "Back")} variant="secondary" onPress={() => setStep(Math.max(0, step - 1))} />
       </View>
     </Screen>
   );

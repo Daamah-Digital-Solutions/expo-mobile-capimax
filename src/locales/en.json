@@ -704,6 +704,12 @@
     "soldOut": "No shares available",
     "maxReached": "Only {{count}} shares available",
     "platformFee": "Platform fee ({{pct}}%)",
-    "totalToPay": "Total to pay"
+    "totalToPay": "Total to pay",
+    "paypalNote": "You'll complete payment securely in PayPal. Card payments are supported.",
+    "payWithPaypal": "Pay with PayPal",
+    "selectBankAccount": "Select an account, transfer the total, then upload your proof.",
+    "network": "Network",
+    "sendExactCrypto": "Send exactly {{amount}} worth of {{currency}} on the {{network}} network only.",
+    "transactionHash": "Transaction Hash / ID"
   }
 }
