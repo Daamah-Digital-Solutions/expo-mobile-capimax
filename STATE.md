@@ -17,8 +17,8 @@
 | 4 | 4-step Buy flow on `/invest/[id]`: gate → amount/fee → pay (all 5 methods, LIVE) → sign contract → complete | ✅ done |
 | 5 | Wallet (balances/summary + transactions/withdrawals) + Withdraw (Flow G) | ✅ done |
 | 6 | MyFunds (My Holdings + sell-status) + Portfolio (svg chart, refresh) | ✅ done |
-| 7 | **NEXT** — Internal Market | ⏳ |
-| 8 | Account + Edit profile (passport upload) + Change password | ⏳ |
+| 7 | Internal Market: listings/holdings/my-listings/transactions/stats + create-listing (SELL) + purchase (BUY, all 4 methods + contract) | ✅ done |
+| 8 | **NEXT** — Account + Edit profile (passport upload) + Change password | ⏳ |
 | 9 | Support / FAQ / Legal / Document center / Settings | ⏳ |
 | 10 | Polish + QA + EAS build | ⏳ |
 
@@ -34,9 +34,11 @@ app/
   index.jsx              redirect → /(tabs)/funds
   (auth)/ login, register, verify, forgot-password, reset-password   (Phase 2, all functional)
   (tabs)/ _layout (TabBar) + funds(real, P3) · wallet(real, P5) · myfunds(real, P6) ·
-          portfolio(real, P6) · market(placeholder → P7) · more(settings → P9)
+          portfolio(real, P6) · market(real, P7) · more(settings → P9)
   opportunity/[id].jsx   Opportunity detail (Phase 3)
   invest/[id].jsx        REAL 4-step Buy flow machine (Phase 4): gate→amount→payment→contract→complete
+  market/buy/[listingId].jsx  REAL internal-market BUY machine (Phase 7): shares→method→
+                         purchase→branch(wallet/bank/PayPal/crypto)→contract→success
   edit-profile.jsx       Phase-8 placeholder (Buy gate routes here when has_passport=false)
 src/
   api/ client.js (axios + interceptors + refresh), services.js (all endpoints), tokenStorage.js (SecureStore)
@@ -51,6 +53,7 @@ src/
                       FilePickerButton, paymentData.js (P4)
               wallet/ WithdrawSheet (P5)
               portfolio/ PerformanceChart (react-native-svg, P6)
+              market/ CreateListingSheet (SELL — Flow E, P7)
   auth/ googleConfig.js   utils/ passwordValidation.js, html.js
 ```
 
@@ -198,6 +201,43 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
   regressions), so it was hard-reset out (back to `6eec5f7`). When revisited, use a *different*
   approach (e.g. a dedicated sign route/modal, or `react-native-keyboard-controller`), not the
   focus-collapse toggle.
+
+---
+
+## 7d) Internal Market (Phase 7) — flow + decisions
+
+> Derived from the web `pages/internal-market/index.jsx` (read in full). LIVE payments, same as Phase 4.
+
+- **Reads** (all named arrays, never paginated): `internal-market/{listings,holdings,user-listings,
+  transactions,statistics}/` → `data.{listings,holdings,listings,transactions,statistics}`.
+- **SELL (Flow E)** — `CreateListingSheet`: only when `holding.can_sell_shares === true`; POST
+  `create-listing/` `{ investment_id, shares_to_sell, asking_price_per_share, listing_type }`. The
+  financial breakdown (normal 2% fee · fast 7.5% discount + 5% fee) is **client-side display only**
+  (exact web math) — the backend computes the real numbers. Deep-link `createListing=true&opportunityId`
+  from MyFunds opens the sheet for the matching holding (waits for holdings to load).
+- **BUY (Flow F)** — `market/buy/[listingId].jsx`: POST `purchase/` `{ listing_id, shares,
+  payment_method }` FIRST (all methods), then branch on `data.payment.status`/method:
+  wallet(completed)→contract; bank_transfer→`bank-transfer-upload/` multipart (pending, no contract);
+  credit_card→PayPal capture→`paypal-complete/`→contract; crypto→**generic** NOWPayments
+  `create-invoice/` with **`opportunityId:null`** (same endpoint as Phase 4, web parity) + 5s/30m poll
+  →contract. `market_transaction_id` = purchase `transaction.transaction_id` (or the paypal-complete
+  transaction id for cards). Success screen reads `response.data.summary` (graceful fallbacks; the
+  crypto path has no server summary so we build a display summary like the web).
+- **Contract reuse:** `ContractStep` now takes an optional `createPayload` →
+  `{ contract_type:'internal_market', market_transaction_id }`. Same typed e-sign + idempotent-400 logic.
+- ⚠️ **Two items to confirm with the owner (flagged, sensible defaults chosen — see report):**
+  1. **Bank-transfer destination:** the web shows *placeholder* bank details ("Example Bank / 1234567890")
+     — clearly mock, so NOT replicated. We reuse the **real platform `BANK_ACCOUNTS`** (the same
+     owner-confirmed accounts as the Phase-4 Buy flow). Confirm internal-market bank transfers go to
+     those same accounts.
+  2. **Gateway charge amount:** for PayPal/crypto we charge `purchaseResult.amount` (backend-authoritative)
+     when present, else the client subtotal `shares × asking_price`. The web's PayPal path used the
+     subtotal directly; we prefer the backend `amount` for live-money correctness (the web's crypto path
+     already does this). Confirm the purchase response returns an `amount` and whether the buyer pays the
+     subtotal or the fee-inclusive total.
+- **Minor divergence (intentional):** if `contracts/create` fails the web alerts and proceeds to success
+  *without* a signature; we keep `ContractStep`'s error+Retry instead (never skip the legally-binding
+  signature) — consistent with the Phase-4 Buy flow.
 
 ---
 
