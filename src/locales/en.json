@@ -48,7 +48,9 @@
     "currency": "Currency",
     "country": "Country",
     "all": "All",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "continue": "Continue",
+    "retry": "Retry"
   },
   "opportunities": {
     "title": "Available Assets",
@@ -678,5 +680,24 @@
     "portfolio": "Portfolio",
     "market": "Market",
     "more": "More"
+  },
+  "buyFlow": {
+    "title": "Buy",
+    "stepOf": "Step {{current}} of {{total}}",
+    "review": "Review",
+    "amount": "Amount",
+    "payment": "Payment",
+    "contract": "Contract",
+    "reviewTitle": "Review & verify",
+    "reviewSubtitle": "Confirm your details before buying shares in this asset.",
+    "verificationTitle": "Identity verification",
+    "verifiedReady": "You're verified and ready to buy.",
+    "passportRequired": "A verified passport is required before you can buy.",
+    "verificationPending": "Your documents are under review. You can continue once your passport is verified.",
+    "agreePrefix": "I agree to the",
+    "termsLink": "Terms & Conditions",
+    "acceptTermsHint": "Accept the terms to continue.",
+    "completeProfileHint": "Complete your profile to continue.",
+    "minSharesNote": "Minimum {{count}} shares"
   }
 }

@@ -48,7 +48,9 @@
     "currency": "العملة",
     "country": "الدولة",
     "all": "الكل",
-    "viewDetails": "عرض التفاصيل"
+    "viewDetails": "عرض التفاصيل",
+    "continue": "متابعة",
+    "retry": "إعادة المحاولة"
   },
   "opportunities": {
     "title": "الأصول المتاحة",
@@ -659,5 +661,24 @@
     "portfolio": "الأداء",
     "market": "السوق",
     "more": "المزيد"
+  },
+  "buyFlow": {
+    "title": "اشترِ",
+    "stepOf": "الخطوة {{current}} من {{total}}",
+    "review": "المراجعة",
+    "amount": "المبلغ",
+    "payment": "الدفع",
+    "contract": "العقد",
+    "reviewTitle": "المراجعة والتحقق",
+    "reviewSubtitle": "أكّد بياناتك قبل شراء حصص في هذا الأصل.",
+    "verificationTitle": "التحقق من الهوية",
+    "verifiedReady": "تم التحقق منك ويمكنك الشراء الآن.",
+    "passportRequired": "يلزم جواز سفر موثّق قبل أن تتمكن من الشراء.",
+    "verificationPending": "مستنداتك قيد المراجعة. يمكنك المتابعة بعد توثيق جواز سفرك.",
+    "agreePrefix": "أوافق على",
+    "termsLink": "الشروط والأحكام",
+    "acceptTermsHint": "اقبل الشروط للمتابعة.",
+    "completeProfileHint": "أكمل ملفك الشخصي للمتابعة.",
+    "minSharesNote": "الحد الأدنى {{count}} حصة"
   }
 }
