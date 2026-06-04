@@ -20,7 +20,7 @@
 | 7 | Internal Market: listings/holdings/my-listings/transactions/stats + create-listing (SELL) + purchase (BUY, all 4 methods + contract) | ✅ done |
 | 8 | Account (users/me) + Edit profile (Flow H passport upload) + Change-password (LIVE — OQ#2 resolved, sign-out on success) | ✅ done |
 | 9 | Contact(feedback) + FAQ + legal/[type] (terms/statement/policy) + Document Center + Our Platforms + real Settings (More) | ✅ done |
-| 10 | **NEXT** — Polish + QA + EAS build | ⏳ |
+| 10 | In progress — real PDF downloads (signed contracts + documents) ✅; remaining polish/QA pending; **EAS build deferred to the very end** (owner directive) | 🔄 |
 
 Detailed per-phase "Ready prompts" + Definitions of Done are in `BUILD_PLAN.md`.
 
@@ -38,7 +38,7 @@ app/
   contact.jsx            Contact + feedback form (P9): users/me prefill → POST feedback
   faq.jsx                FAQ accordion (P9, faq.* keys)
   legal/[type].jsx       terms-conditions (Drive link) | statement | policy-insurance (P9)
-  document-center.jsx    GET /api/documents/ → list, open externally (P9)
+  document-center.jsx    Documents (download/open) + signed-contract PDF download (P9→P10)
   platforms.jsx          Our Platforms — 3 sister sites, open externally (P9)
   opportunity/[id].jsx   Opportunity detail (Phase 3)
   invest/[id].jsx        REAL 4-step Buy flow machine (Phase 4): gate→amount→payment→contract→complete
@@ -84,6 +84,9 @@ Wallet/MyFunds/Portfolio use `Card/Banner/SegmentedControl/AnimatedNumber/EmptyS
   `babel.config.js` includes `react-native-worklets/plugin` (must be last). Respect OS reduce-motion.
 - `babel-preset-expo` is a **direct devDependency** (SDK 54 reinstall didn't hoist it → bundle broke).
 - `expo-updates` added for `Updates.reloadAsync()` (RTL one-time reload).
+- **`expo-file-system` + `expo-sharing`** (P10) for real downloads — `src/utils/fileDownload.js`.
+  Uses the file-system **LEGACY** API (`expo-file-system/legacy`) because `downloadAsync` returns the
+  HTTP status (needed for 401/404/400); the new `File` API does not. Both are in Expo Go (no dev build).
 - **Removed** `react-native-gifted-charts` + `react-native-linear-gradient` (React-19 peer conflict +
   not in Expo Go). **Phase 6 chart** = custom `src/components/portfolio/PerformanceChart.jsx` built on
   **`react-native-svg`** (already a dep) — no new chart lib; Expo-Go + New-Arch safe. Charts are LTR.
@@ -266,12 +269,12 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
   verbatim) + the functional feedback form (`pages/feedback`). Email prefilled from
   `users/me.user_details.email`; `POST /api/feedback/` `{ email, subject, message,
   email_to:'contact@capimaxinvestment.com', user_email }`; success on `data.status==='success'`.
-- ⚠️ **Document Center — signed contracts deferred.** The web doc center ALSO lists signed contracts
-  with an **auth-protected PDF blob** download (`GET /api/contracts/{id}/download/`,
-  `/api/contracts/user-contracts/`). That needs `expo-file-system` + `expo-sharing` (NOT current deps)
-  to fetch-with-token + open, and is outside the Phase-9 scope (documents only). **Deferred to Phase 10**
-  — either add those two deps (download to cache + share) or have the backend issue a signed/public URL.
-  The regular documents list (open externally) is complete.
+- ✅ **Document Center downloads — DONE in Phase 10.** Signed contracts (`GET
+  /api/contracts/user-contracts/` → `status==='signed'`) download the **auth-protected PDF blob**
+  (`GET /api/contracts/{id}/download/` with Bearer) → cache → OS share/save sheet (401/404/400 mapped).
+  Regular documents get a **Download** action (direct file → cache + share; Drive viewer link → open
+  externally). Mechanism: `src/utils/fileDownload.js` on `expo-file-system` (LEGACY API for the HTTP
+  status) + `expo-sharing` (both bundled in Expo Go). The util refreshes the token once on a 401.
 - **Platform logos** (`/platform-logos/*.svg|png`) are web-only assets → mobile uses an accent Ionicon
   per platform. Names/URLs/descriptions are the real ones (verbatim).
 - **Settings (More tab)** is now the real hub (account links + support/legal links + theme + language +
