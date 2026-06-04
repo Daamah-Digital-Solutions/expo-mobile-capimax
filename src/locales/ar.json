@@ -318,7 +318,8 @@
     "error": "فشل في تحميل المستندات. يرجى المحاولة مرة أخرى لاحقًا.",
     "noDocuments": "لا توجد مستندات متاحة",
     "noDocumentsDescription": "ستظهر مستنداتك هنا بمجرد إضافتها إلى حسابك",
-    "download": "تحميل"
+    "download": "تحميل",
+    "open": "فتح المستند"
   },
   "policyInsurance": {
     "title": "وثيقة تأمين السياسة",
@@ -594,7 +595,8 @@
     "subject": "الموضوع",
     "message": "الرسالة",
     "sendFeedback": "إرسال التعليقات",
-    "successMessage": "تم إرسال ملاحظاتك بنجاح!"
+    "successMessage": "تم إرسال ملاحظاتك بنجاح!",
+    "errorMessage": "فشل إرسال التعليقات. يرجى المحاولة مرة أخرى."
   },
   "verifyEmail": {
     "loginVerification": "التحقق من تسجيل الدخول",
@@ -670,7 +672,13 @@
     "error": "تعذّر تحميل بيانات المحفظة"
   },
   "terms_conditions": {
-    "title": "الشروط والأحكام"
+    "title": "الشروط والأحكام",
+    "subtitle": "اقرأ الشروط والأحكام الخاصة بنا",
+    "openDocument": "فتح الشروط والأحكام"
+  },
+  "more": {
+    "supportLegal": "الدعم والقانوني",
+    "version": "الإصدار"
   },
   "internalMarket": {
     "title": "السوق الداخلية",

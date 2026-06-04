@@ -317,7 +317,8 @@
     "error": "Failed to load documents. Please try again later.",
     "noDocuments": "No Documents Available",
     "noDocumentsDescription": "Your documents will appear here once they are added to your account",
-    "download": "Download"
+    "download": "Download",
+    "open": "Open Document"
   },
   "policyInsurance": {
     "title": "Policy Insurance Document",
@@ -592,7 +593,8 @@
     "subject": "Subject",
     "message": "Message",
     "sendFeedback": "Send Feedback",
-    "successMessage": "Your feedback has been sent successfully!"
+    "successMessage": "Your feedback has been sent successfully!",
+    "errorMessage": "Failed to send feedback. Please try again."
   },
   "verifyEmail": {
     "loginVerification": "Login Verification",
@@ -645,7 +647,13 @@
     "viewInvestments": "View My Holdings"
   },
   "terms_conditions": {
-    "title": "Terms & Conditions"
+    "title": "Terms & Conditions",
+    "subtitle": "Read our terms and conditions",
+    "openDocument": "Open Terms & Conditions"
+  },
+  "more": {
+    "supportLegal": "Support & Legal",
+    "version": "Version"
   },
   "portfolio": {
     "title": "Portfolio Performance",
