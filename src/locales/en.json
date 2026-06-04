@@ -192,7 +192,17 @@
     "accountNumber": "Account Number",
     "accountHolderName": "Account Holder Name",
     "swiftCode": "SWIFT Code",
-    "iban": "IBAN"
+    "iban": "IBAN",
+    "loadError": "Failed to load wallet data",
+    "noTransactions": "No transactions yet",
+    "noWithdrawals": "No withdrawals yet",
+    "status_pending": "Pending",
+    "status_completed": "Completed",
+    "status_failed": "Failed",
+    "status_processing": "Processing",
+    "insufficientBalance": "You don't have sufficient balance for this withdrawal",
+    "withdrawSuccess": "Withdrawal request submitted",
+    "withdrawError": "Failed to process withdrawal request"
   },
   "account": {
     "title": "My Account",

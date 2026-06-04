@@ -177,6 +177,18 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
 
 ---
 
+## 7c) Known issues (deferred)
+
+- **Step 3 contract sign — typed-signature input is covered by the Android keyboard.** The contract
+  scrolls fine; the bug is only the signature field being hidden behind the keyboard on Android.
+  **Deferred to Phase 10 polish.** ⚠️ **Do NOT retry the "collapse-the-contract-while-signing"
+  approach** — it was implemented in commit `0ff5836` and **broke the app** (multiple errors /
+  regressions), so it was hard-reset out (back to `6eec5f7`). When revisited, use a *different*
+  approach (e.g. a dedicated sign route/modal, or `react-native-keyboard-controller`), not the
+  focus-collapse toggle.
+
+---
+
 ## 8) Deferred / open items (decisions locked in API_AND_FLOWS §6)
 
 - **#2 Change-password endpoint** — the web page has **no API**; owner to provide endpoint+payload

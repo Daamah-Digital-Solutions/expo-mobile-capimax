@@ -193,7 +193,17 @@
     "accountNumber": "رقم الحساب",
     "accountHolderName": "اسم صاحب الحساب",
     "swiftCode": "رمز السويفت",
-    "iban": "رقم الحساب الدولي"
+    "iban": "رقم الحساب الدولي",
+    "loadError": "تعذّر تحميل بيانات المحفظة",
+    "noTransactions": "لا توجد معاملات بعد",
+    "noWithdrawals": "لا توجد سحوبات بعد",
+    "status_pending": "قيد الانتظار",
+    "status_completed": "مكتمل",
+    "status_failed": "فشل",
+    "status_processing": "قيد المعالجة",
+    "insufficientBalance": "ليس لديك رصيد كافٍ لهذا السحب",
+    "withdrawSuccess": "تم إرسال طلب السحب",
+    "withdrawError": "تعذّر معالجة طلب السحب"
   },
   "account": {
     "title": "حسابي",
