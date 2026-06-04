@@ -18,8 +18,8 @@
 | 5 | Wallet (balances/summary + transactions/withdrawals) + Withdraw (Flow G) | ✅ done |
 | 6 | MyFunds (My Holdings + sell-status) + Portfolio (svg chart, refresh) | ✅ done |
 | 7 | Internal Market: listings/holdings/my-listings/transactions/stats + create-listing (SELL) + purchase (BUY, all 4 methods + contract) | ✅ done |
-| 8 | **NEXT** — Account + Edit profile (passport upload) + Change password | ⏳ |
-| 9 | Support / FAQ / Legal / Document center / Settings | ⏳ |
+| 8 | Account (users/me) + Edit profile (Flow H passport upload) ✅; Change-password UI built but **blocked** (no endpoint, OQ#2) | ✅ done |
+| 9 | **NEXT** — Support / FAQ / Legal / Document center / Settings | ⏳ |
 | 10 | Polish + QA + EAS build | ⏳ |
 
 Detailed per-phase "Ready prompts" + Definitions of Done are in `BUILD_PLAN.md`.
@@ -39,15 +39,20 @@ app/
   invest/[id].jsx        REAL 4-step Buy flow machine (Phase 4): gate→amount→payment→contract→complete
   market/buy/[listingId].jsx  REAL internal-market BUY machine (Phase 7): shares→method→
                          purchase→branch(wallet/bank/PayPal/crypto)→contract→success
-  edit-profile.jsx       Phase-8 placeholder (Buy gate routes here when has_passport=false)
+  account.jsx            REAL profile view (Phase 8): users/me → info + doc-verification card
+  edit-profile.jsx       REAL Edit/Complete Profile (Phase 8, Flow H): prefill + multipart
+                         complete_profile (passport upload). Buy gate routes here.
+  change-password.jsx    Phase-8 UI, BLOCKED (no endpoint, OQ#2): full form + rules, submit
+                         disabled behind ENDPOINT_READY flag + TODO; "coming soon" notice.
 src/
   api/ client.js (axios + interceptors + refresh), services.js (all endpoints), tokenStorage.js (SecureStore)
   context/ ThemeContext, LanguageContext, AuthContext
   theme/ palettes.js (dark+light colors), tokens.js (spacing/radii/type/motion/elevation)
   i18n/ index.js          locales/ en.json, ar.json
   components/ AppButton, Card, AssetCard, StatTile, ReturnPill, Chip, Badge, SegmentedControl,
-              Field, Banner, AuthCard, SectionHeader, EmptyState, BottomSheet, Skeleton,
-              Screen, PlaceholderScreen, GoogleSignInButton
+              Field, SelectField (searchable dropdown, P8), Banner, AuthCard, SectionHeader,
+              EmptyState, BottomSheet, Skeleton, Screen, PlaceholderScreen, GoogleSignInButton
+  constants/ countries.js (COUNTRIES — copied verbatim from web, nationality select)
               motion/ PressableScale, FadeInView, AnimatedNumber
               invest/ PaymentStep, PayPalWebView, NowPaymentsWebView, ContractStep, CompleteStep,
                       FilePickerButton, paymentData.js (P4)
@@ -243,8 +248,11 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
 
 ## 8) Deferred / open items (decisions locked in API_AND_FLOWS §6)
 
-- **#2 Change-password endpoint** — the web page has **no API**; owner to provide endpoint+payload
-  **before Phase 8**. Do not invent.
+- **#2 Change-password endpoint** — STILL PENDING. The web page has **no API**; owner to provide
+  endpoint+payload. The mobile UI (`app/change-password.jsx`) is **fully built but blocked**: form +
+  client rules + checklist done, submit disabled behind `ENDPOINT_READY=false` + a `TODO(owner)` in
+  `submit()`. When the endpoint arrives, wire the TODO (likely via a new `userService.changePassword`)
+  and flip `ENDPOINT_READY` to true — no other change. Do not invent the endpoint.
 - **#8 Manual-payment verification** — bank/crypto-manual/NovaPay stay pending; **no auto-contract for
   bank transfer** (match web). Owner to confirm before finalizing **Phase 4**.
 - **#10 Google OAuth client IDs** — not yet provided. `GoogleSignInButton` is wired but **gated**: shows

@@ -561,7 +561,7 @@ hairline border (dark).
 > **Owner-reviewed 2026-06-03.** Resolutions below are binding decisions for the mobile build.
 
 1. ✅ **RESOLVED.** Treat `POST /api/auth/google/`, `/api/forgot-password/`, `/api/reset-password/`, `/api/token/refresh/` as **public** (no `Authorization`). A 401/403 on any of them must **not** force logout. (Mobile client public-endpoint list includes these in addition to the web's regex list.)
-2. ⏳ **DEFERRED (do not block, do not invent).** `pages/change-password` is UI-only with no endpoint in the web. The real change-password endpoint/payload will be **provided by the owner before Phase 8**. Until then, do not build or guess it.
+2. ⏳ **STILL PENDING (do not invent).** `pages/change-password` is UI-only with no endpoint in the web. Phase 8 built the mobile UI **blocked**: `app/change-password.jsx` has the full form + client password rules but submit is disabled behind `ENDPOINT_READY=false` + a `TODO(owner)` in `submit()`. When the owner provides the real endpoint/payload, add it to `services.js` (e.g. `userService.changePassword`), wire the TODO, and flip `ENDPOINT_READY` to true. Until then, do not guess it.
 3. ✅ **RESOLVED.** Use **local fee math** to match web: `fee = base * pct / 100`, `total = base + fee`; `pct` from `GET /api/fee-percentage/` (default `2.5`). Do **not** call `calculate-fee` / `validate-fee`.
 4. ✅ **RESOLVED.** Handle the per-endpoint token envelope exactly as documented: login & Google → `response.data.data.access`/`.refresh`; verify-email → `response.data.token`; refresh → `response.data.access`.
 5. ✅ **RESOLVED.** Rely **solely on backend** `can_sell_shares` / `days_until_can_sell` for sell eligibility. The `90*24h` math is **display-only**.
