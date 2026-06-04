@@ -17,6 +17,17 @@
     "iosHint": "Tap the share icon, then choose “Add to Home Screen”.",
     "iosShareIconLabel": "Look for this icon in your browser's toolbar."
   },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "title1": "Legally separated, fully yours",
+    "desc1": "Each asset sits in its own independent SPV — complete legal separation that protects your investment.",
+    "title2": "One platform, global assets",
+    "desc2": "Access a diversified world of opportunities — real estate, technology, AI, gold and more — from a single account.",
+    "title3": "Exit whenever you want",
+    "desc3": "A regulated internal secondary market lets you sell your shares and exit with full flexibility."
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
