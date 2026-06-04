@@ -227,6 +227,11 @@ All requests also send `Accept-Language`.
 #### 🔒 `GET /api/users/me/`
 - **Response:** `User/Profile` object (§4.2), including `document_status` sub-object and `user_details`.
 
+#### 🔒 `POST /api/change-password/`  (authed — OQ#2 resolved)
+- **Request (JSON):** `{ current_password, new_password, confirm_password }` (send all three; `confirm_password` must equal `new_password`).
+- **Response (200):** `{ status:'success', message, reauth_required:false, detail }`. The old refresh token is blacklisted → mobile **signs out + routes to login** (re-auth with the new password).
+- **Errors (400):** field-level under `errors.<field>`: `current_password` ("Current password is incorrect." / "...is required."), `confirm_password` ("New password and confirmation do not match."), `new_password` (**STRING or ARRAY** of reasons for a weak password — render all). `401` → `{ detail }` (genuine token issue).
+
 #### 🔒 `POST /api/users/complete_profile/`  (multipart, passport upload)
 - **FormData:** `phone_number`, `passport_number`, `nationality` (country code), `address`, `profession` (`engineer`|`doctor`|`businessman`|… or null), `custom_profession` (when profession is "other"), `passport_scan` (File — `.pdf/.jpg/.jpeg/.png`, ≤5MB), `documents_submitted_at` (ISO string).
 - Mobile file shape: `{ uri, name, type }` appended to FormData as `passport_scan`.
@@ -561,7 +566,7 @@ hairline border (dark).
 > **Owner-reviewed 2026-06-03.** Resolutions below are binding decisions for the mobile build.
 
 1. ✅ **RESOLVED.** Treat `POST /api/auth/google/`, `/api/forgot-password/`, `/api/reset-password/`, `/api/token/refresh/` as **public** (no `Authorization`). A 401/403 on any of them must **not** force logout. (Mobile client public-endpoint list includes these in addition to the web's regex list.)
-2. ⏳ **STILL PENDING (do not invent).** `pages/change-password` is UI-only with no endpoint in the web. Phase 8 built the mobile UI **blocked**: `app/change-password.jsx` has the full form + client password rules but submit is disabled behind `ENDPOINT_READY=false` + a `TODO(owner)` in `submit()`. When the owner provides the real endpoint/payload, add it to `services.js` (e.g. `userService.changePassword`), wire the TODO, and flip `ENDPOINT_READY` to true. Until then, do not guess it.
+2. ✅ **RESOLVED (live).** `POST /api/change-password/` (authed) `{ current_password, new_password, confirm_password }` — see §2.6. Wired in `userService.changePassword` + `app/change-password.jsx` (`ENDPOINT_READY=true`). `new_password` errors may be a string OR an array (render all); on success the old refresh is blacklisted → app signs out and routes to login.
 3. ✅ **RESOLVED.** Use **local fee math** to match web: `fee = base * pct / 100`, `total = base + fee`; `pct` from `GET /api/fee-percentage/` (default `2.5`). Do **not** call `calculate-fee` / `validate-fee`.
 4. ✅ **RESOLVED.** Handle the per-endpoint token envelope exactly as documented: login & Google → `response.data.data.access`/`.refresh`; verify-email → `response.data.token`; refresh → `response.data.access`.
 5. ✅ **RESOLVED.** Rely **solely on backend** `can_sell_shares` / `days_until_can_sell` for sell eligibility. The `90*24h` math is **display-only**.

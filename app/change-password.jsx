@@ -1,10 +1,12 @@
-// Change Password (Phase 8) — UI ONLY, intentionally BLOCKED.
-// ⚠️ The web pages/change-password is a UI shell with NO backend endpoint (API_AND_FLOWS §6
-// OQ#2). We do NOT invent one. The full form is built (current / new / confirm with the same
-// client rules ≥8 / upper / digit / special), but submit is disabled and a "coming soon" notice
-// is shown. When the owner provides the real endpoint+payload, wire the TODO in `submit()` and
-// flip `ENDPOINT_READY` to true — no other change needed.
-import React, { useMemo, useState } from "react";
+// Change Password (Phase 8 UI → wired in Phase 10, OQ#2 RESOLVED).
+//   POST /api/change-password/ (authed) { current_password, new_password, confirm_password }
+//   200 → { status:'success', message, reauth_required:false, detail }
+//   400 → { errors: { current_password|new_password|confirm_password : string | string[] } }
+//        (new_password may be an ARRAY of reasons → render all)
+//   401 → { detail }  (genuine token issue)
+// On success the backend blacklists the old refresh token → we sign out and route to login so
+// the user re-authenticates with the new password (matches the backend's "log in again" guidance).
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -19,10 +21,12 @@ import AppButton from "../src/components/AppButton";
 import FadeInView from "../src/components/motion/FadeInView";
 import { useTheme } from "../src/context/ThemeContext";
 import { useLanguage } from "../src/context/LanguageContext";
+import { useAuth } from "../src/context/AuthContext";
 import { validatePassword } from "../src/utils/passwordValidation";
+import { userService } from "../src/api/services";
 
-// Flip to true once the backend change-password endpoint is provided (OQ#2).
-const ENDPOINT_READY = false;
+// Live as of OQ#2 resolution.
+const ENDPOINT_READY = true;
 
 const RULES = [
   { key: "resetPassword.passwordLengthError", test: (p) => p.length >= 8 },
@@ -31,11 +35,15 @@ const RULES = [
   { key: "resetPassword.passwordSpecialCharError", test: (p) => /[^A-Za-z0-9]/.test(p) },
 ];
 
+const firstStr = (v) => (Array.isArray(v) ? v[0] : v) || undefined;
+const asList = (v) => (Array.isArray(v) ? v : v ? [v] : []);
+
 export default function ChangePasswordScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { theme, radii, type, spacing } = useTheme();
   const { isRTL } = useLanguage();
+  const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => makeStyles(theme, radii, isRTL), [theme, radii, isRTL]);
 
@@ -43,21 +51,62 @@ export default function ChangePasswordScreen() {
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({}); // { current_password, new_password(str|arr), confirm_password }
+  const timer = useRef(null);
+
+  useEffect(() => () => timer.current && clearTimeout(timer.current), []);
 
   const ruleErrors = validatePassword(next);
   const mismatch = confirm.length > 0 && next !== confirm;
   const formValid = current.trim() && next && confirm && ruleErrors.length === 0 && !mismatch;
 
-  const submit = () => {
-    // Client validation is ready; the network call is intentionally not wired.
+  const newPwReasons = asList(fieldErrors.new_password);
+
+  const submit = async () => {
     setError("");
+    setFieldErrors({});
     if (ruleErrors.length > 0) return setError(t("resetPassword.fixPasswordErrors", "Please fix the password errors below."));
     if (mismatch) return setError(t("resetPassword.passwordMismatch", "Passwords do not match"));
-    if (!ENDPOINT_READY) {
-      // TODO(owner): wire the real endpoint here once provided (OQ#2), e.g.
-      //   await userService.changePassword({ current_password: current, new_password: next });
-      // then show success + router.back(). Until then this stays a no-op behind the notice.
-      return;
+
+    setLoading(true);
+    try {
+      const res = await userService.changePassword({
+        current_password: current,
+        new_password: next,
+        confirm_password: confirm,
+      });
+      if (res?.data?.status === "success") {
+        setLoading(false);
+        setSuccess(res.data?.message || t("changePassword.successRelogin", "Your password has been changed. Please sign in again with your new password."));
+        // Old refresh token is blacklisted server-side → sign out + go to login.
+        timer.current = setTimeout(async () => {
+          await signOut();
+          router.replace("/(auth)/login");
+        }, 1600);
+      } else {
+        setLoading(false);
+        setError(res?.data?.message || res?.data?.detail || t("changePassword.errorMessage", "Failed to change password. Please try again."));
+      }
+    } catch (err) {
+      setLoading(false);
+      const status = err?.response?.status;
+      const data = err?.response?.data || {};
+      if (status === 401) {
+        setError(data.detail || t("changePassword.errorMessage", "Failed to change password. Please try again."));
+        return;
+      }
+      const fe = data.errors || data; // field-level errors live under `errors`
+      if (fe && (fe.current_password || fe.new_password || fe.confirm_password)) {
+        setFieldErrors({
+          current_password: firstStr(fe.current_password),
+          new_password: fe.new_password, // keep raw (string OR array) → rendered in full below
+          confirm_password: firstStr(fe.confirm_password),
+        });
+      } else {
+        setError(data.message || data.detail || err?.message || t("changePassword.errorMessage", "Failed to change password. Please try again."));
+      }
     }
   };
 
@@ -81,23 +130,53 @@ export default function ChangePasswordScreen() {
       >
         <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left" }]}>{t("changePassword.subtitle", "Update your account password")}</Text>
 
-        {/* Blocked notice (no endpoint yet) */}
-        <FadeInView index={0}>
-          <Banner type="info" message={t("changePassword.comingSoon", "Password change is coming soon. This will be enabled once the secure endpoint is available.")} />
-        </FadeInView>
+        {!ENDPOINT_READY ? (
+          <Banner type="info" message={t("changePassword.comingSoon", "Password change is coming soon.")} />
+        ) : null}
 
+        {success ? <Banner type="success" message={success} /> : null}
         {error ? <Banner type="error" message={error} /> : null}
 
-        <FadeInView index={1}>
+        <FadeInView index={0}>
           <Card style={{ gap: 12 }}>
-            <Field label={t("changePassword.currentPassword", "Current Password")} value={current} onChangeText={setCurrent} secureTextEntry />
-            <Field label={t("changePassword.newPassword", "New Password")} value={next} onChangeText={setNext} secureTextEntry />
+            <Field
+              label={t("changePassword.currentPassword", "Current Password")}
+              value={current}
+              onChangeText={setCurrent}
+              secureTextEntry
+              editable={!success}
+              error={fieldErrors.current_password}
+            />
+
+            <View style={{ gap: 6 }}>
+              <Field
+                label={t("changePassword.newPassword", "New Password")}
+                value={next}
+                onChangeText={setNext}
+                secureTextEntry
+                editable={!success}
+                error={newPwReasons.length === 1 ? newPwReasons[0] : undefined}
+              />
+              {/* Backend may return MULTIPLE new_password reasons (array) — render them all. */}
+              {newPwReasons.length > 1 ? (
+                <View style={{ gap: 3 }}>
+                  {newPwReasons.map((r, i) => (
+                    <View key={i} style={styles.ruleRow}>
+                      <Ionicons name="alert-circle" size={14} color={theme.negative} />
+                      <Text style={[type.caption, { color: theme.negative, flex: 1, textAlign: isRTL ? "right" : "left" }]}>{r}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+
             <Field
               label={t("changePassword.confirmNewPassword", "Confirm New Password")}
               value={confirm}
               onChangeText={setConfirm}
               secureTextEntry
-              error={mismatch ? t("resetPassword.passwordMismatch", "Passwords do not match") : undefined}
+              editable={!success}
+              error={fieldErrors.confirm_password || (mismatch ? t("resetPassword.passwordMismatch", "Passwords do not match") : undefined)}
             />
 
             {/* Live password-rule checklist */}
@@ -120,7 +199,8 @@ export default function ChangePasswordScreen() {
         <AppButton
           title={t("changePassword.changePassword", "Change Password")}
           icon="lock-closed"
-          disabled={!ENDPOINT_READY || !formValid}
+          loading={loading}
+          disabled={!ENDPOINT_READY || !formValid || !!success}
           onPress={submit}
         />
       </ScrollView>

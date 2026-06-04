@@ -18,7 +18,7 @@
 | 5 | Wallet (balances/summary + transactions/withdrawals) + Withdraw (Flow G) | ✅ done |
 | 6 | MyFunds (My Holdings + sell-status) + Portfolio (svg chart, refresh) | ✅ done |
 | 7 | Internal Market: listings/holdings/my-listings/transactions/stats + create-listing (SELL) + purchase (BUY, all 4 methods + contract) | ✅ done |
-| 8 | Account (users/me) + Edit profile (Flow H passport upload) ✅; Change-password UI built but **blocked** (no endpoint, OQ#2) | ✅ done |
+| 8 | Account (users/me) + Edit profile (Flow H passport upload) + Change-password (LIVE — OQ#2 resolved, sign-out on success) | ✅ done |
 | 9 | Contact(feedback) + FAQ + legal/[type] (terms/statement/policy) + Document Center + Our Platforms + real Settings (More) | ✅ done |
 | 10 | **NEXT** — Polish + QA + EAS build | ⏳ |
 
@@ -47,8 +47,8 @@ app/
   account.jsx            REAL profile view (Phase 8): users/me → info + doc-verification card
   edit-profile.jsx       REAL Edit/Complete Profile (Phase 8, Flow H): prefill + multipart
                          complete_profile (passport upload). Buy gate routes here.
-  change-password.jsx    Phase-8 UI, BLOCKED (no endpoint, OQ#2): full form + rules, submit
-                         disabled behind ENDPOINT_READY flag + TODO; "coming soon" notice.
+  change-password.jsx    LIVE (OQ#2 resolved): POST /api/change-password/ {current,new,confirm};
+                         field-level errors (new_password string|array); success → sign out + login.
 src/
   api/ client.js (axios + interceptors + refresh), services.js (all endpoints), tokenStorage.js (SecureStore)
   context/ ThemeContext, LanguageContext, AuthContext
@@ -281,11 +281,13 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
 
 ## 8) Deferred / open items (decisions locked in API_AND_FLOWS §6)
 
-- **#2 Change-password endpoint** — STILL PENDING. The web page has **no API**; owner to provide
-  endpoint+payload. The mobile UI (`app/change-password.jsx`) is **fully built but blocked**: form +
-  client rules + checklist done, submit disabled behind `ENDPOINT_READY=false` + a `TODO(owner)` in
-  `submit()`. When the endpoint arrives, wire the TODO (likely via a new `userService.changePassword`)
-  and flip `ENDPOINT_READY` to true — no other change. Do not invent the endpoint.
+- **#2 Change-password endpoint — ✅ RESOLVED (live).** `POST /api/change-password/` (authed)
+  `{ current_password, new_password, confirm_password }` → 200 `{ status:'success', message,
+  reauth_required:false, detail }`. Wired in `userService.changePassword` + `app/change-password.jsx`
+  (`ENDPOINT_READY=true`). 400 errors are field-level under `errors.<field>`; **`new_password` may be a
+  STRING or an ARRAY of reasons** — both handled (all reasons rendered). On success the backend
+  blacklists the old refresh token, so the app **signs out + routes to `/(auth)/login`** (re-auth with
+  the new password) — cleanest match to the backend's "log in again" guidance.
 - **#8 Manual-payment verification** — bank/crypto-manual/NovaPay stay pending; **no auto-contract for
   bank transfer** (match web). Owner to confirm before finalizing **Phase 4**.
 - **#10 Google OAuth client IDs** — not yet provided. `GoogleSignInButton` is wired but **gated**: shows

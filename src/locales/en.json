@@ -374,7 +374,9 @@
     "newPassword": "New Password",
     "confirmNewPassword": "Confirm New Password",
     "changePassword": "Change Password",
-    "comingSoon": "Password change is coming soon. This will be enabled once the secure endpoint is available."
+    "comingSoon": "Password change is coming soon. This will be enabled once the secure endpoint is available.",
+    "successRelogin": "Your password has been changed. Please sign in again with your new password.",
+    "errorMessage": "Failed to change password. Please try again."
   },
   "bankAccount": {
     "title": "Bank Account",

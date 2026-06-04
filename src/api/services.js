@@ -121,6 +121,12 @@ export const userService = {
   // POST /api/users/complete_profile/  (multipart, includes passport_scan)
   completeProfile: (formData) =>
     api.post("/api/users/complete_profile/", formData, MULTIPART),
+  // POST /api/change-password/  (authed; OQ#2 resolved)
+  //   body: { current_password, new_password, confirm_password }
+  //   200 → { status:'success', message, reauth_required, detail }
+  //   400 → { errors: { current_password|new_password|confirm_password: string|string[] } }
+  //   (old refresh token is blacklisted on success → app signs out + re-login.)
+  changePassword: (payload) => api.post("/api/change-password/", payload),
 };
 
 // ───────────────────────── Wallet (§2.7) ─────────────────────────
