@@ -34,10 +34,27 @@ export default function MoreTab() {
           </Text>
 
           {isAuthenticated ? (
-            <Pressable style={[styles.btn, styles.btnDanger]} onPress={signOut}>
-              <Ionicons name="log-out-outline" size={18} color="#FFFFFF" />
-              <Text style={styles.btnDangerText}>{t("logout", "Logout")}</Text>
-            </Pressable>
+            <>
+              <Pressable style={styles.linkRow} onPress={() => router.push("/account")}>
+                <Ionicons name="person-circle-outline" size={20} color={theme.primary} />
+                <Text style={styles.linkText}>{t("account.title", "My Account")}</Text>
+                <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
+              </Pressable>
+              <Pressable style={styles.linkRow} onPress={() => router.push("/edit-profile")}>
+                <Ionicons name="create-outline" size={20} color={theme.primary} />
+                <Text style={styles.linkText}>{t("sidebar.edit", "Edit Profile")}</Text>
+                <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
+              </Pressable>
+              <Pressable style={styles.linkRow} onPress={() => router.push("/change-password")}>
+                <Ionicons name="lock-closed-outline" size={20} color={theme.primary} />
+                <Text style={styles.linkText}>{t("changePassword.title", "Change Password")}</Text>
+                <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
+              </Pressable>
+              <Pressable style={[styles.btn, styles.btnDanger]} onPress={signOut}>
+                <Ionicons name="log-out-outline" size={18} color="#FFFFFF" />
+                <Text style={styles.btnDangerText}>{t("logout", "Logout")}</Text>
+              </Pressable>
+            </>
           ) : (
             <Pressable style={styles.btn} onPress={() => router.push("/(auth)/login")}>
               <Ionicons name="log-in-outline" size={18} color={theme.onPrimary} />
@@ -111,6 +128,15 @@ const makeStyles = (theme, radius) =>
       borderRadius: radius.sm,
     },
     btnText: { color: theme.onPrimary, fontWeight: "700", fontSize: 15 }, // on primary fill (rule #4)
+    linkRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      paddingVertical: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.border,
+    },
+    linkText: { flex: 1, color: theme.text, fontSize: 15, fontWeight: "600" },
     btnDanger: { backgroundColor: theme.error },
     btnDangerText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 }, // white for contrast on red
     segRow: { flexDirection: "row", gap: 10 },
