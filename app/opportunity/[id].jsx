@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Image, Pressable, Linking, useWindowDimensions } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Image, Pressable, Linking, ActivityIndicator, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,6 +23,7 @@ import { useLanguage } from "../../src/context/LanguageContext";
 import { useAuth } from "../../src/context/AuthContext";
 import { opportunityService } from "../../src/api/services";
 import { htmlToText } from "../../src/utils/html";
+import { downloadDocumentLink } from "../../src/utils/fileDownload";
 
 function money(v, opts) {
   const n = parseFloat(v);
@@ -56,6 +57,37 @@ export default function OpportunityDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [busyDoc, setBusyDoc] = useState(null); // doc.key currently downloading
+  const [docMsg, setDocMsg] = useState(null); // { type, text }
+
+  // Preview = open the link externally to view (current behaviour). Download = save to device.
+  const previewDoc = (url) => { if (url) Linking.openURL(url); };
+
+  const mapDocErr = (e) => {
+    switch (e?.code) {
+      case "expired": return t("documentCenter.errExpired", "Your session expired. Please sign in again.");
+      case "notfound": return t("documentCenter.errNotFound", "Document not found.");
+      case "noshare": return t("documentCenter.errNoShare", "Sharing is not available on this device.");
+      default: return t("documentCenter.errFailed", "Download failed. Please try again.");
+    }
+  };
+
+  const downloadDoc = async (d) => {
+    setBusyDoc(d.key);
+    setDocMsg(null);
+    try {
+      const r = await downloadDocumentLink({ url: d.url, fileName: d.label });
+      setDocMsg(
+        r?.mode === "opened"
+          ? { type: "info", text: t("opportunity.previewFallback", "Couldn't save this file directly — opened it for viewing instead.") }
+          : { type: "success", text: t("documentCenter.downloadReady", "Ready — choose where to save or share it.") }
+      );
+    } catch (e) {
+      setDocMsg({ type: "error", text: mapDocErr(e) });
+    } finally {
+      setBusyDoc(null);
+    }
+  };
 
   const load = useCallback(async () => {
     setError("");
@@ -296,22 +328,33 @@ export default function OpportunityDetail() {
             </FadeInView>
           ) : null}
 
-          {/* Important Documents */}
+          {/* Important Documents — Preview (view) + Download (save to device) */}
           {docs.length ? (
             <FadeInView index={7} style={{ gap: 10 }}>
               <SectionHeader title={t("opportunity.importantDocuments", "Important Documents")} />
+              {docMsg ? <Banner type={docMsg.type} message={docMsg.text} /> : null}
               <Card style={{ gap: 0 }}>
                 {docs.map((d, i) => (
-                  <Pressable key={d.key} style={[styles.docRow, i === 0 && { borderTopWidth: 0 }]} onPress={() => Linking.openURL(d.url)}>
+                  <View key={d.key} style={[styles.docItem, i === 0 && { borderTopWidth: 0 }]}>
                     <View style={styles.docLeft}>
                       <Ionicons name="document-text-outline" size={18} color={theme.primary} />
-                      <Text style={[type.body, { color: theme.text, flexShrink: 1 }]} numberOfLines={1}>{d.label}</Text>
+                      <Text style={[type.body, { color: theme.text, flexShrink: 1 }]} numberOfLines={2}>{d.label}</Text>
                     </View>
-                    <View style={styles.docRight}>
-                      <Text style={[type.caption, { color: theme.primaryDark }]}>{t("common.download", "Preview")}</Text>
-                      <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={16} color={theme.primaryDark} />
+                    <View style={styles.docActions}>
+                      <Pressable style={styles.docBtn} onPress={() => previewDoc(d.url)} hitSlop={6}>
+                        <Ionicons name="eye-outline" size={15} color={theme.primaryDark} />
+                        <Text style={[type.caption, { color: theme.primaryDark, fontWeight: "600" }]}>{t("common.download", "Preview")}</Text>
+                      </Pressable>
+                      <Pressable style={[styles.docBtn, styles.docBtnPrimary, busyDoc && busyDoc !== d.key && { opacity: 0.5 }]} onPress={() => downloadDoc(d)} hitSlop={6} disabled={!!busyDoc}>
+                        {busyDoc === d.key ? (
+                          <ActivityIndicator size="small" color={theme.primaryDark} />
+                        ) : (
+                          <Ionicons name="download-outline" size={15} color={theme.primaryDark} />
+                        )}
+                        <Text style={[type.caption, { color: theme.primaryDark, fontWeight: "700" }]}>{t("documentCenter.download", "Download")}</Text>
+                      </Pressable>
                     </View>
-                  </Pressable>
+                  </View>
                 ))}
               </Card>
             </FadeInView>
@@ -412,17 +455,27 @@ const makeStyles = (theme, radii, insets, isRTL) =>
     },
     verHeader: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 8 },
 
-    docRow: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 12,
+    docItem: {
+      gap: 10,
       paddingVertical: 14,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: theme.border,
     },
     docLeft: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 10, flexShrink: 1 },
-    docRight: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 2 },
+    docActions: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 10 },
+    docBtn: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      gap: 5,
+      paddingVertical: 8,
+      paddingHorizontal: 14,
+      borderRadius: radii.pill,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.border,
+      backgroundColor: theme.surfaceAlt,
+      minHeight: 36,
+    },
+    docBtnPrimary: { backgroundColor: theme.primary + "22", borderColor: theme.primary },
 
     centerState: { flex: 1, justifyContent: "center", padding: 20, gap: 16 },
 

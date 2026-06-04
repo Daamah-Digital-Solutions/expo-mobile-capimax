@@ -102,6 +102,7 @@
     "pricePerShare": "السعر للسهم",
     "lastUpdated": "آخر تحديث",
     "importantDocuments": "المستندات الهامة",
+    "previewFallback": "تعذّر حفظ الملف مباشرةً — تم فتحه للعرض بدلاً من ذلك.",
     "requestForm": "اتفاقية كابي ماكس",
     "investmentOffer": "اتفاقية التأمين",
     "investmentOfferAcceptance": "تقرير التقييم",

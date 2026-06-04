@@ -58,6 +58,15 @@ function isDriveLink(url = "") {
   return /drive\.google\.com/i.test(url);
 }
 
+// Extract the FILE_ID from a Drive link: /file/d/<ID>/..., ?id=<ID>, /open?id=<ID>.
+function extractDriveId(url = "") {
+  let m = url.match(/\/file\/d\/([^/?#]+)/);
+  if (m) return m[1];
+  m = url.match(/[?&]id=([^&]+)/);
+  if (m) return m[1];
+  return null;
+}
+
 async function openExternally(url) {
   await WebBrowser.openBrowserAsync(url);
   return { mode: "opened" };
@@ -138,4 +147,37 @@ export async function downloadUrlAndShare({ url, fileName, mimeType }) {
 
   await shareFile(res.uri, mime, fileName);
   return { mode: "shared" };
+}
+
+// A document LINK that may be a Google-Drive VIEWER URL (drive.google.com/file/d/<ID>/view).
+// Drive viewer links aren't directly fetchable, so we convert to the direct-download URL
+// (uc?export=download&id=<ID>) and fetch THAT. If Drive returns its HTML confirmation /
+// virus-scan interstitial (large files) — detected via a text/html content-type or a 4xx —
+// we fall back to opening the original link externally (the "Preview" behaviour). Non-Drive
+// URLs reuse downloadUrlAndShare (same-origin auth / public file). Returns { mode } where
+// mode === 'opened' means we fell back to an external open (tell the user).
+export async function downloadDocumentLink({ url, fileName, mimeType }) {
+  if (!url) throw dlError("failed", "No document URL");
+
+  if (isDriveLink(url)) {
+    const id = extractDriveId(url);
+    if (!id) return openExternally(url); // unknown Drive shape → just open it
+    const directUrl = `https://drive.google.com/uc?export=download&id=${id}`;
+    const mime = mimeType || mimeFromName(fileName) || "application/pdf";
+    const dest = FileSystem.cacheDirectory + ensureExt(sanitize(fileName), mime);
+    let res;
+    try {
+      res = await FileSystem.downloadAsync(directUrl, dest);
+    } catch (e) {
+      return openExternally(url); // network/redirect failure → view it instead
+    }
+    const ct = String(res.headers?.["content-type"] || res.headers?.["Content-Type"] || "").toLowerCase();
+    // Got the HTML interstitial instead of the file (large file / scan page) → fall back.
+    if (res.status >= 400 || ct.includes("text/html")) return openExternally(url);
+    await shareFile(res.uri, mime, fileName);
+    return { mode: "shared" };
+  }
+
+  // Not a Drive link → same-origin auth / public file (reuse existing logic, no duplication).
+  return downloadUrlAndShare({ url, fileName, mimeType });
 }

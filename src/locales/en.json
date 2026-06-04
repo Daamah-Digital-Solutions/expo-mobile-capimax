@@ -102,6 +102,7 @@
     "pricePerShare": "Price / share",
     "lastUpdated": "Last Updated",
     "importantDocuments": "Important Documents",
+    "previewFallback": "Couldn't save this file directly — opened it for viewing instead.",
     "requestForm": "Capimax agreement",
     "investmentOffer": "Insurance agreement",
     "investmentOfferAcceptance": "Evaluation report",
