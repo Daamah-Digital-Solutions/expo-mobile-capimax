@@ -651,7 +651,19 @@
     "error": "Failed to load portfolio data",
     "noData": "No portfolio data available",
     "dataRefreshed": "Portfolio data refreshed successfully",
-    "refreshFailed": "Failed to refresh portfolio data"
+    "refreshFailed": "Failed to refresh portfolio data",
+    "noDataMsg": "Buy some assets to see your performance!",
+    "totalGrowth": "Total Growth",
+    "avgMonthlyReturn": "Avg Monthly",
+    "investedCapital": "Purchased Capital",
+    "growthAmount": "Growth",
+    "growthTrend": "Growth % Trend",
+    "growthPercentage": "Growth %",
+    "bestMonthReturn": "Best Month",
+    "worstMonthReturn": "Worst Month",
+    "dataPoints": "Data Points",
+    "months": "months",
+    "performanceStats": "Performance Stats"
   },
   "internalMarket": {
     "title": "Internal Market",

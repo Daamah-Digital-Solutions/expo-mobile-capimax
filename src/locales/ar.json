@@ -631,6 +631,29 @@
     "checkNewOpportunities": "تصفّح المزيد من الأصول",
     "viewInvestments": "عرض حيازاتي"
   },
+  "portfolio": {
+    "title": "أداء المحفظة",
+    "subtitle": "تتبّع نمو أصولك ومؤشرات الأداء",
+    "refresh": "تحديث البيانات",
+    "last24Months": "آخر 24 شهراً",
+    "totalInvested": "إجمالي الشراء",
+    "totalValue": "إجمالي القيمة",
+    "totalGrowth": "إجمالي النمو",
+    "avgMonthlyReturn": "متوسط شهري",
+    "performanceChart": "مخطط الأداء",
+    "investedCapital": "رأس المال المُشترى",
+    "growthAmount": "النمو",
+    "growthTrend": "اتجاه نسبة النمو",
+    "growthPercentage": "نسبة النمو",
+    "bestMonthReturn": "أفضل شهر",
+    "worstMonthReturn": "أسوأ شهر",
+    "dataPoints": "نقاط البيانات",
+    "months": "أشهر",
+    "performanceStats": "إحصاءات الأداء",
+    "noData": "لا توجد بيانات محفظة",
+    "noDataMsg": "اشترِ بعض الأصول لرؤية أدائك!",
+    "error": "تعذّر تحميل بيانات المحفظة"
+  },
   "terms_conditions": {
     "title": "الشروط والأحكام"
   },

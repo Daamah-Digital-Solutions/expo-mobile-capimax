@@ -16,8 +16,8 @@
 | 3 | Funds list (AssetCard) + Opportunity detail page; Buy routes correctly | ✅ done |
 | 4 | 4-step Buy flow on `/invest/[id]`: gate → amount/fee → pay (all 5 methods, LIVE) → sign contract → complete | ✅ done |
 | 5 | Wallet (balances/summary + transactions/withdrawals) + Withdraw (Flow G) | ✅ done |
-| 6 | **NEXT** — MyFunds + Portfolio (+ 90-day sell logic, chart) | ⏳ |
-| 7 | Internal Market | ⏳ |
+| 6 | MyFunds (My Holdings + sell-status) + Portfolio (svg chart, refresh) | ✅ done |
+| 7 | **NEXT** — Internal Market | ⏳ |
 | 8 | Account + Edit profile (passport upload) + Change password | ⏳ |
 | 9 | Support / FAQ / Legal / Document center / Settings | ⏳ |
 | 10 | Polish + QA + EAS build | ⏳ |
@@ -64,7 +64,8 @@ Detail uses `Card/Badge/StatTile/AppButton/SectionHeader/Skeleton/EmptyState` + 
 - `babel-preset-expo` is a **direct devDependency** (SDK 54 reinstall didn't hoist it → bundle broke).
 - `expo-updates` added for `Updates.reloadAsync()` (RTL one-time reload).
 - **Removed** `react-native-gifted-charts` + `react-native-linear-gradient` (React-19 peer conflict +
-  not in Expo Go). Phase 6 chart will use an Expo-Go + New-Arch compatible lib (e.g. svg-based).
+  not in Expo Go). **Phase 6 chart** = custom `src/components/portfolio/PerformanceChart.jsx` built on
+  **`react-native-svg`** (already a dep) — no new chart lib; Expo-Go + New-Arch safe. Charts are LTR.
 - Tokens in **SecureStore** (`access`/`refresh`); language + theme prefs in **AsyncStorage**
   (`app.language`, `app.themeMode`, `app.rtl.reloadGuard`).
 - Backend base URL `https://api.capimaxinvestment.com/` in `app.json` → `extra.apiUrl` (via `expo-constants`).
