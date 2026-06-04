@@ -319,7 +319,20 @@
     "noDocuments": "لا توجد مستندات متاحة",
     "noDocumentsDescription": "ستظهر مستنداتك هنا بمجرد إضافتها إلى حسابك",
     "download": "تحميل",
-    "open": "فتح المستند"
+    "open": "فتح المستند",
+    "signedContracts": "العقود الموقّعة",
+    "documents": "المستندات",
+    "contract": "عقد",
+    "created": "أُنشئ",
+    "signed": "وُقّع",
+    "downloadPdf": "تحميل PDF",
+    "downloadReady": "جاهز — اختر مكان الحفظ أو المشاركة.",
+    "openedExternally": "تم الفتح في المتصفح.",
+    "errExpired": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
+    "errNotFound": "المستند غير موجود.",
+    "errNotSigned": "يجب توقيع العقد قبل التحميل.",
+    "errNoShare": "المشاركة غير متاحة على هذا الجهاز.",
+    "errFailed": "فشل التحميل. يرجى المحاولة مرة أخرى."
   },
   "policyInsurance": {
     "title": "وثيقة تأمين السياسة",

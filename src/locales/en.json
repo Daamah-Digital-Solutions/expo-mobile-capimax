@@ -318,7 +318,20 @@
     "noDocuments": "No Documents Available",
     "noDocumentsDescription": "Your documents will appear here once they are added to your account",
     "download": "Download",
-    "open": "Open Document"
+    "open": "Open Document",
+    "signedContracts": "Signed Contracts",
+    "documents": "Documents",
+    "contract": "Contract",
+    "created": "Created",
+    "signed": "Signed",
+    "downloadPdf": "Download PDF",
+    "downloadReady": "Ready — choose where to save or share it.",
+    "openedExternally": "Opened in your browser.",
+    "errExpired": "Your session expired. Please sign in again.",
+    "errNotFound": "Document not found.",
+    "errNotSigned": "The contract must be signed before downloading.",
+    "errNoShare": "Sharing is not available on this device.",
+    "errFailed": "Download failed. Please try again."
   },
   "policyInsurance": {
     "title": "Policy Insurance Document",
