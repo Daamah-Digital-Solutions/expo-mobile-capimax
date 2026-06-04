@@ -168,7 +168,20 @@
     "duration": "Duration",
     "years": "years",
     "totalInvestment": "Total Purchase",
-    "trackYourInvestmentPortfolio": "Track your asset portfolio"
+    "trackYourInvestmentPortfolio": "Track your asset portfolio",
+    "loadError": "Failed to load your holdings",
+    "sell": "Sell",
+    "noHoldings": "No holdings yet",
+    "noHoldingsMsg": "Buy shares in an asset to see your holdings here.",
+    "statusNoMarketTitle": "Not on Internal Market",
+    "statusNoMarketMsg": "This asset isn't tradable on the Internal Market yet.",
+    "statusHoldingTitle": "3-Month Holding Period",
+    "statusHoldingMsg": "Eligible on {{date}} · {{days}} days remaining.",
+    "statusNoSharesTitle": "No Available Shares",
+    "statusNoSharesListed": "All {{total}} shares are currently listed for sale.",
+    "statusNoSharesLocked": "All shares are temporarily locked or reserved.",
+    "statusReadyTitle": "Ready to Sell",
+    "statusReadyMsg": "{{avail}} of {{total}} shares available for sale."
   },
   "wallet": {
     "title": "Wallet",

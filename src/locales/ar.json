@@ -169,7 +169,20 @@
     "duration": "المدة",
     "years": "سنوات",
     "totalInvestment": "إجمالي الشراء",
-    "trackYourInvestmentPortfolio": "تتبع محفظة أصولك"
+    "trackYourInvestmentPortfolio": "تتبع محفظة أصولك",
+    "loadError": "تعذّر تحميل حيازاتك",
+    "sell": "بيع",
+    "noHoldings": "لا توجد حيازات بعد",
+    "noHoldingsMsg": "اشترِ حصصاً في أصل لرؤية حيازاتك هنا.",
+    "statusNoMarketTitle": "غير متاح في السوق الداخلي",
+    "statusNoMarketMsg": "هذا الأصل غير قابل للتداول في السوق الداخلي بعد.",
+    "statusHoldingTitle": "فترة احتجاز 3 أشهر",
+    "statusHoldingMsg": "متاح للبيع في {{date}} · متبقٍّ {{days}} يوماً.",
+    "statusNoSharesTitle": "لا توجد حصص متاحة",
+    "statusNoSharesListed": "جميع الحصص ({{total}}) مدرجة للبيع حالياً.",
+    "statusNoSharesLocked": "جميع الحصص محجوزة أو مقفلة مؤقتاً.",
+    "statusReadyTitle": "جاهزة للبيع",
+    "statusReadyMsg": "{{avail}} من {{total}} حصة متاحة للبيع."
   },
   "wallet": {
     "title": "المحفظة",
