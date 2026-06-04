@@ -33,9 +33,11 @@ app/
   _layout.jsx            providers (Theme→Language→Auth) + auth gate + splash + StatusBar
   index.jsx              redirect → /(tabs)/funds
   (auth)/ login, register, verify, forgot-password, reset-password   (Phase 2, all functional)
-  (tabs)/ _layout (TabBar) + funds(real), myfunds/wallet/portfolio/market/more (placeholders; more=settings)
+  (tabs)/ _layout (TabBar) + funds(real, P3) · wallet(real, P5) · myfunds(real, P6) ·
+          portfolio(real, P6) · market(placeholder → P7) · more(settings → P9)
   opportunity/[id].jsx   Opportunity detail (Phase 3)
-  invest/[id].jsx        Buy target PLACEHOLDER (Phase 4 builds the real flow)
+  invest/[id].jsx        REAL 4-step Buy flow machine (Phase 4): gate→amount→payment→contract→complete
+  edit-profile.jsx       Phase-8 placeholder (Buy gate routes here when has_passport=false)
 src/
   api/ client.js (axios + interceptors + refresh), services.js (all endpoints), tokenStorage.js (SecureStore)
   context/ ThemeContext, LanguageContext, AuthContext
@@ -43,13 +45,19 @@ src/
   i18n/ index.js          locales/ en.json, ar.json
   components/ AppButton, Card, AssetCard, StatTile, ReturnPill, Chip, Badge, SegmentedControl,
               Field, Banner, AuthCard, SectionHeader, EmptyState, BottomSheet, Skeleton,
-              Screen, PlaceholderScreen, GoogleSignInButton, OpportunityCard(removed→AssetCard)
+              Screen, PlaceholderScreen, GoogleSignInButton
               motion/ PressableScale, FadeInView, AnimatedNumber
+              invest/ PaymentStep, PayPalWebView, NowPaymentsWebView, ContractStep, CompleteStep,
+                      FilePickerButton, paymentData.js (P4)
+              wallet/ WithdrawSheet (P5)
+              portfolio/ PerformanceChart (react-native-svg, P6)
   auth/ googleConfig.js   utils/ passwordValidation.js, html.js
 ```
 
 Auth screens use `AppButton/Field/Banner/AuthCard`. Funds uses `AssetCard/Chip/Skeleton/EmptyState`.
 Detail uses `Card/Badge/StatTile/AppButton/SectionHeader/Skeleton/EmptyState` + safe HTML render.
+Wallet/MyFunds/Portfolio use `Card/Banner/SegmentedControl/AnimatedNumber/EmptyState/Skeleton`
+(+ `WithdrawSheet`, `PerformanceChart`). Buy flow lives entirely under `components/invest/`.
 
 ---
 
@@ -129,8 +137,11 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
 
 ## 7) Backend / live-response findings (verified against api.capimaxinvestment.com)
 
-- **Type warning:** `price_per_share`, `roi_percentage`, `total_investment` are **strings** →
-  `parseFloat`/`Number` before math (see API_AND_FLOWS §4.1).
+- **Type warning (STRINGS → `parseFloat`/`Number` before ANY math):** opportunity
+  `price_per_share`, `roi_percentage`, `total_investment`; wallet `balance`, `profit_balance`
+  (note `total_balance` is numeric); `my_investments` amounts (`total_amount_invested`,
+  `amount_invested`) and portfolio `current_stats` percentages. **Every money/percent value is
+  `parseFloat`'d in code regardless of type** so string-vs-number never breaks. (API_AND_FLOWS §4.1.)
 - `images[]` = `{ id, image_url, caption_en, caption_ar, is_primary, order }` (sort primary→order).
 - `cim_verification` / `cim_rating` / `hcc_insurance` = objects `{ enabled, display_text, link (nullable), code }`
   (also flat `*_enabled/_link/_code`).
