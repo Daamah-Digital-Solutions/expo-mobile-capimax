@@ -33,7 +33,11 @@ import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { contractService } from "../../api/services";
 
-export default function ContractStep({ rail, opportunityId, payment, total, onSigned }) {
+// `createPayload` (optional): when provided it is sent verbatim to contracts/create
+// (used by the internal-market BUY flow with { contract_type:'internal_market',
+// market_transaction_id }). When omitted, the investment payload is built from the
+// opportunityId/payment/total props (the Buy flow on /invest/[id]).
+export default function ContractStep({ rail, opportunityId, payment, total, onSigned, createPayload }) {
   const { t } = useTranslation();
   const { theme, radii, type } = useTheme();
   const { isRTL } = useLanguage();
@@ -53,12 +57,14 @@ export default function ContractStep({ rail, opportunityId, payment, total, onSi
     setPhase("creating");
     setError("");
     try {
-      const createRes = await contractService.create({
-        contract_type: "investment",
-        investment_opportunity_id: opportunityId,
-        payment_transaction_id: payment?.transaction_id,
-        investment_amount: Number(total) || 0,
-      });
+      const createRes = await contractService.create(
+        createPayload || {
+          contract_type: "investment",
+          investment_opportunity_id: opportunityId,
+          payment_transaction_id: payment?.transaction_id,
+          investment_amount: Number(total) || 0,
+        }
+      );
       if (!createRes?.data?.success || !createRes?.data?.contract_id) {
         throw new Error(createRes?.data?.error || t("buyFlow.contractFailed", "Failed to create contract"));
       }
