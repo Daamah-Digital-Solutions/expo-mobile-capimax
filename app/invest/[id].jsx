@@ -223,8 +223,8 @@ export default function InvestScreen() {
   const breakdown = calculateFee(sharesNum * price, feePercentage); // { base_amount, fee_amount, total_amount }
   const totalAmount = Math.round((breakdown.total_amount || 0) * 100) / 100; // carried value == displayed value
 
-  const onGatewaySuccess = (result) => { setPayment(result); setStep(3); };
-  const onManualSuccess = (result) => { setPayment(result); setStep(4); };
+  // All 5 methods run the contract step (matches the web's shared handlePaymentSuccess).
+  const onPaid = (result) => { setPayment(result); setStep(3); };
   const onSigned = (info) => { setContract(info); setStep(4); };
 
   // ── Step 0 — Gate ──────────────────────────────────────────────────────────
@@ -445,8 +445,7 @@ export default function InvestScreen() {
           base={breakdown.base_amount}
           fee={breakdown.fee_amount}
           feePercentage={feePercentage}
-          onGatewaySuccess={onGatewaySuccess}
-          onManualSuccess={onManualSuccess}
+          onPaid={onPaid}
         />
       </Screen>
     );

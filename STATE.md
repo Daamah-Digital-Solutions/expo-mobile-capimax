@@ -164,10 +164,14 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
   `process_crypto_transfer` / `process_novapay`); real pending payment records, manual back-office
   verification. Bank/crypto wallet destinations are REAL (copied verbatim into
   `src/components/invest/paymentData.js`) — do not edit without confirming against the dashboard.
-- **Contract step (3):** the **web** runs contract-create + e-signature for **ALL five** methods
-  (`handlePaymentSuccess`). Per the owner's explicit Phase-4 instruction the mobile app runs the
-  contract step for **PayPal + NOWPayments only**; bank/crypto-manual/NovaPay end at their pending
-  status (Step 4). ⚠️ If exact web parity is wanted later, route all five through the contract step.
+- **Contract step (3) runs for ALL 5 methods** (matches the web's shared `handlePaymentSuccess`):
+  each method resolves a `transaction_id`, then `contracts/create` { contract_type:'investment',
+  investment_opportunity_id, payment_transaction_id, investment_amount: total } → `contracts/:id`
+  (render `contract_html`) → typed e-sign. The manual methods' resolved id is always a non-empty
+  string (real id or the same sentinel the web sends: `BANK_TRANSFER` / `NOVAPAY` /
+  `Pending Verification`), so it is valid to pass to `contracts/create`.
+- **Step 4 status** reflects the PAYMENT, not the contract: gateways → **Completed**; manual methods →
+  their pending status (**Processing** / **Pending Verification**) even though the contract is signed.
 - **Money:** `price_per_share` is a STRING → `parseFloat`; total carried forward is rounded to 2 dp so
   the charged amount equals the displayed amount.
 

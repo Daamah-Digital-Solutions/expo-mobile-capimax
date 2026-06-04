@@ -1,7 +1,9 @@
-// Step 4 — Complete (Flow D step 4). Terminal success screen, mirroring the web's
-// payment-success page. Two variants:
-//   • gateway (PayPal/NOWPayments): contract signed → "Payment Successful".
-//   • manual (bank/crypto/NovaPay): proof submitted → pending verification/processing.
+// Step 4 — Complete (Flow D step 4). Terminal screen, mirroring the web's
+// payment-success page. The contract+signature step runs for ALL methods, so the
+// status shown reflects the PAYMENT itself, not the contract:
+//   • gateway (PayPal/NOWPayments): real-time settled → "Payment Successful" / Completed.
+//   • manual (bank/crypto/NovaPay): contract signed, payment still Processing /
+//     Pending Verification (awaiting back-office verification).
 // No implicit refetch (matches web); user navigates to Holdings / Assets.
 import React, { useMemo } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
@@ -25,8 +27,9 @@ export default function CompleteStep({ payment, contract, shares, total }) {
   const { isRTL } = useLanguage();
   const styles = useMemo(() => makeStyles(theme, isRTL), [theme, isRTL]);
 
-  const signed = !!contract; // gateway path goes through the contract step
-  const statusText = signed ? t("buyFlow.completed", "Completed") : payment?.status || t("buyFlow.pending", "Pending");
+  // Gateways settle in real time; manual methods stay pending despite a signed contract.
+  const isGateway = payment?.paymentMethod === "PayPal" || payment?.paymentMethod === "NOWPayments";
+  const statusText = isGateway ? t("buyFlow.completed", "Completed") : payment?.status || t("buyFlow.pending", "Pending");
 
   const rows = [
     { label: t("paymentSuccess.transactionId", "Transaction ID"), value: String(payment?.transaction_id ?? "—") },
@@ -35,7 +38,7 @@ export default function CompleteStep({ payment, contract, shares, total }) {
     { label: t("buyFlow.method", "Payment Method"), value: payment?.paymentMethod ?? "—" },
     { label: t("paymentSuccess.status", "Status"), value: statusText },
   ];
-  if (signed) {
+  if (contract) {
     rows.push({ label: t("buyFlow.contractId", "Contract ID"), value: String(contract.contractId ?? "—") });
     if (contract.signedAt) rows.push({ label: t("buyFlow.signedAt", "Signed At"), value: String(contract.signedAt) });
   }
@@ -45,15 +48,15 @@ export default function CompleteStep({ payment, contract, shares, total }) {
       <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40, gap: 22, flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <FadeInView index={0} style={styles.hero}>
           <View style={[styles.badge, { backgroundColor: theme.primary + "22" }]}>
-            <Ionicons name={signed ? "checkmark-circle" : "time"} size={56} color={signed ? theme.positive : theme.primary} />
+            <Ionicons name={isGateway ? "checkmark-circle" : "document-text"} size={56} color={isGateway ? theme.positive : theme.primary} />
           </View>
           <Text style={[type.h1, { color: theme.text, textAlign: "center" }]}>
-            {signed ? t("paymentSuccess.congratulations", "Congratulations! Payment Successful!") : t("buyFlow.paymentSubmitted", "Payment submitted")}
+            {isGateway ? t("paymentSuccess.congratulations", "Congratulations! Payment Successful!") : t("buyFlow.paymentSubmitted", "Payment submitted")}
           </Text>
           <Text style={[type.body, { color: theme.textSecondary, textAlign: "center" }]}>
-            {signed
+            {isGateway
               ? t("paymentSuccess.checkEmail", "Check Your Email! Your purchase has been successfully processed.")
-              : t("buyFlow.pendingNote", "Your payment was submitted and is awaiting verification. You'll be notified once it's confirmed.")}
+              : t("buyFlow.signedPendingNote", "Your contract is signed. Your payment is awaiting verification — you'll be notified once it's confirmed.")}
           </Text>
         </FadeInView>
 

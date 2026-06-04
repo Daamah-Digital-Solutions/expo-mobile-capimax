@@ -722,6 +722,7 @@
     "signFailed": "Failed to sign contract. Please try again.",
     "paymentSubmitted": "Payment submitted",
     "pendingNote": "Your payment was submitted and is awaiting verification. You'll be notified once it's confirmed.",
+    "signedPendingNote": "Your contract is signed. Your payment is awaiting verification — you'll be notified once it's confirmed.",
     "completed": "Completed",
     "pending": "Pending",
     "method": "Payment Method",

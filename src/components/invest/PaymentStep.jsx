@@ -3,8 +3,9 @@
 // Exact payloads + response handling + transaction_id resolution per API_AND_FLOWS §2.4.
 //
 // LIVE PAYMENTS — every method moves real money / records a real pending payment.
-// Gateways (PayPal, NOWPayments) call onGatewaySuccess → contract step.
-// Manual methods (bank/crypto/NovaPay) call onManualSuccess → pending completion.
+// ALL methods (gateways + manual) resolve a transaction_id and call onPaid → the
+// contract+signature step runs for every method, exactly like the web's shared
+// handlePaymentSuccess. Manual methods keep their pending/Processing payment status.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,7 +31,7 @@ import { investmentPaymentService } from "../../api/services";
 const USD = (n) => `$${(Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const extra = Constants.expoConfig?.extra || {};
 
-export default function PaymentStep({ rail, opportunityId, shares, total, base, fee, feePercentage, onGatewaySuccess, onManualSuccess }) {
+export default function PaymentStep({ rail, opportunityId, shares, total, base, fee, feePercentage, onPaid }) {
   const { t } = useTranslation();
   const { theme, radii, type, spacing } = useTheme();
   const { isRTL } = useLanguage();
@@ -97,7 +98,7 @@ export default function PaymentStep({ rail, opportunityId, shares, total, base, 
       });
       if (res?.data?.status === "success") {
         setSubmitting(false);
-        onGatewaySuccess({
+        onPaid({
           transaction_id: res.data?.transaction_id || msg.captureId,
           paymentMethod: "PayPal",
           status: msg.status || "COMPLETED",
@@ -156,7 +157,7 @@ export default function PaymentStep({ rail, opportunityId, shares, total, base, 
         if (res?.data?.completed) {
           stopPolling();
           setNowUrl(null);
-          onGatewaySuccess({ transaction_id: invoiceId, paymentMethod: "NOWPayments", status: "completed" });
+          onPaid({ transaction_id: invoiceId, paymentMethod: "NOWPayments", status: "completed" });
           return;
         }
       } catch {
@@ -198,7 +199,7 @@ export default function PaymentStep({ rail, opportunityId, shares, total, base, 
       if (res?.data?.status === "success") {
         const d = res.data?.data || {};
         setSubmitting(false);
-        onManualSuccess({
+        onPaid({
           transaction_id: d.investment_id || d.reference_number || "BANK_TRANSFER",
           paymentMethod: "Bank Transfer",
           status: "Processing",
@@ -225,7 +226,7 @@ export default function PaymentStep({ rail, opportunityId, shares, total, base, 
       if (res?.data?.status === "success") {
         const d = res.data?.data || {};
         setSubmitting(false);
-        onManualSuccess({
+        onPaid({
           transaction_id: d.novapay_transfer_id || d.investment_id || d.reference_number || "NOVAPAY",
           paymentMethod: "NovaPay",
           status: "Processing",
@@ -256,7 +257,7 @@ export default function PaymentStep({ rail, opportunityId, shares, total, base, 
       if (data && (data.status === "success" || data.id)) {
         const rd = data.data || data;
         setSubmitting(false);
-        onManualSuccess({
+        onPaid({
           transaction_id: rd.transaction_hash || rd.transaction_id || txHash || "Pending Verification",
           paymentMethod: "crypto",
           status: "Pending Verification",
