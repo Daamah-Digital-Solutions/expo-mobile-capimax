@@ -720,6 +720,7 @@
     "legalNotice": "By signing electronically, you agree your e-signature has the same legal effect as a handwritten one, and accept the investment terms and risks.",
     "signComplete": "Sign & Complete",
     "signFailed": "Failed to sign contract. Please try again.",
+    "eSignShort": "Legally binding e-signature",
     "paymentSubmitted": "Payment submitted",
     "pendingNote": "Your payment was submitted and is awaiting verification. You'll be notified once it's confirmed.",
     "signedPendingNote": "Your contract is signed. Your payment is awaiting verification — you'll be notified once it's confirmed.",
