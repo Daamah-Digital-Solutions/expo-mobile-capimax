@@ -19,8 +19,8 @@
 | 6 | MyFunds (My Holdings + sell-status) + Portfolio (svg chart, refresh) | ✅ done |
 | 7 | Internal Market: listings/holdings/my-listings/transactions/stats + create-listing (SELL) + purchase (BUY, all 4 methods + contract) | ✅ done |
 | 8 | Account (users/me) + Edit profile (Flow H passport upload) ✅; Change-password UI built but **blocked** (no endpoint, OQ#2) | ✅ done |
-| 9 | **NEXT** — Support / FAQ / Legal / Document center / Settings | ⏳ |
-| 10 | Polish + QA + EAS build | ⏳ |
+| 9 | Contact(feedback) + FAQ + legal/[type] (terms/statement/policy) + Document Center + Our Platforms + real Settings (More) | ✅ done |
+| 10 | **NEXT** — Polish + QA + EAS build | ⏳ |
 
 Detailed per-phase "Ready prompts" + Definitions of Done are in `BUILD_PLAN.md`.
 
@@ -34,7 +34,12 @@ app/
   index.jsx              redirect → /(tabs)/funds
   (auth)/ login, register, verify, forgot-password, reset-password   (Phase 2, all functional)
   (tabs)/ _layout (TabBar) + funds(real, P3) · wallet(real, P5) · myfunds(real, P6) ·
-          portfolio(real, P6) · market(real, P7) · more(settings → P9)
+          portfolio(real, P6) · market(real, P7) · more(REAL Settings hub, P9)
+  contact.jsx            Contact + feedback form (P9): users/me prefill → POST feedback
+  faq.jsx                FAQ accordion (P9, faq.* keys)
+  legal/[type].jsx       terms-conditions (Drive link) | statement | policy-insurance (P9)
+  document-center.jsx    GET /api/documents/ → list, open externally (P9)
+  platforms.jsx          Our Platforms — 3 sister sites, open externally (P9)
   opportunity/[id].jsx   Opportunity detail (Phase 3)
   invest/[id].jsx        REAL 4-step Buy flow machine (Phase 4): gate→amount→payment→contract→complete
   market/buy/[listingId].jsx  REAL internal-market BUY machine (Phase 7): shares→method→
@@ -243,6 +248,34 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
 - **Minor divergence (intentional):** if `contracts/create` fails the web alerts and proceeds to success
   *without* a signature; we keep `ContractStep`'s error+Retry instead (never skip the legally-binding
   signature) — consistent with the Phase-4 Buy flow.
+
+---
+
+## 7e) Support / Legal / Settings (Phase 9) — findings + decisions
+
+> Derived from web pages/{contact,feedback,faq,terms-conditions,legal,policy-insurance,document-center,platforms}.
+
+- **External links open via `expo-web-browser`** (`WebBrowser.openBrowserAsync`) — the web uses
+  `target=_blank`. `document_url`, `statement_url`, `policy_insurance_url`, and the Terms Drive links
+  are all **publicly openable** (no auth header needed — the web opens them with a plain `href`).
+- **Terms & Conditions ≠ inline text:** the web `pages/terms-conditions` opens a **language-specific
+  Google-Drive PDF** (en/ar links hardcoded — copied verbatim into `app/legal/[type].jsx`
+  `TERMS_LINKS`). There is no inline terms text to render. (The Phase-9 ask said "from translations";
+  the faithful web behavior is the Drive link.)
+- **Contact = branch info + feedback form** merged: 3 branch cards (real UAE/UK/USA phones + email,
+  verbatim) + the functional feedback form (`pages/feedback`). Email prefilled from
+  `users/me.user_details.email`; `POST /api/feedback/` `{ email, subject, message,
+  email_to:'contact@capimaxinvestment.com', user_email }`; success on `data.status==='success'`.
+- ⚠️ **Document Center — signed contracts deferred.** The web doc center ALSO lists signed contracts
+  with an **auth-protected PDF blob** download (`GET /api/contracts/{id}/download/`,
+  `/api/contracts/user-contracts/`). That needs `expo-file-system` + `expo-sharing` (NOT current deps)
+  to fetch-with-token + open, and is outside the Phase-9 scope (documents only). **Deferred to Phase 10**
+  — either add those two deps (download to cache + share) or have the backend issue a signed/public URL.
+  The regular documents list (open externally) is complete.
+- **Platform logos** (`/platform-logos/*.svg|png`) are web-only assets → mobile uses an accent Ionicon
+  per platform. Names/URLs/descriptions are the real ones (verbatim).
+- **Settings (More tab)** is now the real hub (account links + support/legal links + theme + language +
+  about/version). The permanent theme/language UI replaces the Phase-1 temporary toggles.
 
 ---
 
