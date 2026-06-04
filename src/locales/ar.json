@@ -679,6 +679,12 @@
     "termsLink": "الشروط والأحكام",
     "acceptTermsHint": "اقبل الشروط للمتابعة.",
     "completeProfileHint": "أكمل ملفك الشخصي للمتابعة.",
-    "minSharesNote": "الحد الأدنى {{count}} حصة"
+    "minSharesNote": "الحد الأدنى {{count}} حصة",
+    "amountTitle": "كم عدد الحصص؟",
+    "sharesAvailable": "{{count}} متاحة",
+    "soldOut": "لا توجد حصص متاحة",
+    "maxReached": "المتاح {{count}} حصة فقط",
+    "platformFee": "رسوم المنصة ({{pct}}%)",
+    "totalToPay": "الإجمالي المستحق"
   }
 }

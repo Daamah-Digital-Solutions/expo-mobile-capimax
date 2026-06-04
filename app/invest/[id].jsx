@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Pressable, TextInput } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,10 +13,13 @@ import Skeleton from "../../src/components/Skeleton";
 import EmptyState from "../../src/components/EmptyState";
 import SectionHeader from "../../src/components/SectionHeader";
 import FadeInView from "../../src/components/motion/FadeInView";
+import AnimatedNumber from "../../src/components/motion/AnimatedNumber";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { useAuth } from "../../src/context/AuthContext";
-import { opportunityService, userService } from "../../src/api/services";
+import { opportunityService, userService, feeService, calculateFee, DEFAULT_FEE_PERCENTAGE } from "../../src/api/services";
+
+const USD = (n) => `$${(Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 // price_per_share / total_investment arrive as STRINGS from the API → parseFloat before any math.
 function money(v, opts) {
@@ -46,6 +49,8 @@ export default function InvestScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [shares, setShares] = useState(""); // controlled string; parsed for math
+  const [feePercentage, setFeePercentage] = useState(DEFAULT_FEE_PERCENTAGE);
 
   const load = useCallback(async () => {
     setError("");
@@ -78,6 +83,28 @@ export default function InvestScreen() {
       router.replace("/(auth)/login");
     }
   }, [isAuthenticated, id]);
+
+  // Fee percentage for Step 1 (Flow D step 1.4). Default 2.5 if the call fails — never blocks.
+  useEffect(() => {
+    let active = true;
+    feeService
+      .getFeePercentage()
+      .then((res) => {
+        const p = parseFloat(res?.data?.fee_percentage);
+        if (active && !Number.isNaN(p)) setFeePercentage(p);
+      })
+      .catch(() => {}); // keep DEFAULT_FEE_PERCENTAGE
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Seed the shares input with the asset's minimum once the asset loads.
+  useEffect(() => {
+    if (opp && shares === "") {
+      setShares(String(Math.max(1, parseInt(opp.minimum_shares, 10) || 1)));
+    }
+  }, [opp]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const reload = () => {
     setLoading(true);
@@ -272,7 +299,129 @@ export default function InvestScreen() {
     );
   }
 
-  // ── Steps 1–4 — built in the next turns ────────────────────────────────────
+  // ── Step 1 — Amount & fee ──────────────────────────────────────────────────
+  if (step === 1) {
+    const price = parseFloat(o.price_per_share) || 0;
+    const minShares = Math.max(1, parseInt(o.minimum_shares, 10) || 1);
+    // Available = total_shares - purchased_shares when both are present, else available_shares.
+    const totalShares = parseInt(o.total_shares, 10);
+    const purchasedShares = parseInt(o.purchased_shares, 10);
+    const fromTotals = Number.isFinite(totalShares) && Number.isFinite(purchasedShares) ? totalShares - purchasedShares : NaN;
+    const maxShares = Number.isFinite(fromTotals) ? Math.max(0, fromTotals) : parseInt(o.available_shares, 10) || 0;
+
+    const sharesNum = parseInt(shares, 10) || 0;
+    const breakdown = calculateFee(sharesNum * price, feePercentage); // base/fee/total, all numeric
+    const valid = sharesNum >= minShares && maxShares > 0 && sharesNum <= maxShares;
+    const tooFew = sharesNum < minShares;
+    const tooMany = maxShares > 0 && sharesNum > maxShares;
+
+    const clampSet = (n) => {
+      let v = Math.max(0, Math.round(Number(n) || 0));
+      if (maxShares > 0) v = Math.min(v, maxShares);
+      setShares(String(v));
+    };
+    const onInput = (txt) => {
+      const digits = txt.replace(/[^0-9]/g, "");
+      if (maxShares > 0 && parseInt(digits, 10) > maxShares) return clampSet(maxShares);
+      setShares(digits);
+    };
+
+    return (
+      <Screen edges={["bottom"]}>
+        {Header}
+        <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingBottom: 130 + insets.bottom, gap: 20 }} showsVerticalScrollIndicator={false}>
+          {StepRail}
+
+          {/* Asset + unit price */}
+          <FadeInView index={0}>
+            <Card style={{ gap: 6 }}>
+              <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>{o.title}</Text>
+              <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left" }]}>
+                {t("opportunity.pricePerShare", "Price / share")}: {USD(price)}
+              </Text>
+            </Card>
+          </FadeInView>
+
+          {/* Shares stepper */}
+          <FadeInView index={1} style={{ gap: 10 }}>
+            <SectionHeader title={t("buyFlow.amountTitle", "How many shares?")} />
+            <Card style={{ gap: 12 }}>
+              <View style={styles.stepperRow}>
+                <Pressable
+                  style={[styles.stepperBtn, sharesNum <= 0 && styles.stepperBtnOff]}
+                  onPress={() => clampSet(sharesNum - 1)}
+                  hitSlop={6}
+                >
+                  <Ionicons name="remove" size={22} color={theme.text} />
+                </Pressable>
+                <TextInput
+                  style={[styles.stepperInput, type.statNumber, { color: theme.text }]}
+                  value={shares}
+                  onChangeText={onInput}
+                  onBlur={() => shares === "" && setShares("0")}
+                  keyboardType="number-pad"
+                  maxLength={9}
+                  selectTextOnFocus
+                  textAlign="center"
+                />
+                <Pressable
+                  style={[styles.stepperBtn, maxShares > 0 && sharesNum >= maxShares && styles.stepperBtnOff]}
+                  onPress={() => clampSet(sharesNum + 1)}
+                  hitSlop={6}
+                >
+                  <Ionicons name="add" size={22} color={theme.text} />
+                </Pressable>
+              </View>
+              <View style={styles.rangeRow}>
+                <Text style={[type.caption, { color: theme.textMuted }]}>{t("buyFlow.minSharesNote", "Minimum {{count}} shares", { count: minShares })}</Text>
+                <Text style={[type.caption, { color: theme.textMuted }]}>
+                  {maxShares > 0 ? t("buyFlow.sharesAvailable", "{{count}} available", { count: maxShares }) : t("buyFlow.soldOut", "No shares available")}
+                </Text>
+              </View>
+              {tooFew ? <Banner type="warning" message={t("buyFlow.minSharesNote", "Minimum {{count}} shares", { count: minShares })} /> : null}
+              {tooMany ? <Banner type="warning" message={t("buyFlow.maxReached", "Only {{count}} shares available", { count: maxShares })} /> : null}
+            </Card>
+          </FadeInView>
+
+          {/* Live breakdown */}
+          <FadeInView index={2} style={{ gap: 10 }}>
+            <SectionHeader title={t("investForm.investmentSummary", "Purchase Summary")} />
+            <Card style={{ gap: 0 }}>
+              <BreakdownRow
+                label={`${t("investForm.numberOfShares", "Number of Shares")} × ${USD(price)}`}
+                value={USD(breakdown.base_amount)}
+                styles={styles} theme={theme} type={type} isRTL={isRTL} first
+              />
+              <BreakdownRow
+                label={t("buyFlow.platformFee", "Platform fee ({{pct}}%)", { pct: feePercentage })}
+                value={USD(breakdown.fee_amount)}
+                styles={styles} theme={theme} type={type} isRTL={isRTL}
+              />
+              <View style={styles.totalRow}>
+                <Text style={[type.label, { color: theme.textSecondary }]}>{t("buyFlow.totalToPay", "Total to pay")}</Text>
+                <AnimatedNumber
+                  value={breakdown.total_amount}
+                  format={USD}
+                  style={[type.display, { color: theme.text, textAlign: isRTL ? "left" : "right" }]}
+                />
+              </View>
+            </Card>
+          </FadeInView>
+        </ScrollView>
+
+        {/* Sticky continue bar */}
+        <View style={[styles.footerBar, { paddingBottom: insets.bottom + 10 }]}>
+          <View style={styles.footerSummary}>
+            <Text style={[type.caption, { color: theme.textMuted }]}>{t("buyFlow.totalToPay", "Total to pay")}</Text>
+            <Text style={[type.statNumber, { color: theme.text }]}>{USD(breakdown.total_amount)}</Text>
+          </View>
+          <AppButton title={t("common.continue", "Continue")} icon="arrow-forward" fullWidth={false} style={{ minWidth: 150 }} disabled={!valid} onPress={() => setStep(2)} />
+        </View>
+      </Screen>
+    );
+  }
+
+  // ── Steps 2–4 — built in the next turns ────────────────────────────────────
   return (
     <Screen edges={["bottom"]}>
       {Header}
@@ -283,6 +432,15 @@ export default function InvestScreen() {
         <AppButton title={t("opportunity.backToOpportunities", "Back")} variant="secondary" onPress={() => setStep(step - 1)} />
       </View>
     </Screen>
+  );
+}
+
+function BreakdownRow({ label, value, styles, theme, type, isRTL, first }) {
+  return (
+    <View style={[styles.breakdownRow, first && { borderTopWidth: 0 }]}>
+      <Text style={[type.body, { color: theme.textSecondary, flexShrink: 1, textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>{label}</Text>
+      <Text style={[type.label, { color: theme.text }]}>{value}</Text>
+    </View>
   );
 }
 
@@ -338,6 +496,41 @@ const makeStyles = (theme, radii, isRTL) =>
 
     centerState: { flex: 1, justifyContent: "center", padding: 20, gap: 16 },
 
+    stepperRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+    stepperBtn: {
+      width: 52,
+      height: 52,
+      borderRadius: radii.button,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.surfaceAlt,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.border,
+    },
+    stepperBtnOff: { opacity: 0.4 },
+    stepperInput: { flex: 1, height: 52, paddingVertical: 0 },
+    rangeRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between" },
+
+    breakdownRow: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      paddingVertical: 12,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: theme.border,
+    },
+    totalRow: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      paddingTop: 14,
+      marginTop: 2,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: theme.borderStrong,
+    },
+
     footer: {
       position: "absolute",
       left: 0,
@@ -350,4 +543,20 @@ const makeStyles = (theme, radii, isRTL) =>
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: theme.border,
     },
+    footerBar: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 14,
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      backgroundColor: theme.surface,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: theme.border,
+    },
+    footerSummary: { gap: 1 },
   });

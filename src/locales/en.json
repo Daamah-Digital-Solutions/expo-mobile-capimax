@@ -698,6 +698,12 @@
     "termsLink": "Terms & Conditions",
     "acceptTermsHint": "Accept the terms to continue.",
     "completeProfileHint": "Complete your profile to continue.",
-    "minSharesNote": "Minimum {{count}} shares"
+    "minSharesNote": "Minimum {{count}} shares",
+    "amountTitle": "How many shares?",
+    "sharesAvailable": "{{count}} available",
+    "soldOut": "No shares available",
+    "maxReached": "Only {{count}} shares available",
+    "platformFee": "Platform fee ({{pct}}%)",
+    "totalToPay": "Total to pay"
   }
 }
