@@ -66,6 +66,7 @@ export default function MoreTab() {
             {isAuthenticated ? (
               <>
                 <Row icon="person-circle-outline" label={t("account.title", "My Account")} onPress={() => router.push("/account")} styles={styles} theme={theme} type={type} isRTL={isRTL} first />
+                <Row icon="wallet-outline" label={t("sidebar.wallet", "Wallet")} onPress={() => router.push("/wallet")} styles={styles} theme={theme} type={type} isRTL={isRTL} />
                 <Row icon="create-outline" label={t("sidebar.edit_account", "Edit Profile")} onPress={() => router.push("/edit-profile")} styles={styles} theme={theme} type={type} isRTL={isRTL} />
                 <Row icon="lock-closed-outline" label={t("changePassword.title", "Change Password")} onPress={() => router.push("/change-password")} styles={styles} theme={theme} type={type} isRTL={isRTL} />
                 <Pressable style={[styles.btn, styles.btnDanger]} onPress={signOut}>

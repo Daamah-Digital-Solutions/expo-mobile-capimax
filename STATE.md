@@ -31,13 +31,19 @@ Detailed per-phase "Ready prompts" + Definitions of Done are in `BUILD_PLAN.md`.
 ```
 app/
   _layout.jsx            providers (Theme→Language→Auth) + auth gate + splash + StatusBar
-  index.jsx              entry gate: authed → /(tabs)/funds · else → /onboarding
+  index.jsx              entry gate: authed → /(tabs)/home · else → /onboarding (post-login dest also /home)
   onboarding.jsx         pre-login sliders (every launch, before auth) — all 9 slides. FlatList
                          pager, dots (active = green pill), Skip/Next→Get Started → /(auth)/login.
                          RTL-safe via onViewableItemsChanged. Pager auto-scales to slide count.
   (auth)/ login, register, verify, forgot-password, reset-password   (Phase 2, all functional)
-  (tabs)/ _layout (TabBar) + funds(real, P3) · wallet(real, P5) · myfunds(real, P6) ·
-          portfolio(real, P6) · market(real, P7) · more(REAL Settings hub, P9)
+  (tabs)/ _layout (TabBar; initialRouteName=home) — order: home · funds(Assets) · myfunds
+          (Holdings) · portfolio · market · more. Home is default after login. Wallet REMOVED
+          from tabs → relocated to app/wallet.jsx (opened from Home header + More).
+  home.jsx (tab)         Home: greeting+wallet/notif header · portfolio-value card (wallet
+                         total_balance + portfolio total_value sparkline + growth chip) · 6 static
+                         value-prop tiles · featured-assets slider · secondary-market list.
+                         COPY RULE: no "Trade"/"Invest" words — icons + scroll only.
+  wallet.jsx             relocated wallet (was a tab) — pushed screen w/ back header (P5 logic)
   contact.jsx            Contact + feedback form (P9): users/me prefill → POST feedback
   faq.jsx                FAQ accordion (P9, faq.* keys)
   legal/[type].jsx       terms-conditions (Drive link) | statement | policy-insurance (P9)
@@ -61,6 +67,7 @@ src/
               Field, SelectField (searchable dropdown, P8), Banner, AuthCard, SectionHeader,
               EmptyState, BottomSheet, Skeleton, Screen, PlaceholderScreen, GoogleSignInButton
   constants/ countries.js (COUNTRIES — copied verbatim from web, nationality select)
+  components/ + Sparkline (tiny svg line+area), home/FeaturedAssetCard (compact horizontal asset card)
               motion/ PressableScale, FadeInView, AnimatedNumber
               invest/ PaymentStep, PayPalWebView, NowPaymentsWebView, ContractStep, CompleteStep,
                       FilePickerButton, paymentData.js (P4)

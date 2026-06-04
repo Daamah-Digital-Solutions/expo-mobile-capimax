@@ -40,6 +40,25 @@
     "title9": "Verified and transparent",
     "desc9": "Every document is verified and held by a global custodian — CIM Financial Group."
   },
+  "home": {
+    "welcomeBack": "Welcome back",
+    "portfolioValue": "Portfolio Value",
+    "portfolioEmpty": "Your portfolio is just getting started — your growth will appear here.",
+    "whyTitle": "Why CapiMax",
+    "vp_spv": "Independent SPVs",
+    "vp_diversified": "Global assets",
+    "vp_rating": "Independent rating",
+    "vp_insured": "Fully insured",
+    "vp_bonus": "Pronova 5% bonus",
+    "vp_financing": "Interest-free via Nova",
+    "featured": "Featured assets",
+    "featuredError": "Couldn't load featured assets.",
+    "featuredEmpty": "No featured assets right now.",
+    "secondaryMarket": "Secondary market",
+    "marketError": "Couldn't load the market.",
+    "marketEmpty": "No listings on the secondary market yet.",
+    "seeAll": "See all"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
@@ -826,6 +845,7 @@
     "totalPaid": "Total Paid"
   },
   "tabs": {
+    "home": "Home",
     "assets": "Assets",
     "holdings": "Holdings",
     "wallet": "Wallet",

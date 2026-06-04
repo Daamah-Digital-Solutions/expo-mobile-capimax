@@ -1,50 +1,52 @@
+// Wallet (relocated out of the bottom tabs) — opened from the Home header wallet icon and the
+// More tab. A pushed screen with a back header. Same logic/flow as before (Flow G withdraw).
+//   base wallet (GET /api/wallet/ results[0]) merged with GET /api/wallet/summary/, plus
+//   transactions + withdrawals; Withdraw via the WithdrawSheet → refetch on success.
+// Money fields arrive as STRINGS (balance/profit_balance) or numbers (total_balance) → parseFloat.
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, RefreshControl } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Pressable, RefreshControl } from "react-native";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import Screen from "../../src/components/Screen";
-import Card from "../../src/components/Card";
-import Banner from "../../src/components/Banner";
-import Skeleton from "../../src/components/Skeleton";
-import EmptyState from "../../src/components/EmptyState";
-import SegmentedControl from "../../src/components/SegmentedControl";
-import AppButton from "../../src/components/AppButton";
-import AnimatedNumber from "../../src/components/motion/AnimatedNumber";
-import FadeInView from "../../src/components/motion/FadeInView";
-import WithdrawSheet from "../../src/components/wallet/WithdrawSheet";
-import { useTheme } from "../../src/context/ThemeContext";
-import { useLanguage } from "../../src/context/LanguageContext";
-import { walletService } from "../../src/api/services";
+import Screen from "../src/components/Screen";
+import Card from "../src/components/Card";
+import Banner from "../src/components/Banner";
+import Skeleton from "../src/components/Skeleton";
+import EmptyState from "../src/components/EmptyState";
+import SegmentedControl from "../src/components/SegmentedControl";
+import AppButton from "../src/components/AppButton";
+import AnimatedNumber from "../src/components/motion/AnimatedNumber";
+import FadeInView from "../src/components/motion/FadeInView";
+import WithdrawSheet from "../src/components/wallet/WithdrawSheet";
+import { useTheme } from "../src/context/ThemeContext";
+import { useLanguage } from "../src/context/LanguageContext";
+import { walletService } from "../src/api/services";
 
-// Money fields arrive as STRINGS (balance/profit_balance) or numbers (total_balance) → parseFloat.
 const USD = (v) => `$${(parseFloat(v) || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 function fmtDate(iso) {
   if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString();
-  } catch {
-    return String(iso);
-  }
+  try { return new Date(iso).toLocaleDateString(); } catch { return String(iso); }
 }
 
-export default function WalletTab() {
+export default function WalletScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
   const { theme, radii, type, spacing } = useTheme();
   const { isRTL } = useLanguage();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => makeStyles(theme, radii, isRTL), [theme, radii, isRTL]);
 
-  const [wallet, setWallet] = useState(null); // merged: {...results[0], ...summary}
+  const [wallet, setWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState("transactions"); // transactions | withdrawals
+  const [tab, setTab] = useState("transactions");
   const [withdrawOpen, setWithdrawOpen] = useState(false);
 
-  // Mirrors the web fetchWalletData: base wallet (results[0]) merged with summary,
-  // plus transactions + withdrawals (each falling back to []).
   const fetchAll = useCallback(async () => {
     setError("");
     try {
@@ -74,21 +76,21 @@ export default function WalletTab() {
     fetchAll().catch(() => {}).finally(() => setRefreshing(false));
   };
 
-  const header = (
-    <View style={styles.titleRow}>
-      <View style={{ gap: 2 }}>
-        <Text style={[type.h1, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("wallet.title", "Wallet")}</Text>
-        <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left" }]}>{t("wallet.subtitle", "Manage your funds")}</Text>
-      </View>
-      <Ionicons name="wallet-outline" size={24} color={theme.primary} />
+  const Header = (
+    <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
+      <Pressable style={styles.headerBack} onPress={() => router.back()} hitSlop={8}>
+        <Ionicons name={isRTL ? "chevron-forward" : "chevron-back"} size={22} color={theme.text} />
+      </Pressable>
+      <Text style={[type.label, { color: theme.text }]}>{t("wallet.title", "Wallet")}</Text>
+      <View style={styles.headerBack} />
     </View>
   );
 
   if (loading) {
     return (
-      <Screen edges={["top"]}>
+      <Screen edges={["bottom"]}>
+        {Header}
         <View style={{ padding: spacing.xl, gap: 14 }}>
-          {header}
           <Skeleton width="100%" height={120} radius={radii.card} />
           <View style={{ flexDirection: "row", gap: 12 }}>
             <Skeleton width="48%" height={84} radius={radii.card} />
@@ -104,9 +106,9 @@ export default function WalletTab() {
 
   if (error && !wallet) {
     return (
-      <Screen edges={["top"]}>
+      <Screen edges={["bottom"]}>
+        {Header}
         <View style={{ padding: spacing.xl, gap: 16 }}>
-          {header}
           <Banner type="error" message={error} actionLabel={t("common.retry", "Retry")} onAction={() => { setLoading(true); fetchAll().catch(() => {}).finally(() => setLoading(false)); }} />
         </View>
       </Screen>
@@ -116,14 +118,13 @@ export default function WalletTab() {
   const lastProfit = wallet?.last_profit_date ? fmtDate(wallet.last_profit_date) : t("wallet.noProfitsYet", "No profits yet");
 
   return (
-    <Screen edges={["top"]}>
+    <Screen edges={["bottom"]}>
+      {Header}
       <ScrollView
         contentContainerStyle={{ padding: spacing.xl, paddingBottom: 32, gap: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.primary} colors={[theme.primary]} />}
       >
-        {header}
-
         {/* Total balance hero */}
         <FadeInView index={0}>
           <Card style={{ gap: 6 }}>
@@ -216,7 +217,6 @@ export default function WalletTab() {
         visible={withdrawOpen}
         onClose={() => setWithdrawOpen(false)}
         onSuccess={() => {
-          // Flow G: close, then refetch summary + transactions + withdrawals.
           setWithdrawOpen(false);
           setLoading(true);
           fetchAll().catch(() => {}).finally(() => setLoading(false));
@@ -257,11 +257,8 @@ function StatusPill({ status, theme, type, t }) {
 
 const makeStyles = (theme, radii, isRTL) =>
   StyleSheet.create({
-    titleRow: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
+    header: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingBottom: 8 },
+    headerBack: { width: 38, height: 38, alignItems: "center", justifyContent: "center" },
     heroLabel: { color: theme.textMuted, textTransform: "uppercase", letterSpacing: 0.5, textAlign: isRTL ? "right" : "left" },
     lastRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 5, marginTop: 2 },
     tilesRow: { flexDirection: isRTL ? "row-reverse" : "row", gap: 12 },

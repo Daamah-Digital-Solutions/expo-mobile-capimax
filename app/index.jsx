@@ -6,5 +6,5 @@ import { useAuth } from "../src/context/AuthContext";
 export default function Index() {
   const { isLoading, isAuthenticated } = useAuth();
   if (isLoading) return null; // providers still booting (root layout shows the splash)
-  return <Redirect href={isAuthenticated ? "/(tabs)/funds" : "/onboarding"} />;
+  return <Redirect href={isAuthenticated ? "/(tabs)/home" : "/onboarding"} />;
 }

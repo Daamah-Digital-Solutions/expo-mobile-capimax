@@ -28,7 +28,7 @@ function RootNavigator() {
     // We only bounce an already-authenticated user out of the auth stack (post-login),
     // returning to the intended route if one was saved (Flow A "return to route").
     if (isAuthenticated && inAuthGroup) {
-      const dest = pendingRoute || "/(tabs)/funds";
+      const dest = pendingRoute || "/(tabs)/home";
       if (pendingRoute) setPendingRoute(null);
       router.replace(dest);
     }

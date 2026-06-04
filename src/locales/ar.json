@@ -40,6 +40,25 @@
     "title9": "موثَّقة وشفافة",
     "desc9": "كل مستند موثَّق ومحفوظ لدى أمين حفظ عالمي — CIM Financial Group."
   },
+  "home": {
+    "welcomeBack": "مرحباً بعودتك",
+    "portfolioValue": "قيمة المحفظة",
+    "portfolioEmpty": "محفظتك في بدايتها — سيظهر نموّك هنا.",
+    "whyTitle": "لماذا كابيماكس",
+    "vp_spv": "شركات SPV مستقلة",
+    "vp_diversified": "أصول عالمية",
+    "vp_rating": "تقييم مستقل",
+    "vp_insured": "مؤمّنة بالكامل",
+    "vp_bonus": "مكافأة Pronova 5%",
+    "vp_financing": "تمويل بدون فوائد عبر Nova",
+    "featured": "أصول مميّزة",
+    "featuredError": "تعذّر تحميل الأصول المميّزة.",
+    "featuredEmpty": "لا توجد أصول مميّزة حالياً.",
+    "secondaryMarket": "السوق الثانوية",
+    "marketError": "تعذّر تحميل السوق.",
+    "marketEmpty": "لا توجد إدراجات في السوق الثانوية بعد.",
+    "seeAll": "عرض الكل"
+  },
   "common": {
     "loading": "جاري التحميل...",
     "error": "خطأ",
@@ -818,6 +837,7 @@
     "totalPaid": "إجمالي المدفوع"
   },
   "tabs": {
+    "home": "الرئيسية",
     "assets": "الأصول",
     "holdings": "حيازاتي",
     "wallet": "المحفظة",

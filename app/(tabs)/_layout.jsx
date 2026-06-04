@@ -5,6 +5,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../src/context/ThemeContext";
 
+// Home is the default tab after login (the entry gate + post-login redirect target /(tabs)/home).
+export const unstable_settings = { initialRouteName: "home" };
+
 // Bottom tabs (DESIGN.md §7): surface bg, soft top shadow (light) / hairline top border (dark),
 // active = primary, inactive = textMuted. Labels from sidebar.* (RTL via I18nManager).
 export default function TabsLayout() {
@@ -43,9 +46,9 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: theme.bg },
       }}
     >
+      <Tabs.Screen name="home" options={{ title: t("tabs.home", "Home"), tabBarIcon: icon("home-outline") }} />
       <Tabs.Screen name="funds" options={{ title: t("tabs.assets", "Assets"), tabBarIcon: icon("albums-outline") }} />
       <Tabs.Screen name="myfunds" options={{ title: t("tabs.holdings", "Holdings"), tabBarIcon: icon("briefcase-outline") }} />
-      <Tabs.Screen name="wallet" options={{ title: t("tabs.wallet", "Wallet"), tabBarIcon: icon("wallet-outline") }} />
       <Tabs.Screen name="portfolio" options={{ title: t("tabs.portfolio", "Portfolio"), tabBarIcon: icon("stats-chart-outline") }} />
       <Tabs.Screen name="market" options={{ title: t("tabs.market", "Market"), tabBarIcon: icon("swap-horizontal-outline") }} />
       <Tabs.Screen name="more" options={{ title: t("tabs.more", "More"), tabBarIcon: icon("ellipsis-horizontal-outline") }} />
