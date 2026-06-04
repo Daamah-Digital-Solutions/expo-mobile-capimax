@@ -15,6 +15,7 @@ import SectionHeader from "../../src/components/SectionHeader";
 import FadeInView from "../../src/components/motion/FadeInView";
 import AnimatedNumber from "../../src/components/motion/AnimatedNumber";
 import PaymentStep from "../../src/components/invest/PaymentStep";
+import ContractStep from "../../src/components/invest/ContractStep";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { useAuth } from "../../src/context/AuthContext";
@@ -53,6 +54,7 @@ export default function InvestScreen() {
   const [shares, setShares] = useState(""); // controlled string; parsed for math
   const [feePercentage, setFeePercentage] = useState(DEFAULT_FEE_PERCENTAGE);
   const [payment, setPayment] = useState(null); // { transaction_id, paymentMethod, status } from Step 2
+  const [contract, setContract] = useState(null); // { contractId, signedAt, ... } from Step 3
 
   const load = useCallback(async () => {
     setError("");
@@ -222,6 +224,7 @@ export default function InvestScreen() {
 
   const onGatewaySuccess = (result) => { setPayment(result); setStep(3); };
   const onManualSuccess = (result) => { setPayment(result); setStep(4); };
+  const onSigned = (info) => { setContract(info); setStep(4); };
 
   // ── Step 0 — Gate ──────────────────────────────────────────────────────────
   if (step === 0) {
@@ -448,7 +451,23 @@ export default function InvestScreen() {
     );
   }
 
-  // ── Steps 3–4 — built in the next turns ────────────────────────────────────
+  // ── Step 3 — Contract (gateway payments only) ──────────────────────────────
+  if (step === 3) {
+    return (
+      <Screen edges={["bottom"]}>
+        {Header}
+        <ContractStep
+          rail={StepRail}
+          opportunityId={id}
+          payment={payment}
+          total={totalAmount}
+          onSigned={onSigned}
+        />
+      </Screen>
+    );
+  }
+
+  // ── Step 4 — Complete — built in the next turn ─────────────────────────────
   return (
     <Screen edges={["bottom"]}>
       {Header}

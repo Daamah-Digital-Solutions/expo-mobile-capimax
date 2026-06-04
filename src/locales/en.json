@@ -710,6 +710,15 @@
     "selectBankAccount": "Select an account, transfer the total, then upload your proof.",
     "network": "Network",
     "sendExactCrypto": "Send exactly {{amount}} worth of {{currency}} on the {{network}} network only.",
-    "transactionHash": "Transaction Hash / ID"
+    "transactionHash": "Transaction Hash / ID",
+    "preparingContract": "Preparing your contract…",
+    "contractFailed": "Failed to create contract",
+    "contractTitle": "Your contract",
+    "signTitle": "Sign electronically",
+    "typeFullName": "Type your full legal name",
+    "fullNamePlaceholder": "Full legal name",
+    "legalNotice": "By signing electronically, you agree your e-signature has the same legal effect as a handwritten one, and accept the investment terms and risks.",
+    "signComplete": "Sign & Complete",
+    "signFailed": "Failed to sign contract. Please try again."
   }
 }
