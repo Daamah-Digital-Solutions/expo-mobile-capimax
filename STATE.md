@@ -14,8 +14,8 @@
 | 1 | Foundation: API client, services, Auth/Language/Theme contexts, i18n/RTL, nav skeleton | ✅ done |
 | 2 | Full auth (login/register/verify/forgot/reset) wired to real backend | ✅ done |
 | 3 | Funds list (AssetCard) + Opportunity detail page; Buy routes correctly | ✅ done |
-| 4 | **NEXT** — 4-step Buy flow: create → pay (PayPal/bank/crypto/NOWPayments) → sign contract → complete | ⏳ |
-| 5 | Wallet + Withdraw | ⏳ |
+| 4 | 4-step Buy flow on `/invest/[id]`: gate → amount/fee → pay (all 5 methods, LIVE) → sign contract → complete | ✅ done |
+| 5 | **NEXT** — Wallet + Withdraw | ⏳ |
 | 6 | MyFunds + Portfolio (+ 90-day sell logic, chart) | ⏳ |
 | 7 | Internal Market | ⏳ |
 | 8 | Account + Edit profile (passport upload) + Change password | ⏳ |

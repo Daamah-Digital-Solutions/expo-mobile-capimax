@@ -16,6 +16,7 @@ import FadeInView from "../../src/components/motion/FadeInView";
 import AnimatedNumber from "../../src/components/motion/AnimatedNumber";
 import PaymentStep from "../../src/components/invest/PaymentStep";
 import ContractStep from "../../src/components/invest/ContractStep";
+import CompleteStep from "../../src/components/invest/CompleteStep";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { useAuth } from "../../src/context/AuthContext";
@@ -467,20 +468,8 @@ export default function InvestScreen() {
     );
   }
 
-  // ── Step 4 — Complete — built in the next turn ─────────────────────────────
-  return (
-    <Screen edges={["bottom"]}>
-      {Header}
-      <View style={styles.centerState}>
-        <Ionicons name="construct-outline" size={44} color={theme.primary} />
-        <Text style={[type.h2, { color: theme.text, textAlign: "center" }]}>{t(`buyFlow.${STEPS[step]}`, STEPS[step] || "complete")}</Text>
-        <Text style={[type.body, { color: theme.textSecondary, textAlign: "center" }]}>
-          {payment ? `${payment.paymentMethod} · ${payment.status} · #${payment.transaction_id}` : `Phase 4 — step ${step + 1} coming next.`}
-        </Text>
-        <AppButton title={t("opportunity.backToOpportunities", "Back")} variant="secondary" onPress={() => setStep(Math.max(0, step - 1))} />
-      </View>
-    </Screen>
-  );
+  // ── Step 4 — Complete (terminal) ───────────────────────────────────────────
+  return <CompleteStep payment={payment} contract={contract} shares={sharesNum} total={totalAmount} />;
 }
 
 function BreakdownRow({ label, value, styles, theme, type, isRTL, first }) {
