@@ -32,9 +32,9 @@ Detailed per-phase "Ready prompts" + Definitions of Done are in `BUILD_PLAN.md`.
 app/
   _layout.jsx            providers (Theme→Language→Auth) + auth gate + splash + StatusBar
   index.jsx              entry gate: authed → /(tabs)/funds · else → /onboarding
-  onboarding.jsx         pre-login sliders (every launch, before auth). FlatList pager, dots
-                         (active = green pill), Skip/Next→Get Started → /(auth)/login. RTL-safe
-                         via onViewableItemsChanged. ⚠️ only FIRST 3 of 9 slides built (rest pending)
+  onboarding.jsx         pre-login sliders (every launch, before auth) — all 9 slides. FlatList
+                         pager, dots (active = green pill), Skip/Next→Get Started → /(auth)/login.
+                         RTL-safe via onViewableItemsChanged. Pager auto-scales to slide count.
   (auth)/ login, register, verify, forgot-password, reset-password   (Phase 2, all functional)
   (tabs)/ _layout (TabBar) + funds(real, P3) · wallet(real, P5) · myfunds(real, P6) ·
           portfolio(real, P6) · market(real, P7) · more(REAL Settings hub, P9)

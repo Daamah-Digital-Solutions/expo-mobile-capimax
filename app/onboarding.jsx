@@ -18,13 +18,19 @@ import AppButton from "../src/components/AppButton";
 import { useTheme } from "../src/context/ThemeContext";
 import { useLanguage } from "../src/context/LanguageContext";
 
-// Icon names map to the nearest Ionicons (no custom illustrations):
-//   shield-lock → shield-checkmark-outline · chart-pie → pie-chart-outline ·
-//   arrows-exchange → swap-horizontal-outline.
+// Icon names map to the nearest Ionicons outline (no custom illustrations):
+//   1 shield-lock → shield-checkmark · 2 chart-pie → pie-chart · 3 arrows-exchange → swap-horizontal
+//   4 ribbon · 5 shield-checkmark · 6 card · 7 sparkles · 8 cash · 9 globe.
 const SLIDES = [
   { n: 1, icon: "shield-checkmark-outline" },
   { n: 2, icon: "pie-chart-outline" },
   { n: 3, icon: "swap-horizontal-outline" },
+  { n: 4, icon: "ribbon-outline" },
+  { n: 5, icon: "shield-checkmark-outline" },
+  { n: 6, icon: "card-outline" },
+  { n: 7, icon: "sparkles-outline" },
+  { n: 8, icon: "cash-outline" },
+  { n: 9, icon: "globe-outline" },
 ];
 
 export default function Onboarding() {
