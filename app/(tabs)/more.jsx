@@ -1,160 +1,155 @@
+// More / Settings (Phase 9) — the proper settings hub.
+//   • Account: My Account / Edit Profile / Change Password / Logout (or Login when signed out).
+//   • Support & Legal: Contact, FAQ, Document Center, Our Platforms, Terms, Statement, Policy.
+//   • Appearance: theme (auto/light/dark) · Language: en/ar (RTL reload handled by LanguageContext).
+//   • About: app name + version.
+// Reads everything from context; design system; both modes + RTL.
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
+
 import Screen from "../../src/components/Screen";
+import Card from "../../src/components/Card";
+import SegmentedControl from "../../src/components/SegmentedControl";
+import AppButton from "../../src/components/AppButton";
+import FadeInView from "../../src/components/motion/FadeInView";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useAuth } from "../../src/context/AuthContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 
-// More/Settings (foundation slice): auth state + login/logout, language switch (en/ar),
-// and a TEMPORARY theme switch (auto/light/dark) for testing. The full settings screen
-// (with the permanent theme + language UI) lands in Phase 9.
 export default function MoreTab() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { theme, radius, mode, setMode } = useTheme();
+  const { theme, radii, type, spacing, mode, setMode } = useTheme();
   const { isAuthenticated, userEmail, signOut } = useAuth();
   const { language, isRTL, setLanguage } = useLanguage();
-  const styles = useMemo(() => makeStyles(theme, radius), [theme, radius]);
+  const styles = useMemo(() => makeStyles(theme, radii, isRTL), [theme, radii, isRTL]);
+
+  const version = Constants.expoConfig?.version || "1.0.0";
+
+  const SUPPORT_LINKS = [
+    { icon: "chatbubbles-outline", label: t("contact.title", "Contact Us"), route: "/contact" },
+    { icon: "help-circle-outline", label: t("sidebar.faq", "FAQ"), route: "/faq" },
+    { icon: "folder-open-outline", label: t("documentCenter.title", "Document Center"), route: "/document-center" },
+    { icon: "grid-outline", label: t("platforms.sectionTitle", "Our Platforms"), route: "/platforms" },
+    { icon: "document-text-outline", label: t("terms_conditions.title", "Terms & Conditions"), route: "/legal/terms-conditions" },
+    { icon: "reader-outline", label: t("statement.title", "Statement Document"), route: "/legal/statement" },
+    { icon: "shield-checkmark-outline", label: t("policyInsurance.title", "Policy Insurance Document"), route: "/legal/policy-insurance" },
+  ];
+
+  const themeSegments = [
+    { label: t("auto", "Auto"), value: "auto" },
+    { label: t("light", "Light"), value: "light" },
+    { label: t("dark", "Dark"), value: "dark" },
+  ];
+  const langSegments = [
+    { label: "English", value: "en" },
+    { label: "العربية", value: "ar" },
+  ];
 
   return (
-    <Screen>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.heading}>{t("sidebar.more", "More")}</Text>
+    <Screen edges={["top"]}>
+      <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40, gap: 16 }} showsVerticalScrollIndicator={false}>
+        <Text style={[type.h1, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("sidebar.more", "More")}</Text>
 
-        {/* Account / auth */}
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>{t("sidebar.account", "Account")}</Text>
-          <Text style={styles.status}>
-            {isAuthenticated
-              ? userEmail || t("myfunds.documentsVerified", "Signed in")
-              : t("login.title", "Not signed in")}
-          </Text>
+        {/* Account */}
+        <FadeInView index={0}>
+          <Card style={{ gap: 4 }}>
+            <Text style={[type.caption, styles.sectionLabel]}>{t("sidebar.account", "Account")}</Text>
+            <Text style={[type.body, { color: theme.text, fontWeight: "600", textAlign: isRTL ? "right" : "left", marginBottom: 4 }]}>
+              {isAuthenticated ? (userEmail || t("account.title", "My Account")) : t("login.title", "Not signed in")}
+            </Text>
 
-          {isAuthenticated ? (
-            <>
-              <Pressable style={styles.linkRow} onPress={() => router.push("/account")}>
-                <Ionicons name="person-circle-outline" size={20} color={theme.primary} />
-                <Text style={styles.linkText}>{t("account.title", "My Account")}</Text>
-                <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
-              </Pressable>
-              <Pressable style={styles.linkRow} onPress={() => router.push("/edit-profile")}>
-                <Ionicons name="create-outline" size={20} color={theme.primary} />
-                <Text style={styles.linkText}>{t("sidebar.edit", "Edit Profile")}</Text>
-                <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
-              </Pressable>
-              <Pressable style={styles.linkRow} onPress={() => router.push("/change-password")}>
-                <Ionicons name="lock-closed-outline" size={20} color={theme.primary} />
-                <Text style={styles.linkText}>{t("changePassword.title", "Change Password")}</Text>
-                <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
-              </Pressable>
-              <Pressable style={[styles.btn, styles.btnDanger]} onPress={signOut}>
-                <Ionicons name="log-out-outline" size={18} color="#FFFFFF" />
-                <Text style={styles.btnDangerText}>{t("logout", "Logout")}</Text>
-              </Pressable>
-            </>
-          ) : (
-            <Pressable style={styles.btn} onPress={() => router.push("/(auth)/login")}>
-              <Ionicons name="log-in-outline" size={18} color={theme.onPrimary} />
-              <Text style={styles.btnText}>{t("login.title", "Login")}</Text>
-            </Pressable>
-          )}
-        </View>
+            {isAuthenticated ? (
+              <>
+                <Row icon="person-circle-outline" label={t("account.title", "My Account")} onPress={() => router.push("/account")} styles={styles} theme={theme} type={type} isRTL={isRTL} first />
+                <Row icon="create-outline" label={t("sidebar.edit_account", "Edit Profile")} onPress={() => router.push("/edit-profile")} styles={styles} theme={theme} type={type} isRTL={isRTL} />
+                <Row icon="lock-closed-outline" label={t("changePassword.title", "Change Password")} onPress={() => router.push("/change-password")} styles={styles} theme={theme} type={type} isRTL={isRTL} />
+                <Pressable style={[styles.btn, styles.btnDanger]} onPress={signOut}>
+                  <Ionicons name="log-out-outline" size={18} color="#FFFFFF" />
+                  <Text style={styles.btnDangerText}>{t("logout", "Logout")}</Text>
+                </Pressable>
+              </>
+            ) : (
+              <AppButton title={t("login.title", "Login")} icon="log-in-outline" onPress={() => router.push("/(auth)/login")} />
+            )}
+          </Card>
+        </FadeInView>
 
-        {/* Theme switch (temporary — moves to Phase 9 settings) */}
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>{t("theme", "Theme")}</Text>
-          <View style={styles.segRow}>
-            <SegButton label={t("auto", "Auto")} icon="contrast-outline" active={mode === "auto"} onPress={() => setMode("auto")} styles={styles} theme={theme} />
-            <SegButton label={t("light", "Light")} icon="sunny-outline" active={mode === "light"} onPress={() => setMode("light")} styles={styles} theme={theme} />
-            <SegButton label={t("dark", "Dark")} icon="moon-outline" active={mode === "dark"} onPress={() => setMode("dark")} styles={styles} theme={theme} />
-          </View>
-          <Text style={styles.hint}>{t("theme", "Theme")}: {theme.name.toUpperCase()} · mode: {mode}</Text>
-        </View>
+        {/* Support & Legal */}
+        <FadeInView index={1}>
+          <Card style={{ gap: 0 }}>
+            <Text style={[type.caption, styles.sectionLabel, { marginBottom: 4 }]}>{t("more.supportLegal", "Support & Legal")}</Text>
+            {SUPPORT_LINKS.map((l, i) => (
+              <Row key={l.route} icon={l.icon} label={l.label} onPress={() => router.push(l.route)} styles={styles} theme={theme} type={type} isRTL={isRTL} first={i === 0} />
+            ))}
+          </Card>
+        </FadeInView>
 
-        {/* Language switch */}
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>{t("language", "Language")}</Text>
-          <View style={[styles.segRow, isRTL && styles.segRowRTL]}>
-            <SegButton label="English" active={language === "en"} onPress={() => setLanguage("en")} styles={styles} theme={theme} />
-            <SegButton label="العربية" active={language === "ar"} onPress={() => setLanguage("ar")} styles={styles} theme={theme} />
-          </View>
-          <Text style={styles.hint}>{isRTL ? "RTL" : "LTR"} · {language.toUpperCase()}</Text>
-        </View>
+        {/* Appearance */}
+        <FadeInView index={2}>
+          <Card style={{ gap: 10 }}>
+            <Text style={[type.caption, styles.sectionLabel]}>{t("theme", "Theme")}</Text>
+            <SegmentedControl segments={themeSegments} value={mode} onChange={setMode} />
+          </Card>
+        </FadeInView>
+
+        {/* Language */}
+        <FadeInView index={3}>
+          <Card style={{ gap: 10 }}>
+            <Text style={[type.caption, styles.sectionLabel]}>{t("language", "Language")}</Text>
+            <SegmentedControl segments={langSegments} value={language} onChange={setLanguage} />
+          </Card>
+        </FadeInView>
+
+        {/* About */}
+        <FadeInView index={4}>
+          <Card style={styles.aboutCard}>
+            <Ionicons name="information-circle-outline" size={18} color={theme.textMuted} />
+            <Text style={[type.caption, { color: theme.textMuted, flex: 1, textAlign: isRTL ? "right" : "left" }]}>
+              {Constants.expoConfig?.name || "CapiMax"} · {t("more.version", "Version")} {version}
+            </Text>
+          </Card>
+        </FadeInView>
       </ScrollView>
     </Screen>
   );
 }
 
-function SegButton({ label, icon, active, onPress, styles, theme }) {
+function Row({ icon, label, onPress, styles, theme, type, isRTL, first }) {
   return (
-    <Pressable onPress={onPress} style={[styles.seg, active && styles.segActive]}>
-      {icon ? (
-        <Ionicons name={icon} size={16} color={active ? theme.onPrimary : theme.textSecondary} />
-      ) : null}
-      <Text style={[styles.segText, active && styles.segTextActive]}>{label}</Text>
+    <Pressable style={[styles.row, first && { borderTopWidth: 0 }]} onPress={onPress}>
+      <Ionicons name={icon} size={20} color={theme.primary} />
+      <Text style={[type.body, { color: theme.text, flex: 1, textAlign: isRTL ? "right" : "left" }]}>{label}</Text>
+      <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
     </Pressable>
   );
 }
 
-const makeStyles = (theme, radius) =>
+const makeStyles = (theme, radii, isRTL) =>
   StyleSheet.create({
-    content: { padding: 16, gap: 16 },
-    heading: { color: theme.text, fontSize: 24, fontWeight: "800", marginTop: 8 },
-    card: {
-      backgroundColor: theme.card,
-      borderColor: theme.border,
-      borderWidth: 1,
-      borderRadius: radius.card,
-      padding: 16,
+    sectionLabel: { color: theme.textMuted, textTransform: "uppercase", letterSpacing: 0.8, textAlign: isRTL ? "right" : "left" },
+    row: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
       gap: 12,
+      paddingVertical: 13,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: theme.border,
     },
-    cardLabel: {
-      color: theme.textSecondary,
-      fontSize: 12,
-      textTransform: "uppercase",
-      letterSpacing: 1,
-    },
-    status: { color: theme.text, fontSize: 16, fontWeight: "600" },
     btn: {
-      flexDirection: "row",
+      flexDirection: isRTL ? "row-reverse" : "row",
       alignItems: "center",
       justifyContent: "center",
       gap: 8,
-      backgroundColor: theme.primary,
-      paddingVertical: 12,
-      borderRadius: radius.sm,
+      paddingVertical: 13,
+      borderRadius: radii.button,
+      marginTop: 10,
     },
-    btnText: { color: theme.onPrimary, fontWeight: "700", fontSize: 15 }, // on primary fill (rule #4)
-    linkRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      paddingVertical: 12,
-      borderTopWidth: 1,
-      borderTopColor: theme.border,
-    },
-    linkText: { flex: 1, color: theme.text, fontSize: 15, fontWeight: "600" },
     btnDanger: { backgroundColor: theme.error },
-    btnDangerText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 }, // white for contrast on red
-    segRow: { flexDirection: "row", gap: 10 },
-    segRowRTL: { flexDirection: "row-reverse" },
-    seg: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 6,
-      paddingVertical: 12,
-      borderRadius: radius.sm,
-      borderWidth: 1,
-      borderColor: theme.border,
-      backgroundColor: theme.surfaceAlt,
-    },
-    segActive: { backgroundColor: theme.primary, borderColor: theme.primary },
-    segText: { color: theme.textSecondary, fontWeight: "600" },
-    segTextActive: { color: theme.onPrimary }, // on primary fill (rule #4)
-    hint: { color: theme.textMuted, fontSize: 12 },
+    btnDangerText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
+    aboutCard: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 10 },
   });
