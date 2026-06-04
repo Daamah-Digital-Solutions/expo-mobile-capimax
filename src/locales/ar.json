@@ -23,6 +23,9 @@
     "success": "نجاح",
     "submit": "إرسال",
     "cancel": "إلغاء",
+    "select": "اختر",
+    "search": "بحث",
+    "noResults": "لا توجد نتائج",
     "opportunities": "الأصول",
     "profile": "الملف الشخصي",
     "documents": "المستندات",
@@ -235,7 +238,17 @@
     "passportDocument": "وثيقة جواز السفر",
     "submitted": "تم الإرسال",
     "notSubmitted": "لم يتم الإرسال",
-    "notProvided": "لم يتم التقديم"
+    "notProvided": "لم يتم التقديم",
+    "email": "البريد الإلكتروني",
+    "loadError": "فشل تحميل حسابك",
+    "statusVerified": "تم التحقق من المستندات",
+    "statusVerifiedMsg": "تم التحقق في {{date}}",
+    "statusPending": "قيد المراجعة",
+    "statusPendingMsg": "تتم مراجعة مستنداتك",
+    "statusNotSubmitted": "لم يتم تقديم المستندات",
+    "statusNotSubmittedMsg": "يرجى تقديم مستندات الهوية الخاصة بك",
+    "editProfile": "تعديل الملف الشخصي",
+    "changePassword": "تغيير كلمة المرور"
   },
   "contact": {
     "title": "اتصل بنا",
@@ -351,7 +364,8 @@
     "passportDocument": "وثيقة جواز السفر",
     "previouslySubmitted": "(تم تقديمها سابقًا)",
     "uploadPassport": "تحميل نسخة جواز السفر",
-    "updateProfile": "تحديث الملف الشخصي"
+    "updateProfile": "تحديث الملف الشخصي",
+    "fileHint": "PDF أو JPG أو PNG · حتى 5 ميجابايت"
   },
   "changePassword": {
     "title": "تغيير كلمة المرور",
@@ -359,7 +373,8 @@
     "currentPassword": "كلمة المرور الحالية",
     "newPassword": "كلمة المرور الجديدة",
     "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
-    "changePassword": "تغيير كلمة المرور"
+    "changePassword": "تغيير كلمة المرور",
+    "comingSoon": "تغيير كلمة المرور قريباً. سيتم تفعيله بمجرد توفّر نقطة النهاية الآمنة."
   },
   "bankAccount": {
     "title": "الحساب البنكي",

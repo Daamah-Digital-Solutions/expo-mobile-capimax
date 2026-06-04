@@ -12,7 +12,7 @@ import { useLanguage } from "../../context/LanguageContext";
 const ALLOWED = ["application/pdf", "image/jpeg", "image/png"];
 const MAX_BYTES = 5 * 1024 * 1024;
 
-export default function FilePickerButton({ file, onPick, onError }) {
+export default function FilePickerButton({ file, onPick, onError, label }) {
   const { t } = useTranslation();
   const { theme, radii, type } = useTheme();
   const { isRTL } = useLanguage();
@@ -50,7 +50,7 @@ export default function FilePickerButton({ file, onPick, onError }) {
     <Pressable onPress={pick} style={styles.box} hitSlop={4}>
       <Ionicons name={file ? "checkmark-circle" : "cloud-upload-outline"} size={22} color={file ? theme.positive : theme.primary} />
       <Text style={[type.label, { color: file ? theme.text : theme.primaryDark, flexShrink: 1, textAlign: "center" }]} numberOfLines={1}>
-        {file ? file.name : t("payment.uploadTransferProof", "Upload Transfer Proof")}
+        {file ? file.name : label || t("payment.uploadTransferProof", "Upload Transfer Proof")}
       </Text>
     </Pressable>
   );

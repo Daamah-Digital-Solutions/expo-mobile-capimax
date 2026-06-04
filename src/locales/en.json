@@ -23,6 +23,9 @@
     "success": "Success",
     "submit": "Submit",
     "cancel": "Cancel",
+    "select": "Select",
+    "search": "Search",
+    "noResults": "No results",
     "opportunities": "Assets",
     "profile": "Profile",
     "documents": "Documents",
@@ -234,7 +237,17 @@
     "passportDocument": "Passport Document",
     "submitted": "Submitted",
     "notSubmitted": "Not submitted",
-    "notProvided": "Not provided"
+    "notProvided": "Not provided",
+    "email": "Email",
+    "loadError": "Failed to load your account",
+    "statusVerified": "Documents Verified",
+    "statusVerifiedMsg": "Verified on {{date}}",
+    "statusPending": "Under Review",
+    "statusPendingMsg": "Your documents are being reviewed",
+    "statusNotSubmitted": "Documents Not Submitted",
+    "statusNotSubmittedMsg": "Please submit your identification documents",
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password"
   },
   "contact": {
     "title": "Contact Us",
@@ -350,7 +363,8 @@
     "passportDocument": "Passport Document",
     "previouslySubmitted": "(Previously submitted)",
     "uploadPassport": "Upload Passport Copy",
-    "updateProfile": "Update Profile"
+    "updateProfile": "Update Profile",
+    "fileHint": "PDF, JPG or PNG · up to 5MB"
   },
   "changePassword": {
     "title": "Change Password",
@@ -358,7 +372,8 @@
     "currentPassword": "Current Password",
     "newPassword": "New Password",
     "confirmNewPassword": "Confirm New Password",
-    "changePassword": "Change Password"
+    "changePassword": "Change Password",
+    "comingSoon": "Password change is coming soon. This will be enabled once the secure endpoint is available."
   },
   "bankAccount": {
     "title": "Bank Account",
