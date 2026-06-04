@@ -9,8 +9,10 @@ import Banner from "../../src/components/Banner";
 import Skeleton from "../../src/components/Skeleton";
 import EmptyState from "../../src/components/EmptyState";
 import SegmentedControl from "../../src/components/SegmentedControl";
+import AppButton from "../../src/components/AppButton";
 import AnimatedNumber from "../../src/components/motion/AnimatedNumber";
 import FadeInView from "../../src/components/motion/FadeInView";
+import WithdrawSheet from "../../src/components/wallet/WithdrawSheet";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { walletService } from "../../src/api/services";
@@ -39,6 +41,7 @@ export default function WalletTab() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [tab, setTab] = useState("transactions"); // transactions | withdrawals
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   // Mirrors the web fetchWalletData: base wallet (results[0]) merged with summary,
   // plus transactions + withdrawals (each falling back to []).
@@ -139,6 +142,11 @@ export default function WalletTab() {
           <BalanceTile label={t("wallet.profitBalance", "Profit Balance")} value={wallet?.profit_balance} theme={theme} type={type} isRTL={isRTL} accent />
         </FadeInView>
 
+        {/* Withdraw */}
+        <FadeInView index={1}>
+          <AppButton title={t("wallet.withdrawFunds", "Withdraw Funds")} icon="cash-outline" onPress={() => setWithdrawOpen(true)} />
+        </FadeInView>
+
         {/* Tabs */}
         <FadeInView index={2}>
           <SegmentedControl
@@ -203,6 +211,17 @@ export default function WalletTab() {
           <EmptyState icon="cash-outline" title={t("wallet.noWithdrawals", "No withdrawals yet")} />
         )}
       </ScrollView>
+
+      <WithdrawSheet
+        visible={withdrawOpen}
+        onClose={() => setWithdrawOpen(false)}
+        onSuccess={() => {
+          // Flow G: close, then refetch summary + transactions + withdrawals.
+          setWithdrawOpen(false);
+          setLoading(true);
+          fetchAll().catch(() => {}).finally(() => setLoading(false));
+        }}
+      />
     </Screen>
   );
 }
