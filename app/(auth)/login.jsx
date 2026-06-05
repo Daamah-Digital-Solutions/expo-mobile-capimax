@@ -19,7 +19,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const { isRTL } = useLanguage();
-  const { signIn, isLocked, biometricEnabled, biometric, unlock } = useAuth();
+  const { signIn, signOut, isLocked, biometricEnabled, biometric, unlock } = useAuth();
   const styles = useMemo(() => makeStyles(theme, isRTL), [theme, isRTL]);
 
   const [email, setEmail] = useState("");
@@ -27,9 +27,9 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Biometric quick sign-in. Visible when a session exists AND biometrics is enabled+available:
-  //   • on launch the gate routes here in "locked" mode (a stored session is being gated), or
-  //   • the user enabled biometrics and still has a stored session.
+  // Biometric quick sign-in. Visible when a stored session exists AND biometrics is
+  // enabled+available — i.e. the launch "lock" routed here, or the user enabled it and still
+  // has a session. Auto-triggers the OS prompt on open; email/password remains as fallback.
   const [hasSession, setHasSession] = useState(false);
   const [bioBusy, setBioBusy] = useState(false);
   const [bioError, setBioError] = useState("");
@@ -60,8 +60,7 @@ export default function LoginScreen() {
     });
     setBioBusy(false);
     if (res?.success) {
-      // Locked path: clearing the lock lets the gate redirect to home. Non-locked safety net:
-      if (!isLocked) router.replace("/(tabs)/home");
+      if (!isLocked) router.replace("/(tabs)/home"); // non-locked safety net; locked path → gate
       return;
     }
     if (res?.error === "lockout" || res?.error === "lockout_permanent") {
@@ -98,18 +97,17 @@ export default function LoginScreen() {
       setError(result.message || t("verifyEmail.verificationFailed", "Login failed"));
       return;
     }
-    // success → applyTokens clears any lock; the auth gate redirects out of (auth), and the
-    // one-time "enable biometrics?" offer (branded overlay) appears if applicable.
+    // success → applyTokens clears any lock; the gate redirects out of (auth) and the one-time
+    // "enable biometrics?" branded overlay appears if applicable.
   };
 
   return (
     <AuthCard
-      title={t("form.welcome_back", "Welcome Back")}
-      subtitle={t("form.please_sign_in", "Please sign in to your account")}
+      title={t("login.heading", "Log in or sign up")}
       footer={
         <Pressable onPress={() => router.push("/(auth)/register")}>
           <Text style={styles.footerText}>
-            {t("form.dont_have_account", "Don't have an account?")}{" "}
+            {t("login.newPrompt", "New to CapiMax?")}{" "}
             <Text style={styles.link}>{t("form.sign_up", "Sign Up")}</Text>
           </Text>
         </Pressable>
@@ -117,31 +115,21 @@ export default function LoginScreen() {
     >
       <Banner type="error" message={error} />
 
-      {/* Biometric quick sign-in — prominent, on-brand; email/password remains below as fallback. */}
-      {canBiometric ? (
-        <View style={styles.bioBlock}>
-          <Pressable
-            style={({ pressed }) => [styles.bioCircle, pressed && { transform: [{ scale: 0.96 }] }]}
-            onPress={runBiometric}
-            disabled={bioBusy}
-            accessibilityRole="button"
-            accessibilityLabel={t("biometric.unlockWith", "Unlock with {{method}}", { method: bioMethod })}
-          >
-            {bioBusy ? <ActivityIndicator color={theme.primary} /> : <Ionicons name={bioIcon} size={42} color={theme.primary} />}
-          </Pressable>
-          <Text style={styles.bioLabel}>{t("biometric.unlockWith", "Unlock with {{method}}", { method: bioMethod })}</Text>
-          {bioError ? <Text style={styles.bioError}>{bioError}</Text> : null}
+      {/* Social — kept visible but inactive until OAuth client IDs are provided (renders disabled). */}
+      <GoogleSignInButton
+        label={t("login.continueGoogle", "Continue with Google")}
+        onError={(m) => setError(m || t("form.google_auth_failed", "Google authentication failed"))}
+      />
 
-          <View style={styles.orRow}>
-            <View style={styles.line} />
-            <Text style={styles.or}>{t("biometric.orEmail", "or sign in with email")}</Text>
-            <View style={styles.line} />
-          </View>
-        </View>
-      ) : null}
+      <View style={styles.orRow}>
+        <View style={styles.line} />
+        <Text style={styles.or}>{t("login.or", "or")}</Text>
+        <View style={styles.line} />
+      </View>
 
       <Field
         label={t("form.email", "Email")}
+        icon="mail-outline"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -149,6 +137,7 @@ export default function LoginScreen() {
       />
       <Field
         label={t("form.password", "Password")}
+        icon="lock-closed-outline"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -161,32 +150,45 @@ export default function LoginScreen() {
         <Text style={styles.link}>{t("form.forgot_password", "Forgot Password?")}</Text>
       </Pressable>
 
-      <AppButton title={t("form.sign_in", "Sign In")} onPress={onSubmit} loading={loading} />
+      {/* Prominent circular biometric button — only when enabled + a session exists. */}
+      {canBiometric ? (
+        <View style={styles.bioBlock}>
+          <Pressable
+            style={({ pressed }) => [styles.bioCircle, pressed && { transform: [{ scale: 0.96 }] }]}
+            onPress={runBiometric}
+            disabled={bioBusy}
+            accessibilityRole="button"
+            accessibilityLabel={t("biometric.unlockWith", "Unlock with {{method}}", { method: bioMethod })}
+          >
+            {bioBusy ? <ActivityIndicator color={theme.primary} /> : <Ionicons name={bioIcon} size={40} color={theme.primary} />}
+          </Pressable>
+          <Text style={styles.bioLabel}>{t("biometric.unlockWith", "Unlock with {{method}}", { method: bioMethod })}</Text>
+          {bioError ? <Text style={styles.bioError}>{bioError}</Text> : null}
+        </View>
+      ) : null}
 
-      <View style={styles.orRow}>
-        <View style={styles.line} />
-        <Text style={styles.or}>{t("form.or_continue_with", "Or continue with")}</Text>
-        <View style={styles.line} />
-      </View>
+      <AppButton title={t("login.logIn", "Log In")} onPress={onSubmit} loading={loading} />
 
-      <GoogleSignInButton
-        label={t("form.google_signin", "Sign in with Google")}
-        onError={(m) => setError(m || t("form.google_auth_failed", "Google authentication failed"))}
-      />
+      {/* When locked, offer the full security exit (clears session + biometric → switch account). */}
+      {isLocked ? (
+        <Pressable onPress={signOut} style={styles.switchAccount}>
+          <Text style={styles.switchAccountText}>{t("login.switchAccount", "Sign out completely")}</Text>
+        </Pressable>
+      ) : null}
     </AuthCard>
   );
 }
 
 const makeStyles = (theme, isRTL) =>
   StyleSheet.create({
-    forgot: { alignSelf: "flex-end" },
+    forgot: { alignSelf: isRTL ? "flex-start" : "flex-end" },
     link: { color: theme.primary, fontWeight: "700" },
     footerText: { color: theme.textSecondary, fontSize: 14 },
     orRow: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 2 },
     line: { flex: 1, height: 1, backgroundColor: theme.border },
     or: { color: theme.textMuted, fontSize: 12 },
     // Biometric block
-    bioBlock: { alignItems: "center", gap: 8, marginBottom: 4 },
+    bioBlock: { alignItems: "center", gap: 8, marginTop: 2 },
     bioCircle: {
       width: 84,
       height: 84,
@@ -199,4 +201,6 @@ const makeStyles = (theme, isRTL) =>
     },
     bioLabel: { color: theme.text, fontSize: 15, fontWeight: "700", textAlign: "center" },
     bioError: { color: theme.error, fontSize: 12, textAlign: "center", paddingHorizontal: 8 },
+    switchAccount: { alignSelf: "center", paddingVertical: 6, marginTop: 2 },
+    switchAccountText: { color: theme.textMuted, fontSize: 13, fontWeight: "700" },
   });

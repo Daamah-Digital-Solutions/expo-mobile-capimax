@@ -20,6 +20,7 @@ export default function Field({
   maxLength,
   onSubmitEditing,
   returnKeyType,
+  icon, // optional leading Ionicons name (e.g. "mail-outline", "lock-closed-outline")
 }) {
   const { theme, radii, type } = useTheme();
   const { isRTL } = useLanguage();
@@ -34,6 +35,9 @@ export default function Field({
     <View style={styles.wrap}>
       {label ? <Text style={[type.label, styles.label]}>{label}</Text> : null}
       <View style={[styles.inputRow, { borderColor, borderWidth }, !editable && styles.disabled]}>
+        {icon ? (
+          <Ionicons name={icon} size={18} color={focused ? theme.primary : theme.textMuted} style={styles.leadIcon} />
+        ) : null}
         <TextInput
           style={[type.body, styles.input]}
           value={value}
@@ -76,6 +80,7 @@ const makeStyles = (theme, radii, isRTL) =>
     },
     disabled: { opacity: 0.6 },
     input: { flex: 1, color: theme.text, textAlign: isRTL ? "right" : "left", height: "100%" },
+    leadIcon: { marginEnd: 10 },
     eye: { paddingHorizontal: 4 },
     error: { color: theme.negative, textAlign: isRTL ? "right" : "left" },
   });
