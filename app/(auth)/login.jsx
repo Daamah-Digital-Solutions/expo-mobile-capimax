@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -27,13 +27,12 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Biometric quick sign-in. Visible when a stored session exists AND biometrics is
-  // enabled+available — i.e. the launch "lock" routed here, or the user enabled it and still
-  // has a session. Auto-triggers the OS prompt on open; email/password remains as fallback.
+  // Biometric quick sign-in. The button is shown when a stored session exists AND biometrics is
+  // enabled+available (launch "lock" routed here, or enabled + a session). The OS prompt runs ONLY
+  // when the user taps the button — never automatically. Email/password remains as the fallback.
   const [hasSession, setHasSession] = useState(false);
   const [bioBusy, setBioBusy] = useState(false);
   const [bioError, setBioError] = useState("");
-  const autoTried = useRef(false);
 
   const canBiometric = !!biometric?.available && biometricEnabled && (isLocked || hasSession);
   const bioMethod = t(methodLabelKey(biometric?.kind), "biometrics");
@@ -70,14 +69,12 @@ export default function LoginScreen() {
     }
   };
 
-  // Auto-trigger the prompt once when biometric sign-in is available on open.
-  useEffect(() => {
-    if (canBiometric && !autoTried.current) {
-      autoTried.current = true;
-      runBiometric();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canBiometric]);
+  // Full sign-out / switch account: wipe session + biometric prefs, then land on Login so the
+  // back gesture can't return into the authenticated app.
+  const onSwitchAccount = async () => {
+    await signOut();
+    router.replace("/(auth)/login");
+  };
 
   const onSubmit = async () => {
     setError("");
@@ -171,7 +168,7 @@ export default function LoginScreen() {
 
       {/* When locked, offer the full security exit (clears session + biometric → switch account). */}
       {isLocked ? (
-        <Pressable onPress={signOut} style={styles.switchAccount}>
+        <Pressable onPress={onSwitchAccount} style={styles.switchAccount}>
           <Text style={styles.switchAccountText}>{t("login.switchAccount", "Sign out completely")}</Text>
         </Pressable>
       ) : null}
