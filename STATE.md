@@ -37,10 +37,18 @@ methods + contract for all 5 · wallet+withdraw · holdings · portfolio · inte
   chip) · 6 static value-prop tiles · featured-assets horizontal slider (first 6 opportunities) ·
   secondary-market list (first listings). **COPY RULE: no "Trade"/"Invest" words on Home — icons + scroll.**
 
-### 1c) Next up (IN PROGRESS — not yet built)
-- **(A) Animated Lottie splash** from `mobile/splash.json` (replace/augment the static splash).
-- **(B) Biometric quick-unlock** — Face ID + fingerprint as a **local convenience lock** over the
-  existing secure-store session (the backend has **no** biometric auth; this is device-side only).
+### 1c) Recently shipped (post-phase polish)
+- **(A) Animated Lottie splash** ✅ — `splash.json` (720×1280, 9:16) played full-screen on
+  `#121c30` over the native splash via `expo-splash-screen` + `lottie-react-native`; fades out on
+  finish or a hard ~2.5 s cap; fails open if Lottie can't render. `src/components/AnimatedSplash.jsx`,
+  wired in `app/_layout.jsx` (commits `ed7af9a`, `68c4b78`).
+- **(B) Biometric quick-unlock** ✅ — Face ID + fingerprint as a **local convenience lock** over the
+  secure-store session (backend has **no** biometric auth; device-side only, password never stored).
+  `src/utils/biometrics.js` (capability + prefs via `expo-local-authentication`), `AuthContext`
+  `isLocked`/`unlock`/`enable`/`disable`, `src/components/LockScreen.jsx` (auto-prompt + retry +
+  "use email & password" fallback), enroll prompt after first login, toggle in More → Settings →
+  Security (en + ar, both themes, RTL). Locks only when enabled **and** device still enrolled, so a
+  removed sensor never locks the user out (commit `68c4b78`).
 
 ### Repo
 - Pushed to GitHub: **https://github.com/Daamah-Digital-Solutions/expo-mobile-capimax** (branch `master`).
