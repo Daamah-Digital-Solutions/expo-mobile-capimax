@@ -37,14 +37,19 @@ export default function MoreTab() {
     refreshBiometricCapability,
   } = useAuth();
 
-  // Full sign-out is destructive (removes the account + biometric from this device) → confirm.
+  // Full sign-out is destructive (removes the account + biometric from this device) → confirm,
+  // then land on the Login screen so the back gesture can't return into the authenticated app.
+  const doSignOut = async () => {
+    await signOut();
+    router.replace("/(auth)/login");
+  };
   const confirmSignOut = () => {
     Alert.alert(
       t("more.signOutTitle", "Sign out completely?"),
       t("more.signOutMsg", "This removes your account and biometric sign-in from this device. You'll need your email & password to sign in again."),
       [
         { text: t("common.cancel", "Cancel"), style: "cancel" },
-        { text: t("more.signOutCompletely", "Sign out completely"), style: "destructive", onPress: signOut },
+        { text: t("more.signOutCompletely", "Sign out completely"), style: "destructive", onPress: doSignOut },
       ]
     );
   };
