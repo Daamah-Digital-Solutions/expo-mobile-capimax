@@ -4,8 +4,8 @@
 //   • Appearance: theme (auto/light/dark) · Language: en/ar (RTL reload handled by LanguageContext).
 //   • About: app name + version.
 // Reads everything from context; design system; both modes + RTL.
-import React, { useMemo } from "react";
-import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import React, { useEffect, useMemo } from "react";
+import { View, Text, ScrollView, StyleSheet, Pressable, Switch, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,16 +19,48 @@ import FadeInView from "../../src/components/motion/FadeInView";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useAuth } from "../../src/context/AuthContext";
 import { useLanguage } from "../../src/context/LanguageContext";
+import { methodLabelKey } from "../../src/utils/biometrics";
 
 export default function MoreTab() {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme, radii, type, spacing, mode, setMode } = useTheme();
-  const { isAuthenticated, userEmail, signOut } = useAuth();
+  const {
+    isAuthenticated,
+    userEmail,
+    signOut,
+    biometric,
+    biometricEnabled,
+    enableBiometric,
+    disableBiometric,
+    refreshBiometricCapability,
+  } = useAuth();
   const { language, isRTL, setLanguage } = useLanguage();
   const styles = useMemo(() => makeStyles(theme, radii, isRTL), [theme, radii, isRTL]);
 
   const version = Constants.expoConfig?.version || "1.0.0";
+
+  // Re-probe biometric capability when opening Settings (the user may have enrolled since launch).
+  useEffect(() => {
+    refreshBiometricCapability?.();
+  }, [refreshBiometricCapability]);
+
+  const bioMethod = t(methodLabelKey(biometric?.kind), "biometrics");
+
+  const onToggleBiometric = async (next) => {
+    if (next) {
+      const res = await enableBiometric({
+        promptMessage: t("biometric.promptVerify", "Confirm it's you"),
+        cancelLabel: t("biometric.cancel", "Cancel"),
+      });
+      if (!res?.success && res?.error === "not_available") {
+        Alert.alert(t("biometric.notAvailable", "Biometric sign-in isn't available on this device."));
+      }
+      // Other failures (e.g. user cancel) simply leave the toggle off.
+    } else {
+      await disableBiometric();
+    }
+  };
 
   const SUPPORT_LINKS = [
     { icon: "chatbubbles-outline", label: t("contact.title", "Contact Us"), route: "/contact" },
@@ -80,8 +112,38 @@ export default function MoreTab() {
           </Card>
         </FadeInView>
 
+        {/* Security — biometric quick-unlock (only when the device has the hardware) */}
+        {isAuthenticated && biometric?.hasHardware ? (
+          <FadeInView index={1}>
+            <Card style={{ gap: 10 }}>
+              <Text style={[type.caption, styles.sectionLabel]}>{t("biometric.security", "Security")}</Text>
+              <View style={styles.bioRow}>
+                <Ionicons
+                  name={biometric?.kind === "face" ? "scan-outline" : "finger-print-outline"}
+                  size={22}
+                  color={theme.primary}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={[type.body, { color: theme.text, fontWeight: "600", textAlign: isRTL ? "right" : "left" }]}>
+                    {t("biometric.settingsTitle", "Biometric sign-in")}
+                  </Text>
+                  <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left" }]}>
+                    {t("biometric.settingsHint", "Unlock the app with {{method}}.", { method: bioMethod })}
+                  </Text>
+                </View>
+                <Switch
+                  value={biometricEnabled}
+                  onValueChange={onToggleBiometric}
+                  trackColor={{ true: theme.primary, false: theme.border }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+            </Card>
+          </FadeInView>
+        ) : null}
+
         {/* Support & Legal */}
-        <FadeInView index={1}>
+        <FadeInView index={2}>
           <Card style={{ gap: 0 }}>
             <Text style={[type.caption, styles.sectionLabel, { marginBottom: 4 }]}>{t("more.supportLegal", "Support & Legal")}</Text>
             {SUPPORT_LINKS.map((l, i) => (
@@ -91,7 +153,7 @@ export default function MoreTab() {
         </FadeInView>
 
         {/* Appearance */}
-        <FadeInView index={2}>
+        <FadeInView index={3}>
           <Card style={{ gap: 10 }}>
             <Text style={[type.caption, styles.sectionLabel]}>{t("theme", "Theme")}</Text>
             <SegmentedControl segments={themeSegments} value={mode} onChange={setMode} />
@@ -99,7 +161,7 @@ export default function MoreTab() {
         </FadeInView>
 
         {/* Language */}
-        <FadeInView index={3}>
+        <FadeInView index={4}>
           <Card style={{ gap: 10 }}>
             <Text style={[type.caption, styles.sectionLabel]}>{t("language", "Language")}</Text>
             <SegmentedControl segments={langSegments} value={language} onChange={setLanguage} />
@@ -107,7 +169,7 @@ export default function MoreTab() {
         </FadeInView>
 
         {/* About */}
-        <FadeInView index={4}>
+        <FadeInView index={5}>
           <Card style={styles.aboutCard}>
             <Ionicons name="information-circle-outline" size={18} color={theme.textMuted} />
             <Text style={[type.caption, { color: theme.textMuted, flex: 1, textAlign: isRTL ? "right" : "left" }]}>
@@ -153,4 +215,5 @@ const makeStyles = (theme, radii, isRTL) =>
     btnDanger: { backgroundColor: theme.error },
     btnDangerText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
     aboutCard: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 10 },
+    bioRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 12 },
   });

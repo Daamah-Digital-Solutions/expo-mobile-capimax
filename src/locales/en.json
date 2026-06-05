@@ -901,5 +901,32 @@
     "method": "Payment Method",
     "contractId": "Contract ID",
     "signedAt": "Signed At"
+  },
+  "biometric": {
+    "lockTitle": "Welcome back",
+    "lockSubtitle": "Unlock to continue to CapiMax",
+    "unlock": "Unlock",
+    "unlockWith": "Unlock with {{method}}",
+    "usePassword": "Use email & password instead",
+    "authenticating": "Authenticating…",
+    "failed": "Couldn't verify it's you. Try again.",
+    "lockedOut": "Too many attempts. Use your email & password instead.",
+    "retry": "Try again",
+    "promptUnlock": "Unlock CapiMax",
+    "promptVerify": "Confirm it's you",
+    "cancel": "Cancel",
+    "enableTitle": "Enable biometric sign-in?",
+    "enableMessage": "Use {{method}} to unlock CapiMax faster next time. Your password is never stored.",
+    "enable": "Enable",
+    "notNow": "Not now",
+    "enabled": "Biometric sign-in enabled",
+    "disabled": "Biometric sign-in disabled",
+    "notAvailable": "Biometric sign-in isn't available on this device.",
+    "settingsTitle": "Biometric sign-in",
+    "settingsHint": "Unlock the app with {{method}}.",
+    "security": "Security",
+    "faceId": "Face ID",
+    "fingerprint": "Fingerprint",
+    "generic": "biometrics"
   }
 }

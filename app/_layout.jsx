@@ -1,18 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import * as SplashScreen from "expo-splash-screen";
 
 import "../src/i18n"; // initialize i18next
 import { ThemeProvider, useTheme } from "../src/context/ThemeContext";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
 import { LanguageProvider, useLanguage } from "../src/context/LanguageContext";
+import AnimatedSplash from "../src/components/AnimatedSplash";
+import LockScreen from "../src/components/LockScreen";
+
+// Hold the native splash until our animated Lottie overlay takes over (no flash gap).
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Auth gate + themed Stack. Reads theme/auth/language from context (must be inside providers).
 function RootNavigator() {
-  const { isLoading, isAuthenticated, pendingRoute, setPendingRoute } = useAuth();
+  const { isLoading, isAuthenticated, isLocked, pendingRoute, setPendingRoute } = useAuth();
   const { isReady: langReady } = useLanguage();
   const { isReady: themeReady, theme, statusBarStyle } = useTheme();
   const segments = useSegments();
@@ -43,6 +49,12 @@ function RootNavigator() {
     );
   }
 
+  // Biometric quick-unlock: a valid session exists but is gated behind the device prompt.
+  // Block the whole app behind the lock screen until the user passes it (or falls back to login).
+  if (isLocked) {
+    return <LockScreen />;
+  }
+
   return (
     <>
       <StatusBar style={statusBarStyle} />
@@ -58,6 +70,7 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
+  const [splashDone, setSplashDone] = useState(false);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -69,6 +82,8 @@ export default function RootLayout() {
           </LanguageProvider>
         </ThemeProvider>
       </SafeAreaProvider>
+      {/* Animated Lottie splash overlay — sits above everything until it finishes/times out. */}
+      {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
     </GestureHandlerRootView>
   );
 }

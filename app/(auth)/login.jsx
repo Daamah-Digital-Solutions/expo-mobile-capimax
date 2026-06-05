@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import AuthCard from "../../src/components/AuthCard";
@@ -9,13 +9,49 @@ import Banner from "../../src/components/Banner";
 import GoogleSignInButton from "../../src/components/GoogleSignInButton";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useAuth } from "../../src/context/AuthContext";
+import {
+  wasBiometricAsked,
+  markBiometricAsked,
+  methodLabelKey,
+} from "../../src/utils/biometrics";
 
 export default function LoginScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useTheme();
-  const { signIn } = useAuth();
+  const { signIn, biometricEnabled, enableBiometric, refreshBiometricCapability } = useAuth();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+
+  // After a first successful login, offer to enable biometric quick-unlock (once). The auth
+  // gate redirects to home immediately; this native Alert simply appears over it. Never nags:
+  // we mark it "asked" so subsequent logins stay quiet — the user can flip it in Settings later.
+  const maybePromptEnableBiometric = async () => {
+    try {
+      if (biometricEnabled) return;
+      if (await wasBiometricAsked()) return;
+      const cap = await refreshBiometricCapability();
+      if (!cap.available) return; // no hardware/enrollment → skip silently
+      await markBiometricAsked();
+      const method = t(methodLabelKey(cap.kind), "biometrics");
+      Alert.alert(
+        t("biometric.enableTitle", "Enable biometric sign-in?"),
+        t("biometric.enableMessage", "Use {{method}} to unlock CapiMax faster next time. Your password is never stored.", { method }),
+        [
+          { text: t("biometric.notNow", "Not now"), style: "cancel" },
+          {
+            text: t("biometric.enable", "Enable"),
+            onPress: () =>
+              enableBiometric({
+                promptMessage: t("biometric.promptVerify", "Confirm it's you"),
+                cancelLabel: t("biometric.cancel", "Cancel"),
+              }),
+          },
+        ]
+      );
+    } catch {
+      /* non-fatal — biometrics is a convenience only */
+    }
+  };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,7 +77,9 @@ export default function LoginScreen() {
       setError(result.message || t("verifyEmail.verificationFailed", "Login failed"));
       return;
     }
-    // success → the auth gate redirects out of the (auth) group (to pendingRoute or funds).
+    // success → the auth gate redirects out of the (auth) group (to pendingRoute or home).
+    // Offer biometric quick-unlock for next time (fire-and-forget; appears over home).
+    maybePromptEnableBiometric();
   };
 
   return (

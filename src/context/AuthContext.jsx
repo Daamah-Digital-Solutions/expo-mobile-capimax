@@ -11,6 +11,12 @@ import {
   setTokens,
   clearTokens,
 } from "../api/tokenStorage";
+import {
+  isBiometricEnabled,
+  setBiometricEnabledFlag,
+  getBiometricCapability,
+  runBiometricAuth,
+} from "../utils/biometrics";
 
 const AuthContext = createContext(null);
 
@@ -33,6 +39,13 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState(null);
 
+  // Biometric quick-unlock (local convenience lock over the secure-store session).
+  // isLocked: a valid session exists but is gated behind the device biometric prompt.
+  // biometricEnabled: the user's saved preference. biometric: device capability probe.
+  const [isLocked, setIsLocked] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometric, setBiometric] = useState({ available: false, kind: "generic", hasHardware: false });
+
   // The intended route to return to after a forced login (Flow A "return to route").
   const [pendingRoute, setPendingRoute] = useState(null);
 
@@ -40,6 +53,7 @@ export function AuthProvider({ children }) {
     await clearTokens();
     setIsAuthenticated(false);
     setUserEmail(null);
+    setIsLocked(false); // no session → nothing to lock; keep the saved pref for next login
   }, []);
 
   // Let the axios interceptor flip our state when a refresh ultimately fails.
@@ -55,26 +69,45 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     (async () => {
       try {
+        // Probe biometric capability + saved preference once (drives the lock + Settings toggle).
+        const [cap, enabledPref] = await Promise.all([
+          getBiometricCapability(),
+          isBiometricEnabled(),
+        ]);
+        setBiometric(cap);
+        // If hardware/enrollment vanished (user removed it in OS settings), silently
+        // treat biometrics as off so we never lock the user out.
+        const effectiveEnabled = enabledPref && cap.available;
+        setBiometricEnabled(effectiveEnabled);
+
         const access = await getAccessToken();
         if (!access) {
           setIsAuthenticated(false);
           return;
         }
+
+        let hasSession = false;
         if (!isAccessTokenExpired(access)) {
-          setIsAuthenticated(true);
-          return;
-        }
-        // expired → try a refresh before giving up
-        const refresh = await getRefreshToken();
-        if (refresh) {
-          const newAccess = await refreshAccessToken(refresh);
-          if (newAccess) {
-            setIsAuthenticated(true);
-            return;
+          hasSession = true;
+        } else {
+          // expired → try a refresh before giving up
+          const refresh = await getRefreshToken();
+          if (refresh) {
+            const newAccess = await refreshAccessToken(refresh);
+            if (newAccess) hasSession = true;
           }
         }
-        await clearTokens();
-        setIsAuthenticated(false);
+
+        if (!hasSession) {
+          await clearTokens();
+          setIsAuthenticated(false);
+          return;
+        }
+
+        setIsAuthenticated(true);
+        // A valid session AND biometric enabled AND device still enrolled → lock the app
+        // behind the biometric prompt until the user passes it.
+        if (effectiveEnabled) setIsLocked(true);
       } finally {
         setIsLoading(false);
       }
@@ -142,6 +175,40 @@ export function AuthProvider({ children }) {
     [applyTokens]
   );
 
+  // Re-probe device capability (e.g. when opening Settings). Returns the fresh capability.
+  const refreshBiometricCapability = useCallback(async () => {
+    const cap = await getBiometricCapability();
+    setBiometric(cap);
+    return cap;
+  }, []);
+
+  // Run the OS biometric prompt to lift the lock screen. Returns the raw result
+  // ({ success, error }). On success we clear the lock and stay authenticated.
+  const unlock = useCallback(async ({ promptMessage, cancelLabel }) => {
+    const res = await runBiometricAuth({ promptMessage, cancelLabel });
+    if (res?.success) setIsLocked(false);
+    return res;
+  }, []);
+
+  // Enable the local biometric lock. Verifies the sensor works first (one prompt), then
+  // persists the preference. Returns { success, error? }. No password is ever stored.
+  const enableBiometric = useCallback(async ({ promptMessage, cancelLabel }) => {
+    const cap = await getBiometricCapability();
+    setBiometric(cap);
+    if (!cap.available) return { success: false, error: "not_available" };
+    const res = await runBiometricAuth({ promptMessage, cancelLabel });
+    if (res?.success) {
+      await setBiometricEnabledFlag(true);
+      setBiometricEnabled(true);
+    }
+    return res;
+  }, []);
+
+  const disableBiometric = useCallback(async () => {
+    await setBiometricEnabledFlag(false);
+    setBiometricEnabled(false);
+  }, []);
+
   const value = {
     isLoading,
     isAuthenticated,
@@ -152,6 +219,14 @@ export function AuthProvider({ children }) {
     signInWithGoogle,
     signOut,
     applyTokens, // verify-email flow (data.token) calls this in Phase 2
+    // Biometric quick-unlock
+    isLocked,
+    biometricEnabled,
+    biometric,
+    unlock,
+    enableBiometric,
+    disableBiometric,
+    refreshBiometricCapability,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
