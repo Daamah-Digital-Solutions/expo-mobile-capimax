@@ -65,14 +65,16 @@ Keep it updated if you discover anything new. **Never call an endpoint that isn'
 
 | Area | Decision | Why |
 |---|---|---|
-| Framework | Expo (SDK 51) + React Native | fastest path to a polished iOS+Android app |
+| Framework | Expo (**SDK 54**) + React Native 0.81 + React 19.1 (New Arch on) | fastest path to a polished iOS+Android app |
 | Navigation | **expo-router** (file-based) | mirrors web routes, easy deep linking |
 | HTTP | single **axios** instance with interceptors | reuse the web's `src/api/api.js` logic |
 | Token storage | **expo-secure-store** | secure replacement for localStorage |
 | Preferences (language…) | `@react-native-async-storage/async-storage` | non-sensitive |
 | i18n | **react-i18next + i18next** | same lib as web; reuse the translation files |
 | RTL | `I18nManager` + per-component handling | full Arabic support |
-| Charts | `victory-native` or `react-native-gifted-charts` | Portfolio/Funds |
+| Charts | **`react-native-svg` custom** (`PerformanceChart`, `Sparkline`) — gifted-charts removed (React-19 peer conflict + not in Expo Go) | Portfolio/Home |
+| Downloads | `expo-file-system` (legacy API) + `expo-sharing` | save contract/document PDFs |
+| Biometric (next) | `expo-local-authentication` | local convenience unlock only |
 | File upload | `expo-image-picker` + `expo-document-picker` | passport_scan upload |
 | Contracts / payment WebView | `react-native-webview` | render contract HTML + checkout |
 | Contract signing | signature pad inside WebView → base64 image | matches web signing flow |
@@ -84,16 +86,18 @@ Keep it updated if you discover anything new. **Never call an endpoint that isn'
 
 ```
 app/                       # expo-router (file-based)
-  _layout.jsx              # Providers (Auth, i18n, SafeArea) + auth gate
-  index.jsx                # redirect → /(tabs)/funds or /(auth)/login
+  _layout.jsx              # Providers (Theme, Language, Auth, SafeArea) + auth gate
+  index.jsx                # entry gate: authed → /(tabs)/home · else → /onboarding
+  onboarding.jsx           # 9 pre-login slides (every launch before login)
   (auth)/ _layout.jsx, login, register, verify, forgot-password, reset-password
-  (tabs)/ _layout.jsx (Funds, MyFunds, Wallet, Portfolio, Market, More)
-          funds, myfunds, wallet, portfolio, market, more
+  (tabs)/ _layout.jsx — order: Home, Assets(funds), Holdings(myfunds), Portfolio, Market, More
+          home, funds, myfunds, portfolio, market, more   # Home is the default tab; NO wallet tab
+  wallet.jsx               # pushed screen (was a tab) — opened from Home header + More
   opportunity/[id].jsx
-  invest/[id].jsx
-  account, edit-profile, change-password, contact, faq, document-center
-  legal/[type].jsx         # terms | privacy | terms-conditions
-  payment-success.jsx
+  invest/[id].jsx · market/buy/[listingId].jsx
+  account, edit-profile, change-password, contact, faq, document-center, platforms
+  legal/[type].jsx         # terms-conditions | statement | policy-insurance
+  > Full, current file map lives in STATE.md §2 (+ §1b for onboarding/home/tabs).
 src/
   api/client.js            # axios instance + interceptors
   api/services.js          # all API calls grouped by domain

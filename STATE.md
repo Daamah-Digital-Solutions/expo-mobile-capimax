@@ -20,7 +20,30 @@
 | 7 | Internal Market: listings/holdings/my-listings/transactions/stats + create-listing (SELL) + purchase (BUY, all 4 methods + contract) | ✅ done |
 | 8 | Account (users/me) + Edit profile (Flow H passport upload) + Change-password (LIVE — OQ#2 resolved, sign-out on success) | ✅ done |
 | 9 | Contact(feedback) + FAQ + legal/[type] (terms/statement/policy) + Document Center + Our Platforms + real Settings (More) | ✅ done |
-| 10 | In progress — real PDF downloads (signed contracts + documents) ✅; remaining polish/QA pending; **EAS build deferred to the very end** (owner directive) | 🔄 |
+| 10 | Real PDF downloads: signed contracts (auth blob) + opportunity document links (Drive/uc download) ✅. Remaining: final polish/QA + **EAS build (saved for the very end)** | ✅ done (polish/EAS pending) |
+
+**Phases 1–10 are functionally complete** (auth · assets+detail · Buy flow with all 5 LIVE payment
+methods + contract for all 5 · wallet+withdraw · holdings · portfolio · internal market · account/edit
+· change-password [LIVE, OQ#2 resolved] · contact/faq/legal/document-center · PDF downloads).
+
+### 1b) Beyond the 10 phases — also DONE
+- **Onboarding** — 9 pre-login slides, shown **every launch before login** (not once-only). `app/
+  onboarding.jsx`; entry gate routes unauthenticated users here → `/(auth)/login`.
+- **Tab restructure** — **Home · Assets · Holdings · Portfolio · Market · More**. **Wallet removed
+  from the tab bar** → relocated to `app/wallet.jsx` (pushed screen w/ back header), opened from the
+  Home header wallet icon + a More row. **Home is the default tab** after login.
+- **Home page** (`app/(tabs)/home.jsx`) — header (welcome + username + wallet/notifications icons) ·
+  portfolio-value card (`wallet/summary.total_balance` + portfolio `total_value` sparkline + growth%
+  chip) · 6 static value-prop tiles · featured-assets horizontal slider (first 6 opportunities) ·
+  secondary-market list (first listings). **COPY RULE: no "Trade"/"Invest" words on Home — icons + scroll.**
+
+### 1c) Next up (IN PROGRESS — not yet built)
+- **(A) Animated Lottie splash** from `mobile/splash.json` (replace/augment the static splash).
+- **(B) Biometric quick-unlock** — Face ID + fingerprint as a **local convenience lock** over the
+  existing secure-store session (the backend has **no** biometric auth; this is device-side only).
+
+### Repo
+- Pushed to GitHub: **https://github.com/Daamah-Digital-Solutions/expo-mobile-capimax** (branch `master`).
 
 Detailed per-phase "Ready prompts" + Definitions of Done are in `BUILD_PLAN.md`.
 
@@ -294,6 +317,19 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
 
 ## 8) Deferred / open items (decisions locked in API_AND_FLOWS §6)
 
+### NEXT UP (in progress, not yet built)
+- **(A) Animated Lottie splash** from `mobile/splash.json` — replace/augment the static splash.
+- **(B) Biometric quick-unlock** — Face ID + fingerprint as a **local convenience lock** over the
+  existing secure-store session. The backend has **no biometric auth** — this is device-side only
+  (e.g. `expo-local-authentication` gating access to the stored session; no new API calls).
+
+### Still deferred
+- **#10 Google OAuth** — client IDs still pending from the owner (see below); button wired + gated.
+- **Android contract-sign keyboard** — stable as-is; ⚠️ **do NOT retry the `0ff5836` collapse approach** (§7c).
+- **Final polish / QA pass** — then **EAS build (saved for the very end)**. Do not run EAS until asked.
+
+---
+
 - **#2 Change-password endpoint — ✅ RESOLVED (live).** `POST /api/change-password/` (authed)
   `{ current_password, new_password, confirm_password }` → 200 `{ status:'success', message,
   reauth_required:false, detail }`. Wired in `userService.changePassword` + `app/change-password.jsx`
@@ -322,3 +358,17 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
 - Commit after every phase with a clear message (`Co-Authored-By: Claude Opus 4.8`). Keep this file +
   API_AND_FLOWS current when something new is discovered/decided.
 - Admin endpoints (`/api/admin/...`) are **out of scope** (investor app only).
+
+### Conventions to KEEP (owner-confirmed, do not regress)
+- **Web terminology** — user-facing word is **"Buy"/"اشترِ"** (Available Assets / Learn More). **No
+  "Trade" or "Invest" in copy**, and **especially none on the Home page** (icons + scroll only).
+- **`parseFloat` every string money field** before any math (`price_per_share`, `roi_percentage`,
+  `total_investment`, wallet `balance`/`profit_balance`, `my_investments` amounts, listing prices,
+  portfolio percentages). `total_balance` is numeric but is `parseFloat`'d anyway.
+- **Theme** — navy-dark `#121c30` + Stake-light, identical token names via `useTheme()` (Rule #4:
+  `onPrimary #0b2928` on green fills).
+- **i18n/RTL** — English LTR, Arabic RTL; add every new key to **both** `en.json` + `ar.json`.
+- **All payments are LIVE** (real money) — **no sandbox/test guard anywhere** (§7b). Do not reintroduce one.
+- **Zero mock** — real Loading/Empty/Error states only; never fabricate data.
+- **Validation before commit** — `npx expo export --platform ios` bundles clean **and** `npx expo-doctor`
+  18/18. The owner tests on a real Android device (Expo Go SDK 54).

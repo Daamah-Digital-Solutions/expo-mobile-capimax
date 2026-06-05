@@ -58,7 +58,7 @@ From `src/routes/Router.jsx`. "Auth" = web wraps it in `ProtectedRoute`.
 | `/opportunity/:id/*`, `/opportunities/:id` | `views/OpportunityDetailPage` | public | Opportunity detail | `/opportunity/[id]` |
 | `/opportunities/:id/invest` | `OpportunityDetailPage` (invest tab) | **auth** | Invest flow entry | `/invest/[id]` |
 | `/myfunds/*` | `pages/myfunds` | **auth** | My investments + sell logic | `/(tabs)/myfunds` |
-| `/wallet/*` | `pages/wallet` | **auth** | Balances, transactions, withdrawals | `/(tabs)/wallet` |
+| `/wallet/*` | `pages/wallet` | **auth** | Balances, transactions, withdrawals | `/wallet` (pushed; opened from Home header + More — no longer a bottom tab) |
 | `/portfolio/*` | `pages/portfolio` | **auth** | Portfolio performance + chart | `/(tabs)/portfolio` |
 | `/internal-market/*` | `pages/internal-market` | **auth** | Secondary market | `/(tabs)/market` |
 | `/account/*` | `pages/account` | **auth** | Profile + verification status | `/account` |
