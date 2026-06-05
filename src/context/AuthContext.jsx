@@ -16,6 +16,8 @@ import {
   setBiometricEnabledFlag,
   getBiometricCapability,
   runBiometricAuth,
+  wasBiometricAsked,
+  markBiometricAsked,
 } from "../utils/biometrics";
 
 const AuthContext = createContext(null);
@@ -45,6 +47,8 @@ export function AuthProvider({ children }) {
   const [isLocked, setIsLocked] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometric, setBiometric] = useState({ available: false, kind: "generic", hasHardware: false });
+  // One-time, post-first-login "enable biometrics?" offer (full-screen branded overlay, not a Alert).
+  const [biometricSetupVisible, setBiometricSetupVisible] = useState(false);
 
   // The intended route to return to after a forced login (Flow A "return to route").
   const [pendingRoute, setPendingRoute] = useState(null);
@@ -114,12 +118,35 @@ export function AuthProvider({ children }) {
     })();
   }, []);
 
-  // Persist tokens + flip auth on. Used by login, google, and verify-email (Phase 2).
-  const applyTokens = useCallback(async ({ access, refresh, email }) => {
-    await setTokens({ access, refresh });
-    if (email) setUserEmail(email);
-    setIsAuthenticated(true);
+  // After a fresh sign-in, offer to enable biometric quick-unlock — once, via the branded
+  // full-screen overlay (no system Alert). Skips silently if the device can't do it, if it's
+  // already enabled, or if we've already asked.
+  const maybeOfferBiometricSetup = useCallback(async () => {
+    try {
+      const cap = await getBiometricCapability();
+      setBiometric(cap);
+      if (!cap.available) return;
+      if (await isBiometricEnabled()) return;
+      if (await wasBiometricAsked()) return;
+      setBiometricSetupVisible(true);
+    } catch {
+      /* non-fatal */
+    }
   }, []);
+
+  // Persist tokens + flip auth on. Used by login, google, and verify-email (Phase 2).
+  // A fresh successful auth always clears any biometric lock (the user just proved identity),
+  // and triggers the one-time "enable biometrics?" offer.
+  const applyTokens = useCallback(
+    async ({ access, refresh, email }) => {
+      await setTokens({ access, refresh });
+      if (email) setUserEmail(email);
+      setIsAuthenticated(true);
+      setIsLocked(false);
+      maybeOfferBiometricSetup();
+    },
+    [maybeOfferBiometricSetup]
+  );
 
   // Flow A. Returns one of:
   //   { status: 'success' }
@@ -209,6 +236,21 @@ export function AuthProvider({ children }) {
     setBiometricEnabled(false);
   }, []);
 
+  // --- One-time biometric setup overlay (post first login) ---
+  // Enable from the overlay: run the verify prompt; mark asked + hide regardless of outcome
+  // (so we never re-offer; the user can still flip it later in Settings).
+  const enableBiometricFromSetup = useCallback(async ({ promptMessage, cancelLabel }) => {
+    const res = await enableBiometric({ promptMessage, cancelLabel });
+    await markBiometricAsked();
+    setBiometricSetupVisible(false);
+    return res;
+  }, [enableBiometric]);
+
+  const dismissBiometricSetup = useCallback(async () => {
+    await markBiometricAsked();
+    setBiometricSetupVisible(false);
+  }, []);
+
   const value = {
     isLoading,
     isAuthenticated,
@@ -227,6 +269,10 @@ export function AuthProvider({ children }) {
     enableBiometric,
     disableBiometric,
     refreshBiometricCapability,
+    // One-time post-login setup overlay
+    biometricSetupVisible,
+    enableBiometricFromSetup,
+    dismissBiometricSetup,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

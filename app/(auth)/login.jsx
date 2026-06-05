@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from "react";
-import { View, Text, Pressable, StyleSheet, Alert } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { Ionicons } from "@expo/vector-icons";
 import AuthCard from "../../src/components/AuthCard";
 import Field from "../../src/components/Field";
 import AppButton from "../../src/components/AppButton";
@@ -9,54 +10,75 @@ import Banner from "../../src/components/Banner";
 import GoogleSignInButton from "../../src/components/GoogleSignInButton";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useAuth } from "../../src/context/AuthContext";
-import {
-  wasBiometricAsked,
-  markBiometricAsked,
-  methodLabelKey,
-} from "../../src/utils/biometrics";
+import { useLanguage } from "../../src/context/LanguageContext";
+import { getAccessToken } from "../../src/api/tokenStorage";
+import { methodLabelKey } from "../../src/utils/biometrics";
 
 export default function LoginScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme } = useTheme();
-  const { signIn, biometricEnabled, enableBiometric, refreshBiometricCapability } = useAuth();
-  const styles = useMemo(() => makeStyles(theme), [theme]);
-
-  // After a first successful login, offer to enable biometric quick-unlock (once). The auth
-  // gate redirects to home immediately; this native Alert simply appears over it. Never nags:
-  // we mark it "asked" so subsequent logins stay quiet — the user can flip it in Settings later.
-  const maybePromptEnableBiometric = async () => {
-    try {
-      if (biometricEnabled) return;
-      if (await wasBiometricAsked()) return;
-      const cap = await refreshBiometricCapability();
-      if (!cap.available) return; // no hardware/enrollment → skip silently
-      await markBiometricAsked();
-      const method = t(methodLabelKey(cap.kind), "biometrics");
-      Alert.alert(
-        t("biometric.enableTitle", "Enable biometric sign-in?"),
-        t("biometric.enableMessage", "Use {{method}} to unlock CapiMax faster next time. Your password is never stored.", { method }),
-        [
-          { text: t("biometric.notNow", "Not now"), style: "cancel" },
-          {
-            text: t("biometric.enable", "Enable"),
-            onPress: () =>
-              enableBiometric({
-                promptMessage: t("biometric.promptVerify", "Confirm it's you"),
-                cancelLabel: t("biometric.cancel", "Cancel"),
-              }),
-          },
-        ]
-      );
-    } catch {
-      /* non-fatal — biometrics is a convenience only */
-    }
-  };
+  const { isRTL } = useLanguage();
+  const { signIn, isLocked, biometricEnabled, biometric, unlock } = useAuth();
+  const styles = useMemo(() => makeStyles(theme, isRTL), [theme, isRTL]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Biometric quick sign-in. Visible when a session exists AND biometrics is enabled+available:
+  //   • on launch the gate routes here in "locked" mode (a stored session is being gated), or
+  //   • the user enabled biometrics and still has a stored session.
+  const [hasSession, setHasSession] = useState(false);
+  const [bioBusy, setBioBusy] = useState(false);
+  const [bioError, setBioError] = useState("");
+  const autoTried = useRef(false);
+
+  const canBiometric = !!biometric?.available && biometricEnabled && (isLocked || hasSession);
+  const bioMethod = t(methodLabelKey(biometric?.kind), "biometrics");
+  const bioIcon = biometric?.kind === "face" ? "scan-outline" : "finger-print-outline";
+
+  // Detect a stored session (covers the non-locked "enabled + session" case).
+  useEffect(() => {
+    let alive = true;
+    getAccessToken()
+      .then((tok) => alive && setHasSession(!!tok))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const runBiometric = async () => {
+    if (bioBusy) return;
+    setBioBusy(true);
+    setBioError("");
+    const res = await unlock({
+      promptMessage: t("biometric.promptUnlock", "Unlock CapiMax"),
+      cancelLabel: t("biometric.cancel", "Cancel"),
+    });
+    setBioBusy(false);
+    if (res?.success) {
+      // Locked path: clearing the lock lets the gate redirect to home. Non-locked safety net:
+      if (!isLocked) router.replace("/(tabs)/home");
+      return;
+    }
+    if (res?.error === "lockout" || res?.error === "lockout_permanent") {
+      setBioError(t("biometric.lockedOut", "Too many attempts. Use your email & password instead."));
+    } else if (res?.error && !["user_cancel", "system_cancel", "app_cancel"].includes(res.error)) {
+      setBioError(t("biometric.failed", "Couldn't verify it's you. Try again."));
+    }
+  };
+
+  // Auto-trigger the prompt once when biometric sign-in is available on open.
+  useEffect(() => {
+    if (canBiometric && !autoTried.current) {
+      autoTried.current = true;
+      runBiometric();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canBiometric]);
 
   const onSubmit = async () => {
     setError("");
@@ -69,7 +91,6 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (result.status === "unverified") {
-      // Route to verification (Flow A). Token storage / redirect handled there + by the gate.
       router.push({ pathname: "/(auth)/verify", params: { email: result.email || email.trim() } });
       return;
     }
@@ -77,9 +98,8 @@ export default function LoginScreen() {
       setError(result.message || t("verifyEmail.verificationFailed", "Login failed"));
       return;
     }
-    // success → the auth gate redirects out of the (auth) group (to pendingRoute or home).
-    // Offer biometric quick-unlock for next time (fire-and-forget; appears over home).
-    maybePromptEnableBiometric();
+    // success → applyTokens clears any lock; the auth gate redirects out of (auth), and the
+    // one-time "enable biometrics?" offer (branded overlay) appears if applicable.
   };
 
   return (
@@ -96,6 +116,29 @@ export default function LoginScreen() {
       }
     >
       <Banner type="error" message={error} />
+
+      {/* Biometric quick sign-in — prominent, on-brand; email/password remains below as fallback. */}
+      {canBiometric ? (
+        <View style={styles.bioBlock}>
+          <Pressable
+            style={({ pressed }) => [styles.bioCircle, pressed && { transform: [{ scale: 0.96 }] }]}
+            onPress={runBiometric}
+            disabled={bioBusy}
+            accessibilityRole="button"
+            accessibilityLabel={t("biometric.unlockWith", "Unlock with {{method}}", { method: bioMethod })}
+          >
+            {bioBusy ? <ActivityIndicator color={theme.primary} /> : <Ionicons name={bioIcon} size={42} color={theme.primary} />}
+          </Pressable>
+          <Text style={styles.bioLabel}>{t("biometric.unlockWith", "Unlock with {{method}}", { method: bioMethod })}</Text>
+          {bioError ? <Text style={styles.bioError}>{bioError}</Text> : null}
+
+          <View style={styles.orRow}>
+            <View style={styles.line} />
+            <Text style={styles.or}>{t("biometric.orEmail", "or sign in with email")}</Text>
+            <View style={styles.line} />
+          </View>
+        </View>
+      ) : null}
 
       <Field
         label={t("form.email", "Email")}
@@ -134,7 +177,7 @@ export default function LoginScreen() {
   );
 }
 
-const makeStyles = (theme) =>
+const makeStyles = (theme, isRTL) =>
   StyleSheet.create({
     forgot: { alignSelf: "flex-end" },
     link: { color: theme.primary, fontWeight: "700" },
@@ -142,4 +185,18 @@ const makeStyles = (theme) =>
     orRow: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 2 },
     line: { flex: 1, height: 1, backgroundColor: theme.border },
     or: { color: theme.textMuted, fontSize: 12 },
+    // Biometric block
+    bioBlock: { alignItems: "center", gap: 8, marginBottom: 4 },
+    bioCircle: {
+      width: 84,
+      height: 84,
+      borderRadius: 42,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "rgba(46,173,111,0.12)",
+      borderWidth: 1,
+      borderColor: theme.primary,
+    },
+    bioLabel: { color: theme.text, fontSize: 15, fontWeight: "700", textAlign: "center" },
+    bioError: { color: theme.error, fontSize: 12, textAlign: "center", paddingHorizontal: 8 },
   });

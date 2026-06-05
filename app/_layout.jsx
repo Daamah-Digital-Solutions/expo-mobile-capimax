@@ -11,14 +11,14 @@ import { ThemeProvider, useTheme } from "../src/context/ThemeContext";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
 import { LanguageProvider, useLanguage } from "../src/context/LanguageContext";
 import AnimatedSplash from "../src/components/AnimatedSplash";
-import LockScreen from "../src/components/LockScreen";
+import BiometricSetupScreen from "../src/components/BiometricSetupScreen";
 
 // Hold the native splash until our animated Lottie overlay takes over (no flash gap).
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Auth gate + themed Stack. Reads theme/auth/language from context (must be inside providers).
 function RootNavigator() {
-  const { isLoading, isAuthenticated, isLocked, pendingRoute, setPendingRoute } = useAuth();
+  const { isLoading, isAuthenticated, isLocked, biometricSetupVisible, pendingRoute, setPendingRoute } = useAuth();
   const { isReady: langReady } = useLanguage();
   const { isReady: themeReady, theme, statusBarStyle } = useTheme();
   const segments = useSegments();
@@ -29,6 +29,15 @@ function RootNavigator() {
   useEffect(() => {
     if (booting) return;
     const inAuthGroup = segments[0] === "(auth)";
+
+    // Biometric quick-unlock: a valid session exists but is gated behind the device prompt.
+    // The Login screen IS the unlock surface (big Face ID/fingerprint button + email/password
+    // fallback), so route there and suppress the normal authenticated→home bounce while locked.
+    if (isLocked) {
+      if (!inAuthGroup) router.replace("/(auth)/login");
+      return;
+    }
+
     // Funds/opportunities are public (matching the web), so we don't force logged-out
     // users to login here. Protected actions/screens prompt for login per-flow.
     // We only bounce an already-authenticated user out of the auth stack (post-login),
@@ -38,7 +47,7 @@ function RootNavigator() {
       if (pendingRoute) setPendingRoute(null);
       router.replace(dest);
     }
-  }, [booting, isAuthenticated, segments]);
+  }, [booting, isAuthenticated, isLocked, segments]);
 
   if (booting) {
     return (
@@ -47,12 +56,6 @@ function RootNavigator() {
         <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
-  }
-
-  // Biometric quick-unlock: a valid session exists but is gated behind the device prompt.
-  // Block the whole app behind the lock screen until the user passes it (or falls back to login).
-  if (isLocked) {
-    return <LockScreen />;
   }
 
   return (
@@ -65,6 +68,8 @@ function RootNavigator() {
           animation: "fade",
         }}
       />
+      {/* One-time, post-first-login "enable biometrics?" offer — branded overlay (not a system Alert). */}
+      {biometricSetupVisible ? <BiometricSetupScreen /> : null}
     </>
   );
 }
