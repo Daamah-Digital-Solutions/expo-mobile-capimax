@@ -29,12 +29,25 @@ export default function MoreTab() {
     isAuthenticated,
     userEmail,
     signOut,
+    lockApp,
     biometric,
     biometricEnabled,
     enableBiometric,
     disableBiometric,
     refreshBiometricCapability,
   } = useAuth();
+
+  // Full sign-out is destructive (removes the account + biometric from this device) → confirm.
+  const confirmSignOut = () => {
+    Alert.alert(
+      t("more.signOutTitle", "Sign out completely?"),
+      t("more.signOutMsg", "This removes your account and biometric sign-in from this device. You'll need your email & password to sign in again."),
+      [
+        { text: t("common.cancel", "Cancel"), style: "cancel" },
+        { text: t("more.signOutCompletely", "Sign out completely"), style: "destructive", onPress: signOut },
+      ]
+    );
+  };
   const { language, isRTL, setLanguage } = useLanguage();
   const styles = useMemo(() => makeStyles(theme, radii, isRTL), [theme, radii, isRTL]);
 
@@ -101,10 +114,24 @@ export default function MoreTab() {
                 <Row icon="wallet-outline" label={t("sidebar.wallet", "Wallet")} onPress={() => router.push("/wallet")} styles={styles} theme={theme} type={type} isRTL={isRTL} />
                 <Row icon="create-outline" label={t("sidebar.edit_account", "Edit Profile")} onPress={() => router.push("/edit-profile")} styles={styles} theme={theme} type={type} isRTL={isRTL} />
                 <Row icon="lock-closed-outline" label={t("changePassword.title", "Change Password")} onPress={() => router.push("/change-password")} styles={styles} theme={theme} type={type} isRTL={isRTL} />
-                <Pressable style={[styles.btn, styles.btnDanger]} onPress={signOut}>
-                  <Ionicons name="log-out-outline" size={18} color="#FFFFFF" />
-                  <Text style={styles.btnDangerText}>{t("logout", "Logout")}</Text>
-                </Pressable>
+                {biometricEnabled ? (
+                  <>
+                    {/* Lock keeps the session so biometrics can reopen it (bank-style). */}
+                    <Pressable style={[styles.btn, styles.btnLock]} onPress={lockApp}>
+                      <Ionicons name="lock-closed-outline" size={18} color={theme.onPrimary} />
+                      <Text style={styles.btnLockText}>{t("more.lock", "Lock")}</Text>
+                    </Pressable>
+                    <Pressable style={[styles.btn, styles.btnDangerOutline]} onPress={confirmSignOut}>
+                      <Ionicons name="log-out-outline" size={18} color={theme.error} />
+                      <Text style={styles.btnDangerOutlineText}>{t("more.signOutCompletely", "Sign out completely")}</Text>
+                    </Pressable>
+                  </>
+                ) : (
+                  <Pressable style={[styles.btn, styles.btnDanger]} onPress={confirmSignOut}>
+                    <Ionicons name="log-out-outline" size={18} color="#FFFFFF" />
+                    <Text style={styles.btnDangerText}>{t("logout", "Logout")}</Text>
+                  </Pressable>
+                )}
               </>
             ) : (
               <AppButton title={t("login.title", "Login")} icon="log-in-outline" onPress={() => router.push("/(auth)/login")} />
@@ -214,6 +241,10 @@ const makeStyles = (theme, radii, isRTL) =>
     },
     btnDanger: { backgroundColor: theme.error },
     btnDangerText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
+    btnLock: { backgroundColor: theme.primary },
+    btnLockText: { color: theme.onPrimary, fontWeight: "700", fontSize: 15 },
+    btnDangerOutline: { backgroundColor: "transparent", borderWidth: 1, borderColor: theme.error, marginTop: 8 },
+    btnDangerOutlineText: { color: theme.error, fontWeight: "700", fontSize: 15 },
     aboutCard: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 10 },
     bioRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 12 },
   });

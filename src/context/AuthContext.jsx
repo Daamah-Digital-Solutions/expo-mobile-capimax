@@ -18,6 +18,7 @@ import {
   runBiometricAuth,
   wasBiometricAsked,
   markBiometricAsked,
+  clearBiometricAsked,
 } from "../utils/biometrics";
 
 const AuthContext = createContext(null);
@@ -53,11 +54,24 @@ export function AuthProvider({ children }) {
   // The intended route to return to after a forced login (Flow A "return to route").
   const [pendingRoute, setPendingRoute] = useState(null);
 
+  // FULL sign-out / switch-account: wipe the stored session AND the biometric prefs (enabled +
+  // "asked"), so the device no longer holds this account and the next user is re-offered enrollment.
+  // This is the security exit (lost/sold phone, switching accounts) — distinct from lockApp().
   const signOut = useCallback(async () => {
     await clearTokens();
+    await setBiometricEnabledFlag(false);
+    await clearBiometricAsked();
+    setBiometricEnabled(false);
     setIsAuthenticated(false);
     setUserEmail(null);
-    setIsLocked(false); // no session → nothing to lock; keep the saved pref for next login
+    setIsLocked(false);
+  }, []);
+
+  // LOCK (bank-style): clear the in-memory auth but KEEP the stored session in secure-store, so
+  // biometrics can reopen it. The gate routes to the Login screen, which shows the biometric button.
+  const lockApp = useCallback(() => {
+    setIsAuthenticated(false);
+    setIsLocked(true);
   }, []);
 
   // Let the axios interceptor flip our state when a refresh ultimately fails.
@@ -209,11 +223,15 @@ export function AuthProvider({ children }) {
     return cap;
   }, []);
 
-  // Run the OS biometric prompt to lift the lock screen. Returns the raw result
-  // ({ success, error }). On success we clear the lock and stay authenticated.
+  // Run the OS biometric prompt to lift the lock. Returns the raw result ({ success, error }).
+  // On success we clear the lock AND restore the in-memory auth (the stored session is valid —
+  // lockApp only cleared the in-memory flag).
   const unlock = useCallback(async ({ promptMessage, cancelLabel }) => {
     const res = await runBiometricAuth({ promptMessage, cancelLabel });
-    if (res?.success) setIsLocked(false);
+    if (res?.success) {
+      setIsLocked(false);
+      setIsAuthenticated(true);
+    }
     return res;
   }, []);
 
@@ -259,7 +277,8 @@ export function AuthProvider({ children }) {
     setPendingRoute,
     signIn,
     signInWithGoogle,
-    signOut,
+    signOut, // full sign-out / switch account (clears session + biometric prefs)
+    lockApp, // bank-style lock (keeps session for biometric re-entry)
     applyTokens, // verify-email flow (data.token) calls this in Phase 2
     // Biometric quick-unlock
     isLocked,

@@ -44,6 +44,16 @@ export async function markBiometricAsked() {
   }
 }
 
+// Clear the "asked" flag — used on a FULL sign-out / switch-account so the next user on this
+// device is offered biometric enrollment again.
+export async function clearBiometricAsked() {
+  try {
+    await AsyncStorage.removeItem(ASKED_KEY);
+  } catch {
+    /* non-fatal */
+  }
+}
+
 // --- Capability probe ---
 // kind: "face" | "fingerprint" | "generic" — used only to pick a label/icon.
 export async function getBiometricCapability() {
