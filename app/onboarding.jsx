@@ -143,7 +143,7 @@ function Slide({ item, active, width, sceneSize, t, theme, type, styles }) {
   return (
     <View style={[styles.slide, { width }]}>
       <View style={styles.illoArea}>
-        <OnboardingScene n={item.n} icon={item.icon} active={active} reduced={reduced} size={sceneSize} theme={theme} />
+        <OnboardingScene n={item.n} active={active} reduced={reduced} size={sceneSize} theme={theme} />
       </View>
 
       <Animated.View style={[styles.textBlock, textStyle]}>
