@@ -1,70 +1,111 @@
-// AnimatedSplash — full-screen splash played over the native splash on launch.
+// AnimatedSplash — calm, code-animated splash rendered over the native splash on launch.
 //
-// NOTE on splash.json: it is a frame-by-frame RASTER animation (41 embedded 720x1280 WEBP
-// bitmaps), not a vector Lottie. So we must (a) never crop it and (b) never upscale it past its
-// native frame. We compute the largest box that fits 720x1280 *inside* the screen (true "contain"
-// letterboxing), center it on the #121c30 background, and render the Lottie at exactly that size —
-// guaranteeing the whole frame is visible with no cropping on any aspect ratio. Because the source
-// is only 720px wide it will soften slightly when the device scales it up; a vector or >=1440px
-// asset would render crisp.
+// Renders the brand logo as a crisp VECTOR (react-native-svg via SplashLogo) on a full-screen
+// navy (#121c30) background — sharp at any size, contained so it's never cropped on any aspect
+// ratio. Animation (react-native-reanimated): the logo fades in + gently scales 0.92→1.0, holds
+// briefly, then the whole splash fades out (total on-screen ~2–2.5s). OS reduce-motion → fade only.
 //
-// Flow: the root layout calls SplashScreen.preventAutoHideAsync() at module load. Once this overlay
-// mounts we hide the native splash (our Lottie becomes what's on screen — no flash gap), play
-// splash.json once, and fade out on finish OR a hard ~3.5s cap. If Lottie ever fails to load/render
-// we finish immediately so startup is never blocked.
+// The root layout calls SplashScreen.preventAutoHideAsync() at module load; once this overlay
+// mounts we hide the native splash (no flash gap) and hand off to the gate when done. Fail open:
+// if the SVG can't render, an error boundary finishes immediately so startup is never blocked.
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, useWindowDimensions, View } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
-import LottieView from "lottie-react-native";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import SplashLogo from "./SplashLogo";
 
-const BG = "#121c30"; // theme navy-dark — matches app.json splash backgroundColor (letterbox bars)
-const FRAME_W = 720; // native frame size of splash.json
-const FRAME_H = 1280;
-const MAX_MS = 3500; // hard cap; let the key part of the animation play, but never hang the app
+const BG = "#121c30"; // theme navy-dark — matches app.json splash backgroundColor
+const LOGO_AR = 271.33 / 242.74; // source viewBox width/height (preserve aspect, no stretching)
+
+// Fail-open boundary: if SplashLogo throws while rendering, finish immediately.
+class SplashErrorBoundary extends React.Component {
+  componentDidCatch() {
+    this.props.onError && this.props.onError();
+  }
+  render() {
+    return this.props.children;
+  }
+}
 
 export default function AnimatedSplash({ onFinish }) {
   const { width: sw, height: sh } = useWindowDimensions();
-  const opacity = useRef(new Animated.Value(1)).current;
+  const reduceMotion = useReducedMotion();
   const [hidden, setHidden] = useState(false);
   const done = useRef(false);
 
-  // Largest box with the frame's exact aspect ratio that fits fully inside the screen (contain).
-  const scale = Math.min(sw / FRAME_W, sh / FRAME_H);
-  const boxW = Math.round(FRAME_W * scale);
-  const boxH = Math.round(FRAME_H * scale);
+  // Logo box: ~66% of screen width, kept fully on-screen (cap height to ~half the screen so it's
+  // never cropped on short/wide aspect ratios), aspect-locked to the source viewBox.
+  let logoW = Math.round(sw * 0.66);
+  let logoH = Math.round(logoW / LOGO_AR);
+  const maxH = sh * 0.5;
+  if (logoH > maxH) {
+    logoH = Math.round(maxH);
+    logoW = Math.round(logoH * LOGO_AR);
+  }
+
+  const containerOpacity = useSharedValue(1);
+  const logoOpacity = useSharedValue(0);
+  const logoScale = useSharedValue(reduceMotion ? 1 : 0.92);
 
   const finish = useCallback(() => {
     if (done.current) return;
     done.current = true;
-    Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
-      setHidden(true);
-      onFinish && onFinish();
-    });
-  }, [opacity, onFinish]);
+    setHidden(true);
+    onFinish && onFinish();
+  }, [onFinish]);
 
   useEffect(() => {
-    // Reveal our overlay by hiding the native splash, then arm the hard timeout cap.
+    // Reveal our overlay by hiding the native splash.
     SplashScreen.hideAsync().catch(() => {});
-    const timer = setTimeout(finish, MAX_MS);
-    return () => clearTimeout(timer);
-  }, [finish]);
+
+    const IN = reduceMotion ? 450 : 700;
+    const HOLD = 1000;
+    const OUT = 350;
+
+    // Fade (+ scale) in.
+    logoOpacity.value = withTiming(1, { duration: IN, easing: Easing.out(Easing.cubic) });
+    if (!reduceMotion) {
+      logoScale.value = withTiming(1, { duration: IN, easing: Easing.out(Easing.cubic) });
+    }
+
+    // After the hold, fade the whole splash out, then hand off to the gate.
+    const t1 = setTimeout(() => {
+      containerOpacity.value = withTiming(0, { duration: OUT }, (completed) => {
+        if (completed) runOnJS(finish)();
+      });
+    }, IN + HOLD);
+
+    // Hard safety cap — always finish even if a timer/animation stalls.
+    const t2 = setTimeout(finish, IN + HOLD + OUT + 900);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [finish, reduceMotion]);
+
+  const containerStyle = useAnimatedStyle(() => ({ opacity: containerOpacity.value }));
+  const logoStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
+    transform: [{ scale: logoScale.value }],
+  }));
 
   if (hidden) return null;
 
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, styles.container, { opacity }]} pointerEvents="none">
-      {/* Centered box at the frame's aspect ratio → whole frame visible, navy fills the bars. */}
-      <View style={{ width: boxW, height: boxH }}>
-        <LottieView
-          source={require("../../splash.json")}
-          autoPlay
-          loop={false}
-          resizeMode="contain"
-          onAnimationFinish={finish}
-          onAnimationFailure={finish} // Lottie couldn't render → don't block startup
-          style={StyleSheet.absoluteFill}
-        />
-      </View>
+    <Animated.View style={[StyleSheet.absoluteFill, styles.container, containerStyle]} pointerEvents="none">
+      <SplashErrorBoundary onError={finish}>
+        <Animated.View style={[{ width: logoW, height: logoH }, logoStyle]}>
+          <SplashLogo width={logoW} height={logoH} />
+        </Animated.View>
+      </SplashErrorBoundary>
     </Animated.View>
   );
 }

@@ -38,10 +38,15 @@ methods + contract for all 5 · wallet+withdraw · holdings · portfolio · inte
   secondary-market list (first listings). **COPY RULE: no "Trade"/"Invest" words on Home — icons + scroll.**
 
 ### 1c) Recently shipped (post-phase polish)
-- **(A) Animated Lottie splash** ✅ — `splash.json` (720×1280, 9:16) played full-screen on
-  `#121c30` over the native splash via `expo-splash-screen` + `lottie-react-native`; fades out on
-  finish or a hard ~2.5 s cap; fails open if Lottie can't render. `src/components/AnimatedSplash.jsx`,
-  wired in `app/_layout.jsx` (commits `ed7af9a`, `68c4b78`).
+- **(A) Code-animated SVG splash** ✅ — brand logo rendered as a crisp **vector** via
+  `react-native-svg` (`src/components/SplashLogo.jsx`, generated from `assets/splash-logo.svg`;
+  CSS `<style>` classes resolved to explicit fills since RN-SVG ignores `<style>`). Full-screen
+  `#121c30`, logo ~66% width contained (never cropped). `react-native-reanimated`: fade-in +
+  scale 0.92→1.0, brief hold, fade-out (~2–2.5 s); reduce-motion → fade only. Holds the native
+  splash via `expo-splash-screen`; fails open (error boundary) if the SVG can't render.
+  `src/components/AnimatedSplash.jsx`, wired in `app/_layout.jsx`. **Replaced** the old Lottie
+  splash (`lottie-react-native` + `splash.json` removed) which pixelated (it was a raster frame
+  sequence, not vector).
 - **(B) Biometric quick-unlock** ✅ — Face ID + fingerprint as a **local convenience lock** over the
   secure-store session (backend has **no** biometric auth; device-side only, password never stored).
   `src/utils/biometrics.js` (capability + prefs via `expo-local-authentication`), `AuthContext`

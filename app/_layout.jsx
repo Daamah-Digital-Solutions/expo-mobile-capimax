@@ -13,7 +13,7 @@ import { LanguageProvider, useLanguage } from "../src/context/LanguageContext";
 import AnimatedSplash from "../src/components/AnimatedSplash";
 import BiometricSetupScreen from "../src/components/BiometricSetupScreen";
 
-// Hold the native splash until our animated Lottie overlay takes over (no flash gap).
+// Hold the native splash until our code-animated SVG splash overlay takes over (no flash gap).
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Auth gate + themed Stack. Reads theme/auth/language from context (must be inside providers).
@@ -87,7 +87,7 @@ export default function RootLayout() {
           </LanguageProvider>
         </ThemeProvider>
       </SafeAreaProvider>
-      {/* Animated Lottie splash overlay — sits above everything until it finishes/times out. */}
+      {/* Code-animated SVG splash overlay — sits above everything until it finishes/times out. */}
       {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
     </GestureHandlerRootView>
   );
