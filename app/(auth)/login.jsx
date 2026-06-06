@@ -54,7 +54,7 @@ export default function LoginScreen() {
     setBioBusy(true);
     setBioError("");
     const res = await unlock({
-      promptMessage: t("biometric.promptUnlock", "Unlock CapiMax"),
+      promptMessage: t("biometric.promptUnlock", "Unlock Capimax"),
       cancelLabel: t("biometric.cancel", "Cancel"),
     });
     setBioBusy(false);
@@ -104,7 +104,7 @@ export default function LoginScreen() {
       footer={
         <Pressable onPress={() => router.push("/(auth)/register")}>
           <Text style={styles.footerText}>
-            {t("login.newPrompt", "New to CapiMax?")}{" "}
+            {t("login.newPrompt", "New to Capimax?")}{" "}
             <Text style={styles.link}>{t("form.sign_up", "Sign Up")}</Text>
           </Text>
         </Pressable>

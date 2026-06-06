@@ -46,7 +46,7 @@ export default function BiometricSetupScreen() {
           </View>
           <Text style={[type.h1, styles.title]}>{t("biometric.setupTitle", "Sign in faster")}</Text>
           <Text style={[type.body, styles.benefit]}>
-            {t("biometric.setupBenefit", "Use {{method}} to unlock CapiMax next time — your password is never stored.", { method })}
+            {t("biometric.setupBenefit", "Use {{method}} to unlock Capimax next time — your password is never stored.", { method })}
           </Text>
         </View>
 

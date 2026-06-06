@@ -161,7 +161,7 @@ export default function HomeTab() {
 
         {/* ── 3) Value-prop grid (static) ── */}
         <View style={{ paddingHorizontal: spacing.xl, gap: 10 }}>
-          <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("home.whyTitle", "Why CapiMax")}</Text>
+          <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("home.whyTitle", "Why Capimax")}</Text>
           <View style={styles.grid}>
             {VALUE_PROPS.map((vp, i) => (
               <FadeInView key={vp.key} index={Math.min(i, 5)} style={styles.gridCellWrap}>
