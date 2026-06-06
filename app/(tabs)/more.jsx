@@ -130,10 +130,13 @@ export default function MoreTab() {
                       <Ionicons name="lock-closed-outline" size={18} color={theme.onPrimary} />
                       <Text style={styles.btnLockText}>{t("more.lock", "Lock")}</Text>
                     </Pressable>
+                    <Text style={styles.exitHint}>{t("more.lockHint", "Lock the app; reopen quickly with {{method}}. You stay signed in.", { method: bioMethod })}</Text>
+
                     <Pressable style={[styles.btn, styles.btnDangerOutline]} onPress={confirmSignOut}>
                       <Ionicons name="log-out-outline" size={18} color={theme.error} />
                       <Text style={styles.btnDangerOutlineText}>{t("more.signOutCompletely", "Sign out completely")}</Text>
                     </Pressable>
+                    <Text style={styles.exitHint}>{t("more.signOutHint", "Sign out and remove your account from this device. You will need your email & password next time.")}</Text>
                   </>
                 ) : (
                   <Pressable style={[styles.btn, styles.btnDanger]} onPress={confirmSignOut}>
@@ -254,6 +257,7 @@ const makeStyles = (theme, radii, isRTL) =>
     btnLockText: { color: theme.onPrimary, fontWeight: "700", fontSize: 15 },
     btnDangerOutline: { backgroundColor: "transparent", borderWidth: 1, borderColor: theme.error, marginTop: 8 },
     btnDangerOutlineText: { color: theme.error, fontWeight: "700", fontSize: 15 },
+    exitHint: { color: theme.textMuted, fontSize: 12, lineHeight: 16, textAlign: isRTL ? "right" : "left", marginTop: 6, paddingHorizontal: 2 },
     aboutCard: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 10 },
     bioRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 12 },
   });

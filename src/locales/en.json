@@ -724,7 +724,9 @@
     "lock": "Lock",
     "signOutCompletely": "Sign out completely",
     "signOutTitle": "Sign out completely?",
-    "signOutMsg": "This removes your account and biometric sign-in from this device. You'll need your email & password to sign in again."
+    "signOutMsg": "This removes your account and biometric sign-in from this device. You'll need your email & password to sign in again.",
+    "lockHint": "Lock the app; reopen quickly with {{method}}. You stay signed in.",
+    "signOutHint": "Sign out and remove your account from this device. You will need your email & password next time."
   },
   "login": {
     "heading": "Log in or sign up",
@@ -939,7 +941,7 @@
     "enableTitle": "Enable biometric sign-in?",
     "enableMessage": "Use {{method}} to unlock CapiMax faster next time. Your password is never stored.",
     "setupTitle": "Sign in faster",
-    "setupBenefit": "Use {{method}} to unlock CapiMax next time — your password is never stored.",
+    "setupBenefit": "Lock CapiMax and reopen it instantly with {{method}} — you stay signed in, and your password is never stored.",
     "maybeLater": "Maybe later",
     "orEmail": "or sign in with email",
     "enable": "Enable",
