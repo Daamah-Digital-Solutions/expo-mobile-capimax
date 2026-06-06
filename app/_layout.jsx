@@ -44,19 +44,19 @@ function RootNavigator() {
       return;
     }
 
-    // Otherwise the user is logged-out OR locked (biometric + stored session). Per the agreed
-    // behavior, onboarding runs ONCE per launch BEFORE the auth/login screens. Actively enforce
-    // it here so the flow holds even when the router lands directly on /(auth)/login (e.g. a
-    // locked session, or the router restoring the last route after a sign-out on relaunch).
-    if (!onboardingDone) {
-      if (!onOnboarding) router.replace("/onboarding");
+    // Locked (a valid session exists + biometrics enabled) → straight to the Login/unlock surface
+    // with the biometric button. A locked user is a returning user, NOT logged-out, so they skip
+    // onboarding entirely.
+    if (isLocked) {
+      if (!inAuthGroup) router.replace("/(auth)/login");
       return;
     }
 
-    // Onboarding done this launch → the auth screens are allowed. A locked session that wandered
-    // off the auth stack (e.g. onto a public tab) is returned to the login/unlock surface.
-    if (isLocked && !inAuthGroup && !onOnboarding) {
-      router.replace("/(auth)/login");
+    // Truly logged-out (no stored session). Onboarding runs ONCE per launch BEFORE the auth/login
+    // screens. Enforce it here so the flow holds even when the router lands directly on
+    // /(auth)/login (e.g. restoring the post-sign-out route on relaunch).
+    if (!onboardingDone) {
+      if (!onOnboarding) router.replace("/onboarding");
     }
   }, [booting, isAuthenticated, isLocked, onboardingDone, segments]);
 
