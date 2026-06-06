@@ -16,7 +16,16 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.capimax.mobile"
+      "bundleIdentifier": "com.capimax.mobile",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.1044086354511-hgope6us8jjava85o69p31n4rbkasefh"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "package": "com.capimax.mobile",
@@ -43,8 +52,12 @@
       "webOrigin": "https://capimaxinvestment.com",
       "google": {
         "webClientId": "2857014122-atnfes15aq8irqnldfnpqq9nr285phka.apps.googleusercontent.com",
-        "iosClientId": "",
-        "androidClientId": ""
+        "iosClientId": "1044086354511-hgope6us8jjava85o69p31n4rbkasefh.apps.googleusercontent.com",
+        "androidClientId": "1044086354511-6k08oi5ifn2l9f1t9koqt7c9go5vercv.apps.googleusercontent.com"
+      },
+      "router": {},
+      "eas": {
+        "projectId": "ae11d47a-8298-4c40-ac6e-c1855431e08b"
       }
     }
   }

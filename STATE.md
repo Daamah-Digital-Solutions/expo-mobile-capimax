@@ -337,7 +337,7 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
   (e.g. `expo-local-authentication` gating access to the stored session; no new API calls).
 
 ### Still deferred
-- **#10 Google OAuth** — client IDs still pending from the owner (see below); button wired + gated.
+- **#10 Google OAuth — ✅ DONE (activated 2026-06-06; all client IDs wired). Testable in a dev/EAS build only.**
 - **Android contract-sign keyboard** — stable as-is; ⚠️ **do NOT retry the `0ff5836` collapse approach** (§7c).
 - **Final polish / QA pass** — then **EAS build (saved for the very end)**. Do not run EAS until asked.
 
@@ -352,9 +352,17 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
   the new password) — cleanest match to the backend's "log in again" guidance.
 - **#8 Manual-payment verification** — bank/crypto-manual/NovaPay stay pending; **no auto-contract for
   bank transfer** (match web). Owner to confirm before finalizing **Phase 4**.
-- **#10 Google OAuth client IDs** — not yet provided. `GoogleSignInButton` is wired but **gated**: shows
-  a disabled button until `app.json extra.google.{iosClientId,androidClientId,webClientId}` are set, then
-  it activates with no code change. Build email/password first.
+- **#10 Google OAuth — ✅ ACTIVATED (2026-06-06).** Live: `POST /api/auth/google/ { credential: <Google
+  ID token> }` → `data.data.{access,refresh,email,username,is_new_user}` → tokens stored via `applyTokens`
+  (fires the biometric enroll offer). All three client IDs (Google Cloud project `2857014122`) are in
+  `app.json extra.google`: **webClientId** = `2857014122-atnfes15aq8irqnldfnpqq9nr285phka` (the audience
+  the backend verifies), **androidClientId** = `1044086354511-6k08oi5ifn2l9f1t9koqt7c9go5vercv`,
+  **iosClientId** = `1044086354511-hgope6us8jjava85o69p31n4rbkasefh`. iOS reversed-client-id URL scheme
+  added to `ios.infoPlist.CFBundleURLTypes`. The button auto-activates when the platform's native ID is
+  present. ⚠️ **Only works in a dev/EAS build, NOT Expo Go** (needs the real bundle/package + scheme).
+  - **EAS upload-key SHA-1** (registered in the Android OAuth client): `9F:D6:1E:74:F4:E1:52:20:E7:E5:43:9B:6E:D3:DF:4B:41:87:B7:0D`.
+  - ⚠️ **Play App Signing SHA-1** must ALSO be added to the Android OAuth client when publishing to Play
+    Store (Play Console → Setup → App signing → SHA-1) — otherwise Google sign-in breaks for Play installs.
 - **#11 PayPal on mobile** — approved approach: **WebView-hosted PayPal SDK** reusing the same live client
   id; same `process_paypal_payment` / `paypal-complete` payloads.
 - **Reset-password deep link** — universal-link wiring is a **Phase 10** task; the screen reads `token`
