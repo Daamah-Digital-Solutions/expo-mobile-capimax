@@ -63,7 +63,9 @@ export default function Onboarding() {
   return (
     <Screen edges={["top", "bottom"]}>
       <View style={styles.brandRow}>
-        <Logo height={22} />
+        {/* Prominent brand mark at the top. Sized by width so it fits any screen and reads clearly
+            in both themes (navy is a wide banner, white is compact — width keeps both visible). */}
+        <Logo width={Math.min(width * 0.72, 270)} />
       </View>
       <View style={{ flex: 1 }}>
         <FlatList
@@ -148,7 +150,7 @@ function Dot({ active, theme, styles }) {
 
 const makeStyles = (theme, radii, isRTL) =>
   StyleSheet.create({
-    brandRow: { alignItems: "center", paddingTop: 6, paddingBottom: 2 },
+    brandRow: { alignItems: "center", paddingTop: 14, paddingBottom: 8 },
     slide: { flex: 1, alignItems: "center", justifyContent: "center", gap: 18 },
     accentCircle: {
       position: "absolute",
