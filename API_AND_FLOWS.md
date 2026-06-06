@@ -108,9 +108,10 @@ All requests also send `Accept-Language`.
 - **Verified live (2026-06-03):** invalid credentials → `HTTP 401 {status:"error", code:"invalid_credentials", message:"Invalid email or password"}` (error text in `message`). Because `/api/user/token/` is public, a 401 here must NOT force logout. The mobile client treats this as a normal error and surfaces `message`. The "Account not verified" case may likewise arrive as an error envelope (handle `code`/`message` containing "not verified").
 
 #### 🔓 `POST /api/auth/google/`  (Google sign-in)
-- **Request:** `{ credential }` — the Google ID token (web sends `credentialResponse.credential` from `@react-oauth/google`). Mobile: obtain `idToken` via `expo-auth-session` and send it as `credential`.
-- **Response read:** `response.data.data.access`, `response.data.data.refresh`.
-- Error read: `error.response.data.message` / `.error`.
+- **Request:** `{ credential }` — the Google **ID token** (web sends `credentialResponse.credential` from `@react-oauth/google`).
+- **Mobile (2026-06-06, reconciled):** uses **`@react-native-google-signin/google-signin`** (the native SDK), NOT `expo-auth-session`. Configure with **`webClientId`** as the server client id so the returned `idToken.aud` = the **web** client id (which the backend verifies); send that `idToken` as `credential`. expo-auth-session's implicit `response_type=id_token` flow was abandoned because Google returns `invalid_request` for native clients and the audience would be wrong. **Native module → requires a dev/EAS build (not Expo Go).**
+- **Response read:** `response.data.data.access`, `response.data.data.refresh` (also `email`, `username`, `is_new_user`).
+- Error read: `error.response.data.error` (Google flow uses `error`) / `.message`.
 
 #### 🔓 `POST /api/verify-email/`
 - **Request:** `{ email, code }` (`code` is the 6-digit code, `.trim()`ed).

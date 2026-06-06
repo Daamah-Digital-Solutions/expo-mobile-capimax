@@ -960,6 +960,8 @@
     "inactiveNote": "Google sign-in will be available soon.",
     "errRequired": "No Google credential received. Please try again.",
     "errInvalidEmail": "We could not verify your Google email. Try another account.",
-    "errGeneric": "Google sign-in failed. Please try again."
+    "errGeneric": "Google sign-in failed. Please try again.",
+    "errPlayServices": "Google Play services are unavailable or need an update.",
+    "expoGoNote": "Google sign-in works in the installed app (not Expo Go)."
   }
 }

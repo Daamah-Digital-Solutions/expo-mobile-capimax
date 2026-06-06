@@ -952,6 +952,8 @@
     "inactiveNote": "سيتوفّر تسجيل الدخول عبر Google قريباً.",
     "errRequired": "لم يتم استلام بيانات اعتماد Google. حاول مرة أخرى.",
     "errInvalidEmail": "تعذّر التحقق من بريدك في Google. جرّب حساباً آخر.",
-    "errGeneric": "فشل تسجيل الدخول عبر Google. حاول مرة أخرى."
+    "errGeneric": "فشل تسجيل الدخول عبر Google. حاول مرة أخرى.",
+    "errPlayServices": "خدمات Google Play غير متوفرة أو تحتاج إلى تحديث.",
+    "expoGoNote": "يعمل تسجيل الدخول عبر Google في التطبيق المثبَّت (وليس Expo Go)."
   }
 }

@@ -13,16 +13,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.capimax.mobile",
-      "infoPlist": {
-        "CFBundleURLTypes": [
-          {
-            "CFBundleURLSchemes": [
-              "com.googleusercontent.apps.1044086354511-hgope6us8jjava85o69p31n4rbkasefh"
-            ]
-          }
-        ]
-      }
+      "bundleIdentifier": "com.capimax.mobile"
     },
     "android": {
       "package": "com.capimax.mobile",
@@ -48,6 +39,12 @@
           "dark": {
             "backgroundColor": "#121c30"
           }
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.1044086354511-hgope6us8jjava85o69p31n4rbkasefh"
         }
       ]
     ],

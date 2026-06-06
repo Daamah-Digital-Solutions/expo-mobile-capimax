@@ -1,10 +1,10 @@
 // Google OAuth config. Client IDs are read from app.json extra.google.*.
 //
-// The backend verifies the ID token's audience against the WEB client id, so webClientId must
-// always be set (it is, now). Completing the native OAuth flow on a device additionally needs the
-// platform's NATIVE client id (iosClientId on iOS, androidClientId on Android) + its redirect
-// scheme. Until those native IDs are provided, the "Continue with Google" button stays inactive
-// with a small note — flipping it on later requires no code change.
+// Used by the native Google Sign-In SDK (@react-native-google-signin/google-signin):
+//   • webClientId  → passed to GoogleSignin.configure() as the server client id, so the returned
+//                    id_token's `aud` is the WEB client id (what the backend verifies). REQUIRED.
+//   • iosClientId  → the iOS device flow (Android uses package + SHA-1, no client id needed in JS).
+// The button activates when webClientId + the platform's native client id are present.
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 
