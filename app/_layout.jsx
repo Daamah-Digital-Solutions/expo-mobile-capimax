@@ -10,10 +10,11 @@ import "../src/i18n"; // initialize i18next
 import { ThemeProvider, useTheme } from "../src/context/ThemeContext";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
 import { LanguageProvider, useLanguage } from "../src/context/LanguageContext";
-import AnimatedSplash from "../src/components/AnimatedSplash";
+import Splash from "../src/components/Splash";
 import BiometricSetupScreen from "../src/components/BiometricSetupScreen";
 
-// Hold the native splash until our code-animated SVG splash overlay takes over (no flash gap).
+// Hold the native splash until our animated splash overlay takes over (no flash gap).
+// The overlay is Lottie or SVG depending on SPLASH_MODE in src/components/Splash.jsx.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Auth gate + themed Stack. Reads theme/auth/language from context (must be inside providers).
@@ -87,8 +88,8 @@ export default function RootLayout() {
           </LanguageProvider>
         </ThemeProvider>
       </SafeAreaProvider>
-      {/* Code-animated SVG splash overlay — sits above everything until it finishes/times out. */}
-      {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
+      {/* Animated splash overlay (Lottie/SVG per SPLASH_MODE) — above everything until done. */}
+      {!splashDone && <Splash onFinish={() => setSplashDone(true)} />}
     </GestureHandlerRootView>
   );
 }
