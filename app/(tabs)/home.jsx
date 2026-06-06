@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Screen from "../../src/components/Screen";
+import Logo from "../../src/components/Logo";
 import Card from "../../src/components/Card";
 import Banner from "../../src/components/Banner";
 import Skeleton from "../../src/components/Skeleton";
@@ -104,8 +105,8 @@ export default function HomeTab() {
   // ── Header (greeting + wallet/notifications) ─────────────────────────────────
   const Header = (
     <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
-      <View style={{ flex: 1, gap: 1 }}>
-        <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left" }]}>{t("home.welcomeBack", "Welcome back")}</Text>
+      <View style={{ flex: 1, gap: 4, alignItems: isRTL ? "flex-end" : "flex-start" }}>
+        <Logo height={14} />
         <Text style={[type.h2, { color: theme.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{username || t("account.user", "User")}</Text>
       </View>
       <View style={styles.headerIcons}>

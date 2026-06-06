@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 
 import Screen from "../../src/components/Screen";
+import Logo from "../../src/components/Logo";
 import Card from "../../src/components/Card";
 import SegmentedControl from "../../src/components/SegmentedControl";
 import AppButton from "../../src/components/AppButton";
@@ -103,6 +104,9 @@ export default function MoreTab() {
   return (
     <Screen edges={["top"]}>
       <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40, gap: 16 }} showsVerticalScrollIndicator={false}>
+        <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
+          <Logo height={20} />
+        </View>
         <Text style={[type.h1, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("sidebar.more", "More")}</Text>
 
         {/* Account */}

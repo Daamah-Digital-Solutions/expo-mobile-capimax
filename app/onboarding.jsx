@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import Screen from "../src/components/Screen";
 import AppButton from "../src/components/AppButton";
+import Logo from "../src/components/Logo";
 import { useTheme } from "../src/context/ThemeContext";
 import { useLanguage } from "../src/context/LanguageContext";
 
@@ -61,6 +62,9 @@ export default function Onboarding() {
 
   return (
     <Screen edges={["top", "bottom"]}>
+      <View style={styles.brandRow}>
+        <Logo height={22} />
+      </View>
       <View style={{ flex: 1 }}>
         <FlatList
           ref={listRef}
@@ -144,6 +148,7 @@ function Dot({ active, theme, styles }) {
 
 const makeStyles = (theme, radii, isRTL) =>
   StyleSheet.create({
+    brandRow: { alignItems: "center", paddingTop: 6, paddingBottom: 2 },
     slide: { flex: 1, alignItems: "center", justifyContent: "center", gap: 18 },
     accentCircle: {
       position: "absolute",
