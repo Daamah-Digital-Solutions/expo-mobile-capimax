@@ -24,6 +24,7 @@ import Logo from "../src/components/Logo";
 import OnboardingScene from "../src/components/onboarding/OnboardingScenes";
 import { useTheme } from "../src/context/ThemeContext";
 import { useLanguage } from "../src/context/LanguageContext";
+import { useAuth } from "../src/context/AuthContext";
 
 // Per-slide icon (used by the generic scene + as a concept hint). Scene 1 is fully bespoke.
 const SLIDES = [
@@ -43,6 +44,7 @@ export default function Onboarding() {
   const { t } = useTranslation();
   const { theme, radii, type, spacing } = useTheme();
   const { isRTL } = useLanguage();
+  const { completeOnboarding } = useAuth();
   const { width } = useWindowDimensions();
   const styles = useMemo(() => makeStyles(theme, radii, isRTL, spacing), [theme, radii, isRTL, spacing]);
 
@@ -57,7 +59,10 @@ export default function Onboarding() {
   });
   const viewCfgRef = useRef({ itemVisiblePercentThreshold: 60 });
 
-  const finish = () => router.replace("/(auth)/login");
+  const finish = () => {
+    completeOnboarding(); // allow the auth screens for the rest of this launch
+    router.replace("/(auth)/login");
+  };
   const next = () => {
     if (isLast) return finish();
     listRef.current?.scrollToIndex({ index: index + 1, animated: true });

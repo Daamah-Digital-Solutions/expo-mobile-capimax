@@ -42,6 +42,11 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState(null);
 
+  // Onboarding-before-auth gate. In-memory only → resets every launch, so a logged-out (or
+  // locked) user sees onboarding on EVERY launch before reaching the login/register screens.
+  // Set true when the user finishes/skips onboarding; authenticated users never see it.
+  const [onboardingDone, setOnboardingDone] = useState(false);
+
   // Biometric quick-unlock (local convenience lock over the secure-store session).
   // isLocked: a valid session exists but is gated behind the device biometric prompt.
   // biometricEnabled: the user's saved preference. biometric: device capability probe.
@@ -269,6 +274,9 @@ export function AuthProvider({ children }) {
     setBiometricSetupVisible(false);
   }, []);
 
+  // Onboarding finished/skipped this launch → allow the auth screens.
+  const completeOnboarding = useCallback(() => setOnboardingDone(true), []);
+
   const value = {
     isLoading,
     isAuthenticated,
@@ -292,6 +300,9 @@ export function AuthProvider({ children }) {
     biometricSetupVisible,
     enableBiometricFromSetup,
     dismissBiometricSetup,
+    // Onboarding-before-auth gate
+    onboardingDone,
+    completeOnboarding,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

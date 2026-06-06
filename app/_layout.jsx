@@ -19,7 +19,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // Auth gate + themed Stack. Reads theme/auth/language from context (must be inside providers).
 function RootNavigator() {
-  const { isLoading, isAuthenticated, isLocked, biometricSetupVisible, pendingRoute, setPendingRoute } = useAuth();
+  const { isLoading, isAuthenticated, isLocked, onboardingDone, biometricSetupVisible, pendingRoute, setPendingRoute } = useAuth();
   const { isReady: langReady } = useLanguage();
   const { isReady: themeReady, theme, statusBarStyle } = useTheme();
   const segments = useSegments();
@@ -29,26 +29,36 @@ function RootNavigator() {
 
   useEffect(() => {
     if (booting) return;
-    const inAuthGroup = segments[0] === "(auth)";
+    const seg0 = segments[0];
+    const inAuthGroup = seg0 === "(auth)";
+    const onOnboarding = seg0 === "onboarding";
 
-    // Biometric quick-unlock: a valid session exists but is gated behind the device prompt.
-    // The Login screen IS the unlock surface (big Face ID/fingerprint button + email/password
-    // fallback), so route there and suppress the normal authenticated→home bounce while locked.
-    if (isLocked) {
-      if (!inAuthGroup) router.replace("/(auth)/login");
+    // Fully authenticated (and not locked) → into the app. Bounce out of the auth stack /
+    // onboarding to the intended route (Flow A "return to route") or home.
+    if (isAuthenticated && !isLocked) {
+      if (inAuthGroup || onOnboarding) {
+        const dest = pendingRoute || "/(tabs)/home";
+        if (pendingRoute) setPendingRoute(null);
+        router.replace(dest);
+      }
       return;
     }
 
-    // Funds/opportunities are public (matching the web), so we don't force logged-out
-    // users to login here. Protected actions/screens prompt for login per-flow.
-    // We only bounce an already-authenticated user out of the auth stack (post-login),
-    // returning to the intended route if one was saved (Flow A "return to route").
-    if (isAuthenticated && inAuthGroup) {
-      const dest = pendingRoute || "/(tabs)/home";
-      if (pendingRoute) setPendingRoute(null);
-      router.replace(dest);
+    // Otherwise the user is logged-out OR locked (biometric + stored session). Per the agreed
+    // behavior, onboarding runs ONCE per launch BEFORE the auth/login screens. Actively enforce
+    // it here so the flow holds even when the router lands directly on /(auth)/login (e.g. a
+    // locked session, or the router restoring the last route after a sign-out on relaunch).
+    if (!onboardingDone) {
+      if (!onOnboarding) router.replace("/onboarding");
+      return;
     }
-  }, [booting, isAuthenticated, isLocked, segments]);
+
+    // Onboarding done this launch → the auth screens are allowed. A locked session that wandered
+    // off the auth stack (e.g. onto a public tab) is returned to the login/unlock surface.
+    if (isLocked && !inAuthGroup && !onOnboarding) {
+      router.replace("/(auth)/login");
+    }
+  }, [booting, isAuthenticated, isLocked, onboardingDone, segments]);
 
   if (booting) {
     return (
