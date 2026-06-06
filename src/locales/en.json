@@ -955,5 +955,11 @@
     "faceId": "Face ID",
     "fingerprint": "Fingerprint",
     "generic": "biometrics"
+  },
+  "google": {
+    "inactiveNote": "Google sign-in will be available soon.",
+    "errRequired": "No Google credential received. Please try again.",
+    "errInvalidEmail": "We could not verify your Google email. Try another account.",
+    "errGeneric": "Google sign-in failed. Please try again."
   }
 }

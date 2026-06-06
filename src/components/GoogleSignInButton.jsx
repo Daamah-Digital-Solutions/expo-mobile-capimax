@@ -1,10 +1,12 @@
 // "Continue with Google" button.
-// - When Google is configured (app.json extra.google.*): uses expo-auth-session to get a Google
-//   idToken and sends it to the backend as `credential` via AuthContext.signInWithGoogle.
-// - When NOT configured (current state — OQ#10 deferred): renders a disabled button with a note.
+// - When configured (app.json extra.google.* — needs webClientId for audience + the platform's
+//   native client id): uses expo-auth-session's Google provider to get a Google ID token, then
+//   POSTs it to /api/auth/google/ as `credential` via AuthContext.signInWithGoogle → tokens → home.
+// - When NOT configured: renders a disabled button with a small note (no code change to activate).
 import React, { useEffect, useMemo } from "react";
-import { Pressable, Text, StyleSheet, View, Alert } from "react-native";
+import { Pressable, Text, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { useTheme } from "../context/ThemeContext";
@@ -12,6 +14,15 @@ import { useAuth } from "../context/AuthContext";
 import { isGoogleConfigured, googleClientIds } from "../auth/googleConfig";
 
 WebBrowser.maybeCompleteAuthSession();
+
+// Map a raw backend Google error to a friendly, localized message.
+function friendlyGoogleError(raw, t) {
+  const r = (raw || "").toLowerCase();
+  if (r.includes("credential is required")) return t("google.errRequired", "No Google credential received. Please try again.");
+  if (r.includes("invalid or unverified email")) return t("google.errInvalidEmail", "We could not verify your Google email. Try another account.");
+  // Wrong issuer / wrong audience / token used too early / etc. → generic
+  return t("google.errGeneric", "Google sign-in failed. Please try again.");
+}
 
 export default function GoogleSignInButton({ label, onError, onSuccess }) {
   const configured = isGoogleConfigured();
@@ -24,35 +35,38 @@ export default function GoogleSignInButton({ label, onError, onSuccess }) {
 }
 
 function ConfiguredGoogleButton({ label, onError, onSuccess }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const { signInWithGoogle } = useAuth();
   const styles = useMemo(() => makeStyles(theme), [theme]);
 
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest(googleClientIds);
+  // webClientId sets the ID-token audience the backend verifies against; the native client id
+  // (ios/android) drives the on-device OAuth flow + redirect scheme.
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    webClientId: googleClientIds.webClientId,
+    iosClientId: googleClientIds.iosClientId,
+    androidClientId: googleClientIds.androidClientId,
+  });
 
   useEffect(() => {
     (async () => {
       if (response?.type === "success") {
         const idToken = response.params?.id_token;
         if (!idToken) {
-          onError?.("No Google credential returned");
+          onError?.(t("google.errRequired", "No Google credential received. Please try again."));
           return;
         }
-        const result = await signInWithGoogle(idToken); // sent to /api/auth/google/ as `credential`
-        if (result.status === "success") onSuccess?.();
-        else onError?.(result.message);
+        const result = await signInWithGoogle(idToken); // → POST /api/auth/google/ { credential: idToken }
+        if (result.status === "success") onSuccess?.(result);
+        else onError?.(friendlyGoogleError(result.message, t));
       } else if (response?.type === "error") {
-        onError?.("Google sign-in was unsuccessful");
+        onError?.(t("google.errGeneric", "Google sign-in failed. Please try again."));
       }
     })();
-  }, [response]);
+  }, [response]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Pressable
-      style={[styles.btn, !request && styles.disabled]}
-      disabled={!request}
-      onPress={() => promptAsync()}
-    >
+    <Pressable style={[styles.btn, !request && styles.disabled]} disabled={!request} onPress={() => promptAsync()}>
       <View style={styles.row}>
         <Ionicons name="logo-google" size={18} color={theme.text} />
         <Text style={styles.text}>{label}</Text>
@@ -62,20 +76,19 @@ function ConfiguredGoogleButton({ label, onError, onSuccess }) {
 }
 
 function DisabledGoogleButton({ label }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = useMemo(() => makeStyles(theme), [theme]);
   return (
-    <Pressable
-      style={[styles.btn, styles.disabled]}
-      onPress={() =>
-        Alert.alert("Google sign-in", "Google sign-in will be enabled once the OAuth client IDs are configured.")
-      }
-    >
-      <View style={styles.row}>
-        <Ionicons name="logo-google" size={18} color={theme.textSecondary} />
-        <Text style={[styles.text, { color: theme.textSecondary }]}>{label}</Text>
-      </View>
-    </Pressable>
+    <View style={{ gap: 6 }}>
+      <Pressable style={[styles.btn, styles.disabled]} disabled>
+        <View style={styles.row}>
+          <Ionicons name="logo-google" size={18} color={theme.textSecondary} />
+          <Text style={[styles.text, { color: theme.textSecondary }]}>{label}</Text>
+        </View>
+      </Pressable>
+      <Text style={styles.note}>{t("google.inactiveNote", "Google sign-in will be available soon.")}</Text>
+    </View>
   );
 }
 
@@ -93,4 +106,5 @@ const makeStyles = (theme) =>
     row: { flexDirection: "row", alignItems: "center", gap: 8 },
     text: { color: theme.text, fontSize: 15, fontWeight: "600" },
     disabled: { opacity: 0.6 },
+    note: { color: theme.textMuted, fontSize: 12, textAlign: "center" },
   });

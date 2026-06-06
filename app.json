@@ -40,7 +40,12 @@
       "paypalClientId": "AZHEGDb90rDEPUTjBV5cssSfewEAQrwG8cMy0W6NUdj8hLk_XPedJ_hhsJ0m9AG07AfsbBMbkTKhtwyw",
       "paypalEnv": "live",
       "paypalCurrency": "USD",
-      "webOrigin": "https://capimaxinvestment.com"
+      "webOrigin": "https://capimaxinvestment.com",
+      "google": {
+        "webClientId": "2857014122-atnfes15aq8irqnldfnpqq9nr285phka.apps.googleusercontent.com",
+        "iosClientId": "",
+        "androidClientId": ""
+      }
     }
   }
 }

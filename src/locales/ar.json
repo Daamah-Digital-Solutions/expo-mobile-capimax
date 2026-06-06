@@ -947,5 +947,11 @@
     "faceId": "بصمة الوجه",
     "fingerprint": "بصمة الإصبع",
     "generic": "القياسات الحيوية"
+  },
+  "google": {
+    "inactiveNote": "سيتوفّر تسجيل الدخول عبر Google قريباً.",
+    "errRequired": "لم يتم استلام بيانات اعتماد Google. حاول مرة أخرى.",
+    "errInvalidEmail": "تعذّر التحقق من بريدك في Google. جرّب حساباً آخر.",
+    "errGeneric": "فشل تسجيل الدخول عبر Google. حاول مرة أخرى."
   }
 }

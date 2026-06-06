@@ -202,20 +202,24 @@ export function AuthProvider({ children }) {
     [applyTokens]
   );
 
-  // Google sign-in: send the Google idToken as `credential`; read data.data.access/refresh.
+  // Google sign-in (live): POST /api/auth/google/ { credential: <Google ID token JWT> }.
+  // Success 200 → data.data.{ access, refresh, email, username, name, is_new_user }. Store tokens
+  // like a normal login (applyTokens also fires the biometric enroll offer). Errors 400 → { error }.
   const signInWithGoogle = useCallback(
     async (credential) => {
       try {
         const res = await authService.google(credential);
         const inner = res?.data?.data;
         if (inner?.access) {
-          await applyTokens({ access: inner.access, refresh: inner.refresh });
-          return { status: "success" };
+          await applyTokens({ access: inner.access, refresh: inner.refresh, email: inner.email });
+          return { status: "success", isNewUser: !!inner.is_new_user };
         }
-        return { status: "error", message: "Invalid response from server" };
+        return { status: "error", message: res?.data?.error || res?.data?.message || "Invalid response from server" };
       } catch (err) {
         const apiErr = err?.response?.data;
-        return { status: "error", message: apiErr?.message || apiErr?.error || err.message };
+        // Backend uses the `error` field for the Google flow (e.g. "Wrong issuer.",
+        // "Invalid or unverified email", "Google credential is required").
+        return { status: "error", message: apiErr?.error || apiErr?.message || err.message };
       }
     },
     [applyTokens]
