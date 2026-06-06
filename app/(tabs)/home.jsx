@@ -102,20 +102,19 @@ export default function HomeTab() {
       },
     });
 
-  // ── Header (greeting + wallet/notifications) ─────────────────────────────────
+  // ── Header: centered logo on top; greeting (start) + wallet (end) below ──────
   const Header = (
     <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
-      <View style={{ flex: 1, gap: 4, alignItems: isRTL ? "flex-end" : "flex-start" }}>
-        <Logo height={14} />
-        <Text style={[type.h2, { color: theme.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{username || t("account.user", "User")}</Text>
+      <View style={styles.logoRow}>
+        <Logo height={22} />
       </View>
-      <View style={styles.headerIcons}>
+      <View style={styles.greetRow}>
+        <View style={{ flex: 1, gap: 1 }}>
+          <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left" }]}>{t("home.welcomeBack", "Welcome back")}</Text>
+          <Text style={[type.h2, { color: theme.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{username || t("account.user", "User")}</Text>
+        </View>
         <Pressable style={styles.iconBtn} onPress={() => router.push("/wallet")} hitSlop={6}>
           <Ionicons name="wallet-outline" size={22} color={theme.text} />
-        </Pressable>
-        <Pressable style={styles.iconBtn} hitSlop={6}>
-          <Ionicons name="notifications-outline" size={22} color={theme.text} />
-          <View style={styles.notifDot} />
         </Pressable>
       </View>
     </View>
@@ -255,16 +254,18 @@ function SectionHead({ title, onSeeAll, t, theme, type, isRTL, styles, inset }) 
 const makeStyles = (theme, radii, isRTL) =>
   StyleSheet.create({
     header: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      alignItems: "center",
-      justifyContent: "space-between",
       paddingHorizontal: 20,
       paddingBottom: 10,
       gap: 12,
     },
-    headerIcons: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6 },
+    logoRow: { alignItems: "center", paddingBottom: 2 },
+    greetRow: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+    },
     iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: theme.surfaceAlt },
-    notifDot: { position: "absolute", top: 9, right: 10, width: 7, height: 7, borderRadius: 4, backgroundColor: theme.primary },
 
     muLabel: { color: theme.textMuted, textTransform: "uppercase", letterSpacing: 0.5, textAlign: isRTL ? "right" : "left" },
     pvTop: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
