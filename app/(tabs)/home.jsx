@@ -106,7 +106,7 @@ export default function HomeTab() {
   const Header = (
     <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
       <View style={styles.logoRow}>
-        <Logo height={22} />
+        <Logo height={28} />
       </View>
       <View style={styles.greetRow}>
         <View style={{ flex: 1, gap: 1 }}>

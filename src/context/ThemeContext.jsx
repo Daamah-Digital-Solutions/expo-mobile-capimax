@@ -16,7 +16,10 @@ export const THEME_MODES = ["auto", "light", "dark"];
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [mode, setModeState] = useState("auto");
+  // Default mode is "dark" on a fresh install (before any saved choice). The load effect below
+  // overrides this with the persisted preference if the user has picked auto/light/dark in Settings,
+  // and rendering is gated on isReady so the default never flashes over a saved choice.
+  const [mode, setModeState] = useState("dark");
   const [systemScheme, setSystemScheme] = useState(Appearance.getColorScheme() || "light");
   const [isReady, setIsReady] = useState(false);
 
