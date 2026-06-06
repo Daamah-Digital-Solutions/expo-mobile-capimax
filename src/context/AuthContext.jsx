@@ -209,6 +209,8 @@ export function AuthProvider({ children }) {
     async (credential) => {
       try {
         const res = await authService.google(credential);
+        // TEMPORARY DEBUG: log the backend response shape.
+        console.log("[auth/google][DEBUG] status:", res?.status, "| body:", JSON.stringify(res?.data));
         const inner = res?.data?.data;
         if (inner?.access) {
           await applyTokens({ access: inner.access, refresh: inner.refresh, email: inner.email });
@@ -217,6 +219,8 @@ export function AuthProvider({ children }) {
         return { status: "error", message: res?.data?.error || res?.data?.message || "Invalid response from server" };
       } catch (err) {
         const apiErr = err?.response?.data;
+        // TEMPORARY DEBUG: log the rejection status + body.
+        console.log("[auth/google][DEBUG] rejected status:", err?.response?.status, "| body:", JSON.stringify(apiErr), "| err:", err?.message);
         // Backend uses the `error` field for the Google flow (e.g. "Wrong issuer.",
         // "Invalid or unverified email", "Google credential is required").
         return { status: "error", message: apiErr?.error || apiErr?.message || err.message };

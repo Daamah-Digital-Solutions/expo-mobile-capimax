@@ -77,22 +77,40 @@ function NativeGoogleButton({ label, onError, onSuccess }) {
       }
       if (!idToken) {
         setBusy(false);
-        onError?.(t("google.errRequired", "No Google credential received. Please try again."));
+        console.log("[GoogleSignIn][DEBUG] native signIn returned NO idToken; res=", JSON.stringify(res));
+        onError?.("DEBUG: no idToken from Google");
         return;
       }
+
+      // --- TEMPORARY DEBUG: decode the id_token to verify audience == webClientId ---
+      try {
+        const payloadJson = global.atob(idToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"));
+        const p = JSON.parse(payloadJson);
+        const audOk = p.aud === googleClientIds.webClientId;
+        console.log("[GoogleSignIn][DEBUG] idToken aud =", p.aud);
+        console.log("[GoogleSignIn][DEBUG] expected webClientId =", googleClientIds.webClientId);
+        console.log("[GoogleSignIn][DEBUG] aud == webClientId ?", audOk, "| iss =", p.iss, "| email =", p.email, "| email_verified =", p.email_verified);
+      } catch (decErr) {
+        console.log("[GoogleSignIn][DEBUG] idToken decode failed:", decErr?.message);
+      }
+
       const result = await signInWithGoogle(idToken); // → POST /api/auth/google/ { credential: idToken }
       setBusy(false);
-      if (result.status === "success") onSuccess?.(result);
-      else onError?.(friendlyGoogleError(result.message, t));
+      if (result.status === "success") {
+        onSuccess?.(result);
+      } else {
+        // TEMPORARY DEBUG: surface the RAW backend error instead of the friendly message.
+        console.log("[GoogleSignIn][DEBUG] backend rejected → message:", result.message);
+        onError?.("DEBUG backend: " + (result.message || "unknown"));
+      }
     } catch (e) {
       setBusy(false);
       const code = e?.code;
+      // TEMPORARY DEBUG: log the full native error and surface the real code/message.
+      console.log("[GoogleSignIn][DEBUG] native error → code:", String(code), "| message:", e?.message);
+      try { console.log("[GoogleSignIn][DEBUG] native error full:", JSON.stringify(e)); } catch {}
       if (code === statusCodes.SIGN_IN_CANCELLED || code === statusCodes.IN_PROGRESS) return;
-      if (code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        onError?.(t("google.errPlayServices", "Google Play services are unavailable or need an update."));
-        return;
-      }
-      onError?.(t("google.errGeneric", "Google sign-in failed. Please try again."));
+      onError?.("DEBUG native: code=" + String(code) + " | " + (e?.message || "(no message)"));
     }
   };
 
