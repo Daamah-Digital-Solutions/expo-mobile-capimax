@@ -40,7 +40,7 @@ export default function Onboarding() {
   const { theme, radii, type, spacing } = useTheme();
   const { isRTL } = useLanguage();
   const { width } = useWindowDimensions();
-  const styles = useMemo(() => makeStyles(theme, radii, isRTL), [theme, radii, isRTL]);
+  const styles = useMemo(() => makeStyles(theme, radii, isRTL, spacing), [theme, radii, isRTL, spacing]);
 
   const listRef = useRef(null);
   const [index, setIndex] = useState(0);
@@ -63,9 +63,9 @@ export default function Onboarding() {
   return (
     <Screen edges={["top", "bottom"]}>
       <View style={styles.brandRow}>
-        {/* Prominent brand mark at the top. Sized by width so it fits any screen and reads clearly
-            in both themes (navy is a wide banner, white is compact — width keeps both visible). */}
-        <Logo width={Math.min(width * 0.72, 270)} />
+        {/* Refined brand mark at the top (~50% screen width, capped). Both themed variants share
+            the same aspect ratio, so light (navy) and dark (white) render identically sized. */}
+        <Logo width={Math.min(width * 0.5, 200)} />
       </View>
       <View style={{ flex: 1 }}>
         <FlatList
@@ -125,12 +125,13 @@ function Slide({ item, active, width, t, theme, type, spacing, styles, isRTL }) 
 
   return (
     <View style={[styles.slide, { width, paddingHorizontal: spacing.xl }]}>
-      {/* Soft brand-tinted background circle accent */}
-      <View style={styles.accentCircle} pointerEvents="none" />
-
-      <Animated.View style={[styles.iconBox, iconStyle]}>
-        <Ionicons name={item.icon} size={68} color={theme.primary} />
-      </Animated.View>
+      {/* Icon over a soft brand-tinted circle accent (circle centered behind the icon). */}
+      <View style={styles.iconWrap}>
+        <View style={styles.accentCircle} pointerEvents="none" />
+        <Animated.View style={[styles.iconBox, iconStyle]}>
+          <Ionicons name={item.icon} size={64} color={theme.primary} />
+        </Animated.View>
+      </View>
 
       <Text style={[type.h2, styles.title]}>{t(`onboarding.title${item.n}`)}</Text>
       <Text style={[type.body, styles.desc]}>{t(`onboarding.desc${item.n}`)}</Text>
@@ -148,38 +149,55 @@ function Dot({ active, theme, styles }) {
   return <Animated.View style={[styles.dot, active ? styles.dotActive : styles.dotIdle, style]} />;
 }
 
-const makeStyles = (theme, radii, isRTL) =>
+const makeStyles = (theme, radii, isRTL, spacing) =>
   StyleSheet.create({
-    brandRow: { alignItems: "center", paddingTop: 14, paddingBottom: 8 },
-    slide: { flex: 1, alignItems: "center", justifyContent: "center", gap: 18 },
+    // Top: comfortable inset → refined logo → divider of breathing space before the slide.
+    brandRow: { alignItems: "center", paddingTop: spacing.lg, paddingBottom: spacing.xs },
+
+    // Slide content is centered in the flex area, so the breathing space above the icon mirrors
+    // the space below the description → balanced, intentional rhythm.
+    slide: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.xl },
+
+    // Icon + accent circle live in a fixed square so the glow is perfectly centered behind the icon.
+    iconWrap: {
+      width: 220,
+      height: 220,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: spacing["2xl"],
+    },
     accentCircle: {
       position: "absolute",
-      top: "14%",
-      width: 320,
-      height: 320,
-      borderRadius: 160,
+      width: 220,
+      height: 220,
+      borderRadius: 110,
       backgroundColor: theme.primary + "14",
     },
     iconBox: {
-      width: 132,
-      height: 132,
-      borderRadius: 40,
+      width: 124,
+      height: 124,
+      borderRadius: 36,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: theme.primary + "1F",
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: theme.primary + "40",
-      marginBottom: 14,
     },
-    title: { color: theme.text, fontWeight: "600", textAlign: "center", paddingHorizontal: 8 },
-    desc: { color: theme.textSecondary, textAlign: "center", lineHeight: 22, paddingHorizontal: 8 },
+    title: { color: theme.text, fontWeight: "600", textAlign: "center", paddingHorizontal: spacing.md },
+    desc: {
+      color: theme.textSecondary,
+      textAlign: "center",
+      lineHeight: 22,
+      paddingHorizontal: spacing.lg,
+      marginTop: spacing.sm,
+    },
 
     dotsRow: {
       flexDirection: isRTL ? "row-reverse" : "row",
       alignItems: "center",
       justifyContent: "center",
-      gap: 8,
-      paddingVertical: 14,
+      gap: spacing.sm,
+      paddingVertical: spacing.lg,
     },
     dot: { height: 8, borderRadius: 4 },
     dotIdle: { backgroundColor: theme.borderStrong },
@@ -189,8 +207,8 @@ const makeStyles = (theme, radii, isRTL) =>
       flexDirection: isRTL ? "row-reverse" : "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingHorizontal: 20,
-      paddingTop: 6,
-      paddingBottom: 8,
+      paddingHorizontal: spacing.xl,
+      paddingTop: spacing.xs,
+      paddingBottom: spacing.md,
     },
   });

@@ -2,8 +2,7 @@
 // mode (crisp vector via react-native-svg, never stretched). Size with `height` OR `width`; the
 // other dimension follows the active variant's own aspect ratio. Default height 26.
 //
-// NOTE: the two source assets have different aspect ratios (navy ≈ 12.2:1, white ≈ 3.8:1), so at a
-// given height the light and dark logos render at different widths. Size placements deliberately.
+// Both variants share the same aspect ratio (~3.82:1), so light/dark render identically sized.
 import React from "react";
 import { useTheme } from "../context/ThemeContext";
 import LogoNavy, { ASPECT as NAVY_AR } from "./logo/LogoNavy";
