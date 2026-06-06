@@ -34,16 +34,16 @@
   - `GET  /api/opportunities/`
   - `GET  /api/opportunities/{id}/`
   - `GET  /api/categories/`
-  - *(In practice also public but NOT in the regex list: `POST /api/auth/google/`, `POST /api/forgot-password/`, `POST /api/reset-password/`, `POST /api/token/refresh/`. See Open Questions #1.)*
+  - *(In practice also public but NOT in the regex list: `POST /api/auth/google/`, `POST /api/forgot-password/`, `POST /api/reset-password/`, `POST /api/user/token/refresh/`. See Open Questions #1.)*
 - All other endpoints attach `Authorization: Bearer <access>`.
 - **Response interceptor:** on `401`/`403` for a **non-public** endpoint → clear both tokens and redirect to login. (Web uses `window.location.href='/auth/login'`; mobile must do this via `AuthContext` → `router.replace('/(auth)/login')`.)
-- **Token refresh** exists via `POST /api/token/refresh/` (web `ProtectedRoute.jsx` decodes the access JWT `exp` and refreshes when expired). Mobile should replicate this before forcing logout.
+- **Token refresh** exists via `POST /api/user/token/refresh/` (web `ProtectedRoute.jsx` decodes the access JWT `exp` and refreshes when expired). Mobile should replicate this before forcing logout.
 
 > ⚠️ **Token envelope is inconsistent across endpoints** (verified in code):
 > - Login `POST /api/user/token/` → tokens at **`response.data.data.access` / `.refresh`** (and `response.data.data.is_verified`, `.email`).
 > - Google `POST /api/auth/google/` → **`response.data.data.access` / `.refresh`**.
 > - Verify-email `POST /api/verify-email/` → **`response.data.token`** (and optional `response.data.refresh`).
-> - Refresh `POST /api/token/refresh/` → **`response.data.access`**.
+> - Refresh `POST /api/user/token/refresh/` → **`response.data.access`**.
 
 ---
 
@@ -129,9 +129,10 @@ All requests also send `Accept-Language`.
 - **Request:** `{ token, new_password }` — `token` comes from the reset link URL param.
 - **Response read:** `response.data.message`, `response.data.errors.password` (field errors).
 
-#### 🔓 `POST /api/token/refresh/`
+#### 🔓 `POST /api/user/token/refresh/`
 - **Request:** `{ refresh }`.
 - **Response read:** `response.data.access`. (Web stores it back as the new access token.)
+- **RECONCILED 2026-06-06 (live probe):** the real endpoint is **`/api/user/token/refresh/`** (nested under `user/token`, consistent with login `/api/user/token/`). The previously-documented `/api/token/refresh/` returns **404** — using it silently broke refresh and forced logout. Mobile `client.js` now calls `/api/user/token/refresh/`.
 
 ### 2.2 Opportunities & categories
 
@@ -331,7 +332,7 @@ All requests also send `Accept-Language`.
    - Read intended route (`redirectUrl`, default `/funds` → mobile `/(tabs)/funds`), then clear it, and navigate there (replace).
 4. Catch: if `error.response.data.error === "Account not verified"` → go to verify-email.
 - **Client-side password rules (register & reset):** ≥8 chars, ≥1 uppercase, ≥1 digit, ≥1 special char.
-- **Token refresh (ProtectedRoute):** decode access JWT `exp`; if `exp < now`, call `POST /api/token/refresh/` with `{ refresh }`; on 200 store new `access`; on failure → unauthorized → login.
+- **Token refresh (ProtectedRoute):** decode access JWT `exp`; if `exp < now`, call `POST /api/user/token/refresh/` with `{ refresh }`; on 200 store new `access`; on failure → unauthorized → login.
 - **"Return to intended route":** web sets `localStorage.redirectUrl = currentPath` before bouncing to login (e.g. when an unauthenticated user taps Invest). Mobile keeps the intended route in state and returns to it after login (CLAUDE.md §6).
 
 ### Flow B — Register → Verify
@@ -570,7 +571,7 @@ hairline border (dark).
 
 > **Owner-reviewed 2026-06-03.** Resolutions below are binding decisions for the mobile build.
 
-1. ✅ **RESOLVED.** Treat `POST /api/auth/google/`, `/api/forgot-password/`, `/api/reset-password/`, `/api/token/refresh/` as **public** (no `Authorization`). A 401/403 on any of them must **not** force logout. (Mobile client public-endpoint list includes these in addition to the web's regex list.)
+1. ✅ **RESOLVED.** Treat `POST /api/auth/google/`, `/api/forgot-password/`, `/api/reset-password/`, `/api/user/token/refresh/` as **public** (no `Authorization`). A 401/403 on any of them must **not** force logout. (Mobile client public-endpoint list includes these in addition to the web's regex list.)
 2. ✅ **RESOLVED (live).** `POST /api/change-password/` (authed) `{ current_password, new_password, confirm_password }` — see §2.6. Wired in `userService.changePassword` + `app/change-password.jsx` (`ENDPOINT_READY=true`). `new_password` errors may be a string OR an array (render all); on success the old refresh is blacklisted → app signs out and routes to login.
 3. ✅ **RESOLVED.** Use **local fee math** to match web: `fee = base * pct / 100`, `total = base + fee`; `pct` from `GET /api/fee-percentage/` (default `2.5`). Do **not** call `calculate-fee` / `validate-fee`.
 4. ✅ **RESOLVED.** Handle the per-endpoint token envelope exactly as documented: login & Google → `response.data.data.access`/`.refresh`; verify-email → `response.data.token`; refresh → `response.data.access`.

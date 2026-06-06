@@ -40,7 +40,7 @@ const PUBLIC_ENDPOINTS = [
   /^\/api\/auth\/google\/?$/,
   /^\/api\/forgot-password\/?$/,
   /^\/api\/reset-password\/?$/,
-  /^\/api\/token\/refresh\/?$/,
+  /^\/api\/user\/token\/refresh\/?$/,
 ];
 
 export function isPublicEndpoint(url = "") {
@@ -61,7 +61,7 @@ export async function refreshAccessToken(refresh) {
   if (!token) return null;
   try {
     const res = await axios.post(
-      `${baseURL}api/token/refresh/`,
+      `${baseURL}api/user/token/refresh/`, // backend endpoint (reconciled 2026-06-06: /api/token/refresh/ is 404)
       { refresh: token },
       { headers: { "Content-Type": "application/json", "Accept-Language": i18n.language || "en" } }
     );
