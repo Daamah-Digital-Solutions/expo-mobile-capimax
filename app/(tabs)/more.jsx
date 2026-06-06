@@ -212,7 +212,7 @@ export default function MoreTab() {
           <Card style={styles.aboutCard}>
             <Ionicons name="information-circle-outline" size={18} color={theme.textMuted} />
             <Text style={[type.caption, { color: theme.textMuted, flex: 1, textAlign: isRTL ? "right" : "left" }]}>
-              {Constants.expoConfig?.name || "Capimax"} · {t("more.version", "Version")} {version}
+              {Constants.expoConfig?.name || "Capimax Assets"} · {t("more.version", "Version")} {version}
             </Text>
           </Card>
         </FadeInView>
