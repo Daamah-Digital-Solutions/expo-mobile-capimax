@@ -185,9 +185,9 @@ export default function OpportunityDetail() {
   const description = htmlToText(o.description);
 
   const verifications = [
-    o.cim_verification?.enabled && { key: "v", title: t("opportunity.cimVerification", "CIM Verification"), ...o.cim_verification },
-    o.cim_rating?.enabled && { key: "r", title: t("opportunity.cimRating", "CIM Rating"), ...o.cim_rating },
-    o.hcc_insurance?.enabled && { key: "h", title: t("opportunity.hccInsurance", "HCC Insurance"), ...o.hcc_insurance },
+    o.cim_verification?.enabled && { key: "v", title: t("opportunity.cimVerification", "CIM Verification"), linkLabel: t("opportunity.goToVerificationLink", "Verify externally"), codeLabel: t("opportunity.verificationCode", "Verification Code"), ...o.cim_verification },
+    o.cim_rating?.enabled && { key: "r", title: t("opportunity.cimRating", "CIM Rating"), linkLabel: t("opportunity.goToRatingLink", "Check the rating"), codeLabel: t("opportunity.ratingCode", "Rating Code"), ...o.cim_rating },
+    o.hcc_insurance?.enabled && { key: "h", title: t("opportunity.hccInsurance", "HCC Insurance"), linkLabel: t("opportunity.goToInsuranceLink", "Verify the insurance"), codeLabel: t("opportunity.insuranceCode", "Insurance Code"), ...o.hcc_insurance },
   ].filter(Boolean);
 
   const docs = DOC_FIELDS.filter(([field]) => o[field]).map(([field, key]) => ({ key, label: t(`opportunity.${key}`), url: o[field] }));
@@ -319,9 +319,9 @@ export default function OpportunityDetail() {
                     <Text style={[type.label, { color: theme.text }]}>{v.title}</Text>
                   </View>
                   {v.display_text ? <Text style={[type.caption, { color: theme.textSecondary }]}>{v.display_text}</Text> : null}
-                  {v.code ? <Text style={[type.caption, { color: theme.textMuted }]}>{v.code}</Text> : null}
+                  {v.code ? <Text style={[type.caption, { color: theme.textMuted }]}>{v.codeLabel}: {v.code}</Text> : null}
                   {v.link ? (
-                    <AppButton title={t("common.download", "Preview")} variant="secondary" fullWidth={false} icon="open-outline" onPress={() => Linking.openURL(v.link)} />
+                    <AppButton title={v.linkLabel} variant="secondary" fullWidth={false} icon="open-outline" onPress={() => Linking.openURL(v.link)} />
                   ) : null}
                 </Card>
               ))}
