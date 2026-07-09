@@ -181,9 +181,9 @@
     "verifyYourself": "يمكنك التحقق من هذا بنفسك",
     "checkRatingYourself": "يمكنك التحقق من التقييم بنفسك",
     "checkInsuranceYourself": "يمكنك التحقق من التأمين بنفسك",
-    "goToVerificationLink": "اذهب إلى رابط التحقق",
-    "goToRatingLink": "اذهب إلى رابط التقييم",
-    "goToInsuranceLink": "اذهب إلى رابط التأمين",
+    "goToVerificationLink": "تحقّق خارجياً",
+    "goToRatingLink": "تحقّق من التقييم",
+    "goToInsuranceLink": "تحقّق من التأمين",
     "verificationCode": "رمز التحقق",
     "ratingCode": "رمز التقييم",
     "insuranceCode": "رمز التأمين",
@@ -324,12 +324,10 @@
     "name": "الاسم",
     "message": "الرسالة",
     "sendMessage": "إرسال الرسالة",
-    "uae": "الإمارات العربية المتحدة",
-    "uaeAddress": "أبو ظبي / جزيرة الريم / برج أداكس",
     "uk": "المملكة المتحدة",
-    "ukAddress": "128 شارع المدينة، لندن، EC1V 2NX\n167-169 شارع جريت بورتلاند، الطابق الخامس، لندن، W1W 5PF",
+    "ukAddress": "128 City Road, London, EC1V 2NX\n167-169 Great Portland Street, 5th Floor, London, W1W 5PF",
     "usa": "الولايات المتحدة",
-    "usaAddress": "418 برودواي، جناح R، ألباني، نيويورك 12207\n30 شارع جولد، جناح R، شيريدان، وايومنغ 82801"
+    "usaAddress": "418 Broadway, Ste R, Albany, NY 12207\n30 N Gould St Ste R, Sheridan, WY 82801"
   },
   "faq": {
     "title": "الأسئلة الشائعة",

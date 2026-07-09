@@ -47,10 +47,10 @@ export default function ContactScreen() {
     return () => { active = false; };
   }, []);
 
+  // USA + UK only (UAE removed per owner). Addresses are the real ones from the web.
   const BRANCHES = [
-    { country: t("contact.uae", "UAE"), address: t("contact.uaeAddress", ""), phones: ["0097126289388", "0097126220546", "0097126271528", "0097126226527", "0097126214210"] },
-    { country: t("contact.uk", "United Kingdom"), address: t("contact.ukAddress", ""), phones: ["00447441358588"] },
     { country: t("contact.usa", "United States"), address: t("contact.usaAddress", ""), phones: ["0012342795751"] },
+    { country: t("contact.uk", "United Kingdom"), address: t("contact.ukAddress", ""), phones: ["00447441358588"] },
   ];
 
   const set = (key) => (value) => setForm((p) => ({ ...p, [key]: value }));
