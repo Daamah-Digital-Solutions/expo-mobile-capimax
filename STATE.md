@@ -62,6 +62,36 @@ Detailed per-phase "Ready prompts" + Definitions of Done are in `BUILD_PLAN.md`.
 
 ---
 
+### 1d) CLIENT HOMEPAGE REVAMP — IN PROGRESS (started 2026-06-06)
+Client MD note requested homepage + More/Wallet/Opportunities changes. **Owner decisions:** backend-blocked
+features → show **"coming soon"** (don't invent endpoints); **start Phase A now**; **About Us copy written by
+us** (owner reviews). Full analysis/plan was delivered in chat.
+
+**Backend feasibility — CONFIRMED (live probe + web scan):**
+- ❌ **Crypto withdrawal** — NO endpoint. `POST /api/wallet/withdraw/` is **bank-only** (no method/address field).
+- ❌ **Wallet deposit / top-up** — NO endpoint (the web itself has only a `console.log` stub). Funds enter only via investment purchase.
+- ❌ **Pronova (PRN) as a payment method** — NOT a payment method (partner-platform link only); no endpoint, no 5% bonus logic.
+- These 3 are **Phase C (need backend)** → surfaced as "coming soon" per owner.
+
+**Real data gathered (zero-mock):**
+- Platforms (3 real, in `src/constants/platforms.js`): Capimax RT `capimaxrt.tech` · Nova DeFi `novadf.com` · Pronova Crypto `pronovacrypto.tech`. Pronova ecosystem URL = `pronovacrypto.tech`. Client wants **5** (adds **Capimax BRX** + **Capimax PropShare** — NOT in web → need owner: name/url/desc/logo).
+- Contact (real, now live): USA `418 Broadway, Ste R, Albany, NY 12207` + `30 N Gould St Ste R, Sheridan, WY 82801` (ph `0012342795751`); UK `128 City Road, London, EC1V 2NX` + `167-169 Great Portland Street, 5th Floor, London, W1W 5PF` (ph `00447441358588`). Emails `info@capimaxinvestment.com` / `contact@capimaxinvestment.com`. **UAE removed.**
+- Verification/Partners: **no institutional CIN/links exist in web** → need owner data. `src/constants/accreditations.js` holds CIM/HCC/Assurax with `link/code = null` → UI shows "coming soon" until filled.
+- No Live Chat / WhatsApp in web → need WhatsApp number + Live Chat provider decision.
+
+**Phase A — DONE (pushed):** `c943dae` home redesign (8 value tiles + Our Platforms + Access Pronova CTA + Featured moved up) · `84ef8bd` About Us (`app/about.jsx`) + Verification (`app/verification.jsx`) pages + More rows · contact USA/UK + opportunity external-verify link relabel (commits up to `ea78c96`).
+
+**Phase A — REMAINING (next up):**
+- More: **WhatsApp + Live Chat** rows as "coming soon" (Task #4c).
+- **Wallet Deposit** button (bank/crypto/other) + **Crypto withdraw** option + **Pronova payment** in the invest/market method lists — all as **"coming soon" UI only** (Task #5; NO endpoints).
+
+**Phase B — BLOCKED ON OWNER DATA:** Partners section (logos CIM/HCC/Assurax) · Capimax BRX + PropShare platforms · real Verification codes+links (fill `accreditations.js`) · WhatsApp number + Live Chat provider · About Us copy review.
+**Phase C — BLOCKED ON BACKEND:** Deposit, Crypto withdraw, Pronova payment endpoints.
+
+Conventions kept: zero-mock, no invented endpoints, brand "Capimax", both themes + RTL, `expo export` + `expo-doctor 18/18` gate, commit per logical step.
+
+---
+
 ## 2) What's built (file map)
 
 ```
