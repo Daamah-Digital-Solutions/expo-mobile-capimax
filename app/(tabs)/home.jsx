@@ -76,9 +76,11 @@ export default function HomeTab() {
     setPortfolio(port.status === "fulfilled" && port.value?.data?.success ? port.value.data.portfolio_data : null);
     setFeatured(opps.status === "fulfilled" ? (opps.value?.data?.results || []).slice(0, 6) : []);
     setListings(list.status === "fulfilled" ? (list.value?.data?.listings || []).slice(0, 5) : []);
+    const detail = (r) => (r?.response?.status ? `HTTP ${r.response.status}` : (r?.message || "network error"));
     setErrs({
       summary: sum.status === "rejected",
-      featured: opps.status === "rejected",
+      // string detail (e.g. "HTTP 500" / "timeout") when rejected, else false — surfaced for diagnosis.
+      featured: opps.status === "rejected" ? detail(opps.reason) : false,
       listings: list.status === "rejected",
     });
   }, []);
@@ -179,7 +181,14 @@ export default function HomeTab() {
               <Skeleton width={240} height={210} radius={radii.card} />
             </View>
           ) : errs.featured ? (
-            <View style={{ paddingHorizontal: spacing.xl }}><Banner type="error" message={t("home.featuredError", "Couldn't load featured assets.")} /></View>
+            <View style={{ paddingHorizontal: spacing.xl }}>
+              <Banner
+                type="error"
+                message={t("home.featuredError", "Couldn't load featured assets.") + (typeof errs.featured === "string" ? ` (${errs.featured})` : "")}
+                actionLabel={t("common.retry", "Retry")}
+                onAction={onRefresh}
+              />
+            </View>
           ) : featured.length ? (
             <FlatList
               data={featured}

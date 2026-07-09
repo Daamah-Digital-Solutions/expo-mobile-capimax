@@ -24,6 +24,7 @@ if (!baseURL) {
 
 const api = axios.create({
   baseURL,
+  timeout: 30000, // don't let a stalled request hang a whole screen (Promise.allSettled waits for all)
   headers: { "Content-Type": "application/json" },
 });
 
