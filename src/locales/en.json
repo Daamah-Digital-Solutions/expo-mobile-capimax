@@ -8,6 +8,13 @@
       "pronovacrypto": "Pronova (PRN) — a next-generation cryptocurrency for the Capimax ecosystem.",
       "capimaxbrx": "A leading platform in digital real-estate investment, aiming to enable everyone to invest in high-value properties through tokenization and blockchain technology. Capimax BRX is a registered digital technology platform that operates as a technological infrastructure for real-estate asset tokenization and provides digital tools for data management and display; it does not engage in any financial, investment, or brokerage activities. All offerings are conducted through qualified independent entities and are subject to Regulation D and Regulation S exemptions in accordance with applicable laws, with full compliance with governance and regulatory standards.",
       "capimaxpropshare": "Capimax PropShare is a technology-driven digital platform designed to enable fractional real-estate investment through structured, transparent, and secure digital solutions. It connects investors with carefully selected real-estate opportunities while giving property owners and developers efficient access to capital, operating as a technology and marketplace platform that offers the digital tools, data, and infrastructure to facilitate access to real-estate opportunities."
+    },
+    "tags": {
+      "capimaxrt": "Tokenization",
+      "novadf": "DeFi",
+      "pronovacrypto": "Crypto",
+      "capimaxbrx": "Real Estate",
+      "capimaxpropshare": "PropShare"
     }
   },
   "pwa": {
@@ -83,7 +90,9 @@
     "accessPronova": "Access Pronova",
     "accessPronovaDesc": "Explore the Pronova ecosystem",
     "partnersTitle": "Strategic Partners",
-    "partnersDesc": "Backed by leading financial, insurance, and verification institutions."
+    "partnersDesc": "Backed by leading financial, insurance, and verification institutions.",
+    "whySubtitle": "Eight reasons investors choose the Capimax ecosystem.",
+    "featuredBadge": "Featured"
   },
   "common": {
     "loading": "Loading...",

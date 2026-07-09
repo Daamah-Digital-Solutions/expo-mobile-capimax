@@ -199,22 +199,33 @@ export default function HomeTab() {
         {/* ── Why Capimax → 8 competitive-advantage tiles (Nova integration highlighted) ── */}
         <View style={{ paddingHorizontal: spacing.xl, gap: 12 }}>
           <SectionHead title={t("home.whyTitle", "Why Capimax")} t={t} theme={theme} type={type} isRTL={isRTL} styles={styles} inset />
+          <Text style={styles.secSub}>{t("home.whySubtitle", "Eight reasons investors choose the Capimax ecosystem.")}</Text>
           <View style={styles.grid}>
             {VALUE_PROPS.map((vp, i) => {
               const hi = vp.key === "nova";
               return (
                 <FadeInView key={vp.key} index={Math.min(i, 7)} style={styles.gridCellWrap}>
-                  <View style={[styles.vpCard, hi && styles.vpCardHi]}>
-                    <View style={[styles.vpIcon, hi && styles.vpIconHi]}>
-                      <Ionicons name={vp.icon} size={20} color={hi ? theme.onPrimary : theme.primary} />
-                    </View>
-                    <Text style={[type.caption, { color: theme.text, fontWeight: "700", textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>
-                      {t(`home.vp_${vp.key}`)}
-                    </Text>
-                    <Text style={[type.micro, { color: theme.textMuted, textAlign: isRTL ? "right" : "left", lineHeight: 15 }]} numberOfLines={3}>
-                      {t(`home.vpd_${vp.key}`)}
-                    </Text>
-                  </View>
+                  <LinearGradient
+                    colors={hi ? [theme.primary + "2E", theme.surface] : [theme.surfaceAlt, theme.card]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0.4, y: 1 }}
+                    style={[styles.vpCard, hi && styles.vpCardHi]}
+                  >
+                    {hi ? (
+                      <LinearGradient colors={[theme.primaryLight, theme.primaryDark]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.vpIconHi}>
+                        <Ionicons name={vp.icon} size={22} color={theme.onPrimary} />
+                      </LinearGradient>
+                    ) : (
+                      <View style={styles.vpIcon}>
+                        <Ionicons name={vp.icon} size={22} color={theme.primary} />
+                      </View>
+                    )}
+                    <Text style={styles.vpTitle} numberOfLines={2}>{t(`home.vp_${vp.key}`)}</Text>
+                    <Text style={styles.vpDesc} numberOfLines={3}>{t(`home.vpd_${vp.key}`)}</Text>
+                    {hi ? (
+                      <View style={styles.vpBadge}><Text style={styles.vpBadgeText}>{t("home.featuredBadge", "Featured")}</Text></View>
+                    ) : null}
+                  </LinearGradient>
                 </FadeInView>
               );
             })}
@@ -232,17 +243,20 @@ export default function HomeTab() {
             contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: 12 }}
             renderItem={({ item: p }) => (
               <Pressable onPress={() => openUrl(p.url)}>
-                <LinearGradient colors={["#1a2942", "#0f1830"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.platCard, { borderColor: p.accent + "55" }]}>
-                  <View style={[styles.platAccent, { backgroundColor: p.accent }]} />
-                  <View style={styles.platLogoBox}>
-                    <PlatformLogo logo={p.logo} boxW={166} boxH={48} />
-                  </View>
-                  <View style={styles.platFooter}>
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text style={styles.platName} numberOfLines={1}>{p.name}</Text>
-                      <Text style={[styles.platUrl, { color: p.accent }]} numberOfLines={1}>{p.url.replace(/^https?:\/\//, "")}</Text>
+                <LinearGradient colors={["#1c2a48", "#0e1626"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.platCard, { borderColor: p.accent + "55" }]}>
+                  <LinearGradient colors={[p.accent + "33", "transparent"]} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.platGlow} pointerEvents="none" />
+                  <View style={styles.platTagRow}>
+                    <View style={[styles.platTag, { backgroundColor: p.accent + "1F", borderColor: p.accent + "44" }]}>
+                      <Text style={[styles.platTagText, { color: p.accent }]} numberOfLines={1}>{t(`platforms.tags.${p.key}`)}</Text>
                     </View>
-                    <Ionicons name="open-outline" size={16} color="rgba(255,255,255,0.55)" />
+                  </View>
+                  <View style={styles.platLogoBox}>
+                    <PlatformLogo logo={p.logo} boxW={162} boxH={46} />
+                  </View>
+                  <Text style={styles.platName} numberOfLines={1}>{p.name}</Text>
+                  <View style={styles.platVisitRow}>
+                    <Text style={[styles.platUrl, { color: p.accent }]} numberOfLines={1}>{p.url.replace(/^https?:\/\//, "")}</Text>
+                    <Ionicons name="open-outline" size={13} color={p.accent} />
                   </View>
                 </LinearGradient>
               </Pressable>
@@ -355,42 +369,51 @@ const makeStyles = (theme, radii, isRTL) =>
 
     grid: { flexDirection: "row", flexWrap: "wrap", rowGap: 12, justifyContent: "space-between" },
     gridCellWrap: { width: "48%" },
+    secSub: { color: theme.textMuted, fontSize: 12.5, lineHeight: 18, marginTop: -4, textAlign: isRTL ? "right" : "left" },
     vpCard: {
       flex: 1,
+      overflow: "hidden",
       alignItems: isRTL ? "flex-end" : "flex-start",
-      gap: 8,
-      padding: 13,
-      borderRadius: 16,
-      backgroundColor: theme.surfaceAlt,
-      borderWidth: StyleSheet.hairlineWidth,
+      gap: 11,
+      padding: 15,
+      borderRadius: 20,
+      borderWidth: 1,
       borderColor: theme.border,
-      minHeight: 122,
+      minHeight: 150,
     },
-    vpCardHi: { backgroundColor: theme.primary + "18", borderColor: theme.primary + "55" },
-    vpIcon: { width: 38, height: 38, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: theme.primary + "22" },
-    vpIconHi: { backgroundColor: theme.primary },
+    vpCardHi: { borderColor: theme.primary + "66" },
+    vpIcon: { width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: theme.primary + "18", borderWidth: 1, borderColor: theme.primary + "33" },
+    vpIconHi: { width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+    vpTitle: { color: theme.text, fontSize: 14.5, fontWeight: "700", lineHeight: 19, textAlign: isRTL ? "right" : "left" },
+    vpDesc: { color: theme.textSecondary, fontSize: 12, lineHeight: 17, textAlign: isRTL ? "right" : "left" },
+    vpBadge: { position: "absolute", top: 12, right: isRTL ? undefined : 12, left: isRTL ? 12 : undefined, backgroundColor: theme.primary, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 999 },
+    vpBadgeText: { color: theme.onPrimary, fontSize: 8.5, fontWeight: "800", letterSpacing: 0.5, textTransform: "uppercase" },
 
     platCard: {
-      width: 190,
-      padding: 14,
-      paddingTop: 16,
-      borderRadius: 18,
+      width: 200,
+      padding: 16,
+      borderRadius: 22,
       gap: 12,
       borderWidth: 1,
       overflow: "hidden",
     },
-    platAccent: { position: "absolute", top: 0, left: 0, right: 0, height: 3, opacity: 0.75 },
+    platGlow: { position: "absolute", top: 0, left: 0, right: 0, height: 96 },
+    platTagRow: { flexDirection: isRTL ? "row-reverse" : "row" },
+    platTag: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999, borderWidth: 1 },
+    platTagText: { fontSize: 10, fontWeight: "800", letterSpacing: 0.4, textTransform: "uppercase" },
     platLogoBox: {
-      height: 68,
-      borderRadius: 12,
-      backgroundColor: "rgba(255,255,255,0.05)",
+      height: 74,
+      borderRadius: 16,
+      backgroundColor: "rgba(255,255,255,0.045)",
+      borderWidth: 1,
+      borderColor: "rgba(255,255,255,0.06)",
       alignItems: "center",
       justifyContent: "center",
-      paddingHorizontal: 10,
+      paddingHorizontal: 12,
     },
-    platFooter: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 8 },
-    platName: { color: "#FFFFFF", fontWeight: "700", fontSize: 14.5, textAlign: isRTL ? "right" : "left" },
-    platUrl: { fontSize: 11, fontFamily: "monospace", letterSpacing: 0.2, textAlign: isRTL ? "right" : "left" },
+    platName: { color: "#FFFFFF", fontWeight: "800", fontSize: 16, textAlign: isRTL ? "right" : "left" },
+    platVisitRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4, marginTop: -4 },
+    platUrl: { fontSize: 11.5, fontFamily: "monospace", letterSpacing: 0.2, textAlign: isRTL ? "right" : "left" },
 
     partnersRow: { flexDirection: isRTL ? "row-reverse" : "row", gap: 10 },
     partnerChip: {
@@ -417,8 +440,8 @@ const makeStyles = (theme, radii, isRTL) =>
 
     sectionHead: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
     sectionTitleWrap: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 9, flexShrink: 1 },
-    sectionBar: { width: 4, height: 18, borderRadius: 2, backgroundColor: theme.primary },
-    sectionTitle: { color: theme.text, fontSize: 17, fontWeight: "800", letterSpacing: 0.2, flexShrink: 1 },
+    sectionBar: { width: 4, height: 20, borderRadius: 2, backgroundColor: theme.primary },
+    sectionTitle: { color: theme.text, fontSize: 18.5, fontWeight: "800", letterSpacing: 0.2, flexShrink: 1 },
     seeAll: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 2, backgroundColor: theme.primary + "14", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
     sliderRow: { flexDirection: "row", gap: 12 },
 
