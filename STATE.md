@@ -88,7 +88,7 @@ us** (owner reviews). Full analysis/plan was delivered in chat.
 - `b5d76e6` **DONE**: Partner brand logos (CIM/HCC/Assurax) generated from source SVGs → `src/constants/brandLogos.js` (each `.stN` class resolved to explicit fill/clip-path at generation time; metadata/style/entity-ns stripped; well-formed per xmldom) rendered by `src/components/PartnerLogo.jsx` (`SvgXml`). New Home **"Strategic Partners"** section + real logos on the **Verification** page (`accreditations.js` gained a `logo` key). Added **Capimax BRX** (`capimaxbrx.com`) + **Capimax PropShare** (`capimaxpropshare.com`) → **5 platforms** with en/ar descriptions.
   - Regenerate logos: `node <scratchpad>/gen_partner_logos.js` (source: `E:/Work/capimax-group/src/assets/logos-needded/{cim ,hcc,assurax}.svg`).
   - ⚠️ **On-device QA:** HCC/CIM are gradient-mesh logos (clipPath+use, 180–230 polygons) rendered as vector — verify they render cleanly on a device; if not, ask owner for flat PNG exports. Assurax is flat (22 paths).
-  - ⚠️ BRX/PropShare **descriptions** are placeholder (PropShare name-derived, BRX neutral) → owner to confirm official copy.
+  - BRX/PropShare **descriptions** = owner's official copy (en; ar translated). BRX includes the "registered tech platform, not a financial/investment/brokerage actor; offerings via qualified independent entities under Regulation D / Regulation S" compliance note — keep this wording intact.
 - **STILL BLOCKED ON OWNER DATA:** real Verification codes+links (fill `accreditations.js` `link`/`code`) · WhatsApp number + Live Chat provider · About Us copy review.
 **Phase C — BLOCKED ON BACKEND:** Deposit, Crypto withdraw, Pronova payment endpoints.
 
