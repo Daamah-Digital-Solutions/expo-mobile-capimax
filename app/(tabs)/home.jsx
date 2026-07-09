@@ -287,7 +287,7 @@ export default function HomeTab() {
           <View style={styles.partnersRow}>
             {ACCREDITATIONS.map((p) => (
               <View key={p.key} style={styles.partnerChip}>
-                <PartnerLogo name={p.logo} height={30} />
+                <PartnerLogo source={p.logo} height={40} />
               </View>
             ))}
           </View>

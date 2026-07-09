@@ -49,7 +49,7 @@ export default function VerificationScreen() {
             <Card style={{ gap: 10 }}>
               <View style={styles.rowHead}>
                 {a.logo ? (
-                  <View style={styles.logoChip}><PartnerLogo name={a.logo} height={24} /></View>
+                  <View style={styles.logoChip}><PartnerLogo source={a.logo} height={34} /></View>
                 ) : (
                   <View style={styles.icon}><Ionicons name={a.icon} size={20} color={theme.primary} /></View>
                 )}
