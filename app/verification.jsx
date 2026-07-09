@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Screen from "../src/components/Screen";
 import Card from "../src/components/Card";
 import AppButton from "../src/components/AppButton";
+import PartnerLogo from "../src/components/PartnerLogo";
 import FadeInView from "../src/components/motion/FadeInView";
 import { useTheme } from "../src/context/ThemeContext";
 import { useLanguage } from "../src/context/LanguageContext";
@@ -47,7 +48,11 @@ export default function VerificationScreen() {
           <FadeInView key={a.key} index={i}>
             <Card style={{ gap: 10 }}>
               <View style={styles.rowHead}>
-                <View style={styles.icon}><Ionicons name={a.icon} size={20} color={theme.primary} /></View>
+                {a.logo ? (
+                  <View style={styles.logoChip}><PartnerLogo name={a.logo} height={24} /></View>
+                ) : (
+                  <View style={styles.icon}><Ionicons name={a.icon} size={20} color={theme.primary} /></View>
+                )}
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{a.name}</Text>
                   <Text style={[type.caption, { color: theme.textSecondary, textAlign: isRTL ? "right" : "left", lineHeight: 18 }]}>{t(`verification.${a.key}_desc`)}</Text>
@@ -78,5 +83,6 @@ const makeStyles = (theme, radii, isRTL) =>
     headerBack: { width: 38, height: 38, alignItems: "center", justifyContent: "center" },
     rowHead: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "flex-start", gap: 12 },
     icon: { width: 40, height: 40, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: theme.primary + "1F" },
+    logoChip: { backgroundColor: "#FFFFFF", borderRadius: 11, paddingHorizontal: 10, paddingVertical: 8, minWidth: 56, alignItems: "center", justifyContent: "center", borderWidth: StyleSheet.hairlineWidth, borderColor: theme.border },
     soon: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6, alignSelf: isRTL ? "flex-end" : "flex-start" },
   });

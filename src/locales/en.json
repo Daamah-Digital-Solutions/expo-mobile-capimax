@@ -5,7 +5,9 @@
     "descriptions": {
       "capimaxrt": "Real-estate tokenization platform — own vetted property shares on-chain.",
       "novadf": "Decentralized finance platform — grow and manage your digital assets with DeFi tools.",
-      "pronovacrypto": "Pronova (PRN) — a next-generation cryptocurrency for the Capimax ecosystem."
+      "pronovacrypto": "Pronova (PRN) — a next-generation cryptocurrency for the Capimax ecosystem.",
+      "capimaxbrx": "A Capimax ecosystem platform — explore what's building at capimaxbrx.com.",
+      "capimaxpropshare": "Fractional property ownership — co-invest in vetted real-estate shares."
     }
   },
   "pwa": {
@@ -79,7 +81,9 @@
     "vpd_nova": "Interest-free financing & loans via the Nova ecosystem.",
     "openPlatform": "Open",
     "accessPronova": "Access Pronova",
-    "accessPronovaDesc": "Explore the Pronova ecosystem"
+    "accessPronovaDesc": "Explore the Pronova ecosystem",
+    "partnersTitle": "Strategic Partners",
+    "partnersDesc": "Backed by leading financial, insurance, and verification institutions."
   },
   "common": {
     "loading": "Loading...",

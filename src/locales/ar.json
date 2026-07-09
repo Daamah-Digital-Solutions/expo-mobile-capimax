@@ -5,7 +5,9 @@
     "descriptions": {
       "capimaxrt": "منصة لترميز العقارات — تملّك حصصًا عقارية موثّقة على البلوكتشين.",
       "novadf": "منصة تمويل لامركزي — أدِر وأنمِّ أصولك الرقمية باستخدام أدوات DeFi.",
-      "pronovacrypto": "برونوفا (PRN) — عملة مشفّرة جديدة ضمن منظومة كابيماكس."
+      "pronovacrypto": "برونوفا (PRN) — عملة مشفّرة جديدة ضمن منظومة كابيماكس.",
+      "capimaxbrx": "إحدى منصات منظومة Capimax — اكتشفها عبر capimaxbrx.com.",
+      "capimaxpropshare": "الملكية العقارية الجزئية — استثمر في حصص عقارية مدروسة."
     }
   },
   "pwa": {
@@ -79,7 +81,9 @@
     "vpd_nova": "تمويل وقروض بدون فوائد عبر منظومة نوفا.",
     "openPlatform": "فتح",
     "accessPronova": "ادخل إلى Pronova",
-    "accessPronovaDesc": "اكتشف منظومة Pronova"
+    "accessPronovaDesc": "اكتشف منظومة Pronova",
+    "partnersTitle": "شركاؤنا الاستراتيجيون",
+    "partnersDesc": "مدعومون من مؤسسات رائدة في التمويل والتأمين والتوثيق."
   },
   "common": {
     "loading": "جاري التحميل...",

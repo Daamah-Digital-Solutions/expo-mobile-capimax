@@ -24,7 +24,9 @@ import FeaturedAssetCard from "../../src/components/home/FeaturedAssetCard";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { userService, walletService, portfolioService, opportunityService, internalMarketService } from "../../src/api/services";
+import PartnerLogo from "../../src/components/PartnerLogo";
 import { PLATFORMS, PRONOVA_URL } from "../../src/constants/platforms";
+import { ACCREDITATIONS } from "../../src/constants/accreditations";
 
 const USD = (v) => `$${(parseFloat(v) || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const num = (v) => parseFloat(v) || 0;
@@ -259,6 +261,21 @@ export default function HomeTab() {
           </Pressable>
         </View>
 
+        {/* ── Strategic Partners — CIM / HCC / Assurax (real brand logos on light chips) ── */}
+        <View style={{ paddingHorizontal: spacing.xl, gap: 10 }}>
+          <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("home.partnersTitle", "Strategic Partners")}</Text>
+          <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left", lineHeight: 18 }]}>
+            {t("home.partnersDesc", "Backed by leading financial, insurance, and verification institutions.")}
+          </Text>
+          <View style={styles.partnersRow}>
+            {ACCREDITATIONS.map((p) => (
+              <View key={p.key} style={styles.partnerChip}>
+                <PartnerLogo name={p.logo} height={30} />
+              </View>
+            ))}
+          </View>
+        </View>
+
         {/* ── 5) Secondary market ── */}
         <View style={{ paddingHorizontal: spacing.xl, gap: 10 }}>
           <SectionHead title={t("home.secondaryMarket", "Secondary market")} onSeeAll={() => router.push("/(tabs)/market")} t={t} theme={theme} type={type} isRTL={isRTL} styles={styles} inset />
@@ -356,6 +373,20 @@ const makeStyles = (theme, radii, isRTL) =>
     },
     platCardIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
     platOpen: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4 },
+
+    partnersRow: { flexDirection: isRTL ? "row-reverse" : "row", gap: 10 },
+    partnerChip: {
+      flex: 1,
+      backgroundColor: "#FFFFFF",
+      borderRadius: 14,
+      paddingVertical: 16,
+      paddingHorizontal: 8,
+      minHeight: 64,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.border,
+    },
 
     pronovaCta: {
       flexDirection: isRTL ? "row-reverse" : "row",
