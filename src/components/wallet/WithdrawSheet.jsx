@@ -13,6 +13,7 @@ import BottomSheet from "../BottomSheet";
 import Field from "../Field";
 import AppButton from "../AppButton";
 import Banner from "../Banner";
+import SegmentedControl from "../SegmentedControl";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { walletService } from "../../api/services";
@@ -35,6 +36,7 @@ export default function WithdrawSheet({ visible, onClose, onSuccess }) {
   const styles = useMemo(() => makeStyles(theme, isRTL), [theme, isRTL]);
 
   const [form, setForm] = useState(EMPTY);
+  const [method, setMethod] = useState("bank"); // bank | crypto (crypto = coming soon, no endpoint)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -45,6 +47,7 @@ export default function WithdrawSheet({ visible, onClose, onSuccess }) {
   useEffect(() => {
     if (visible) {
       setForm(EMPTY);
+      setMethod("bank");
       setError("");
       setSuccess("");
       setFieldErrors({});
@@ -113,41 +116,60 @@ export default function WithdrawSheet({ visible, onClose, onSuccess }) {
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets
       >
-        {error ? <Banner type="error" message={error} /> : null}
-        {success ? <Banner type="success" message={success} /> : null}
-
-        <Field
-          label={t("wallet.amount", "Amount")}
-          value={form.amount}
-          onChangeText={(v) => set("amount")(v.replace(/[^0-9.]/g, ""))}
-          keyboardType="decimal-pad"
-          placeholder="0.00"
-          error={fe("amount")}
+        {/* Method: Bank (live) vs Crypto (coming soon — no backend endpoint yet). */}
+        <SegmentedControl
+          segments={[
+            { label: t("wallet.withdrawBank", "Bank"), value: "bank" },
+            { label: t("wallet.withdrawCrypto", "Crypto"), value: "crypto" },
+          ]}
+          value={method}
+          onChange={(v) => { setMethod(v); setError(""); }}
         />
 
-        <View style={styles.switchRow}>
-          <Text style={[type.body, { color: theme.text, flex: 1, textAlign: isRTL ? "right" : "left" }]}>
-            {t("wallet.withdrawProfitOnly", "Withdraw from profit balance only")}
-          </Text>
-          <Switch
-            value={form.withdraw_profit_only}
-            onValueChange={set("withdraw_profit_only")}
-            trackColor={{ false: theme.surfaceAlt, true: theme.primary }}
-            thumbColor="#ffffff"
-            ios_backgroundColor={theme.surfaceAlt}
-          />
-        </View>
+        {method === "crypto" ? (
+          <>
+            <Banner type="info" message={t("wallet.cryptoWithdrawComingSoon", "Crypto withdrawals are coming soon. For now, you can withdraw to your bank account.")} />
+            <AppButton title={t("common.close", "Close")} variant="secondary" onPress={onClose} />
+          </>
+        ) : (
+          <>
+            {error ? <Banner type="error" message={error} /> : null}
+            {success ? <Banner type="success" message={success} /> : null}
 
-        <Field label={t("wallet.bankName", "Bank Name")} value={form.bank_name} onChangeText={set("bank_name")} autoCapitalize="words" error={fe("bank_name")} />
-        <Field label={t("wallet.accountNumber", "Account Number")} value={form.account_number} onChangeText={set("account_number")} error={fe("account_number")} />
-        <Field label={t("wallet.accountHolderName", "Account Holder Name")} value={form.account_holder_name} onChangeText={set("account_holder_name")} autoCapitalize="words" error={fe("account_holder_name")} />
-        <Field label={t("wallet.swiftCode", "SWIFT Code")} value={form.swift_code} onChangeText={set("swift_code")} autoCapitalize="characters" error={fe("swift_code")} />
-        <Field label={t("wallet.iban", "IBAN")} value={form.iban} onChangeText={set("iban")} autoCapitalize="characters" error={fe("iban")} />
+            <Field
+              label={t("wallet.amount", "Amount")}
+              value={form.amount}
+              onChangeText={(v) => set("amount")(v.replace(/[^0-9.]/g, ""))}
+              keyboardType="decimal-pad"
+              placeholder="0.00"
+              error={fe("amount")}
+            />
 
-        <View style={styles.actions}>
-          <AppButton title={t("common.cancel", "Cancel")} variant="ghost" fullWidth={false} onPress={loading ? undefined : onClose} disabled={loading || !!success} />
-          <AppButton title={t("common.submit", "Submit")} fullWidth={false} style={{ minWidth: 140 }} loading={loading} disabled={!canSubmit} onPress={submit} />
-        </View>
+            <View style={styles.switchRow}>
+              <Text style={[type.body, { color: theme.text, flex: 1, textAlign: isRTL ? "right" : "left" }]}>
+                {t("wallet.withdrawProfitOnly", "Withdraw from profit balance only")}
+              </Text>
+              <Switch
+                value={form.withdraw_profit_only}
+                onValueChange={set("withdraw_profit_only")}
+                trackColor={{ false: theme.surfaceAlt, true: theme.primary }}
+                thumbColor="#ffffff"
+                ios_backgroundColor={theme.surfaceAlt}
+              />
+            </View>
+
+            <Field label={t("wallet.bankName", "Bank Name")} value={form.bank_name} onChangeText={set("bank_name")} autoCapitalize="words" error={fe("bank_name")} />
+            <Field label={t("wallet.accountNumber", "Account Number")} value={form.account_number} onChangeText={set("account_number")} error={fe("account_number")} />
+            <Field label={t("wallet.accountHolderName", "Account Holder Name")} value={form.account_holder_name} onChangeText={set("account_holder_name")} autoCapitalize="words" error={fe("account_holder_name")} />
+            <Field label={t("wallet.swiftCode", "SWIFT Code")} value={form.swift_code} onChangeText={set("swift_code")} autoCapitalize="characters" error={fe("swift_code")} />
+            <Field label={t("wallet.iban", "IBAN")} value={form.iban} onChangeText={set("iban")} autoCapitalize="characters" error={fe("iban")} />
+
+            <View style={styles.actions}>
+              <AppButton title={t("common.cancel", "Cancel")} variant="ghost" fullWidth={false} onPress={loading ? undefined : onClose} disabled={loading || !!success} />
+              <AppButton title={t("common.submit", "Submit")} fullWidth={false} style={{ minWidth: 140 }} loading={loading} disabled={!canSubmit} onPress={submit} />
+            </View>
+          </>
+        )}
       </ScrollView>
     </BottomSheet>
   );

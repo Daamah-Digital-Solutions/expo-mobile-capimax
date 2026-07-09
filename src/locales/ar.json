@@ -117,7 +117,9 @@
     "all": "الكل",
     "viewDetails": "عرض التفاصيل",
     "continue": "متابعة",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "comingSoon": "قريباً",
+    "comingSoonMsg": "هذه الميزة قادمة قريباً."
   },
   "opportunities": {
     "title": "الأصول المتاحة",
@@ -284,7 +286,18 @@
     "status_processing": "قيد المعالجة",
     "insufficientBalance": "ليس لديك رصيد كافٍ لهذا السحب",
     "withdrawSuccess": "تم إرسال طلب السحب",
-    "withdrawError": "تعذّر معالجة طلب السحب"
+    "withdrawError": "تعذّر معالجة طلب السحب",
+    "deposit": "إيداع",
+    "withdraw": "سحب",
+    "depositFunds": "إيداع الأموال",
+    "depositComingSoon": "الإيداع قادم قريباً. ستتمكن قريباً من إضافة الأموال عبر التحويل البنكي والعملات الرقمية وطرق أخرى — من هنا مباشرة في محفظتك.",
+    "depositMethodBank": "تحويل بنكي",
+    "depositMethodCrypto": "العملات الرقمية",
+    "depositMethodOther": "طرق أخرى",
+    "withdrawMethod": "طريقة السحب",
+    "withdrawBank": "بنكي",
+    "withdrawCrypto": "عملات رقمية",
+    "cryptoWithdrawComingSoon": "سحب العملات الرقمية قادم قريباً. حالياً يمكنك السحب بأمان إلى حسابك البنكي."
   },
   "account": {
     "title": "حسابي",
@@ -579,7 +592,9 @@
     "novapayDetails": "تفاصيل الدفع عبر NovaPay",
     "novapayInstructions": "أكمل الدفع عبر NovaPay، ثم ارفع إثبات التحويل ورقم المرجع أدناه.",
     "submitNovapayProof": "إرسال إثبات الدفع عبر NovaPay",
-    "novapayError": "فشل إرسال الدفع عبر NovaPay. حاول مرة أخرى."
+    "novapayError": "فشل إرسال الدفع عبر NovaPay. حاول مرة أخرى.",
+    "pronovaTitle": "الدفع عبر Pronova",
+    "pronovaComingSoon": "الدفع عبر Pronova قادم قريباً. ستتمكن قريباً من الدفع من خلال منظومة Pronova. حالياً، الرجاء اختيار طريقة أخرى بالأعلى."
   },
   "investForm": {
     "createInvestment": "إنشاء طلب شراء",
@@ -631,7 +646,8 @@
     "profession": "المهنة",
     "loadingProfile": "جاري تحميل الملف الشخصي...",
     "completeProfileInfo": "يرجى إكمال معلومات ملفك الشخصي",
-    "uploadDocuments": "تحميل المستندات"
+    "uploadDocuments": "تحميل المستندات",
+    "pronova": "Pronova"
   },
   "form": {
     "registration_success": "تم تسجيل الحساب بنجاح!",
@@ -762,7 +778,11 @@
     "signOutTitle": "تسجيل الخروج نهائياً؟",
     "signOutMsg": "سيؤدي هذا إلى إزالة حسابك وتسجيل الدخول البيومتري من هذا الجهاز. ستحتاج إلى بريدك الإلكتروني وكلمة المرور لتسجيل الدخول مرة أخرى.",
     "lockHint": "اقفل التطبيق وأعد فتحه بسرعة باستخدام {{method}}. تبقى مسجّلاً الدخول.",
-    "signOutHint": "سجّل الخروج وأزل حسابك من هذا الجهاز. ستحتاج إلى بريدك الإلكتروني وكلمة المرور في المرة القادمة."
+    "signOutHint": "سجّل الخروج وأزل حسابك من هذا الجهاز. ستحتاج إلى بريدك الإلكتروني وكلمة المرور في المرة القادمة.",
+    "contactSupport": "التواصل والدعم",
+    "whatsapp": "واتساب",
+    "liveChat": "الدردشة المباشرة",
+    "channelComingSoon": "قناة الدعم هذه قادمة قريباً."
   },
   "login": {
     "heading": "تسجيل الدخول أو إنشاء حساب",
@@ -868,7 +888,10 @@
     "platformFee": "رسوم المنصة",
     "walletBalanceAfter": "رصيد المحفظة المتبقي",
     "completedAt": "اكتمل في",
-    "totalPaid": "إجمالي المدفوع"
+    "totalPaid": "إجمالي المدفوع",
+    "payPronova": "Pronova",
+    "payPronovaDesc": "قريباً",
+    "pronovaComingSoon": "الدفع عبر Pronova قادم قريباً. الرجاء اختيار طريقة أخرى لإتمام الشراء الآن."
   },
   "tabs": {
     "home": "الرئيسية",

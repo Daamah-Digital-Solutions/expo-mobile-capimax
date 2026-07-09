@@ -47,6 +47,8 @@ const METHODS = [
   { key: "bank_transfer", icon: "business-outline", title: "internalMarket.payBank", titleDefault: "Bank Transfer", desc: "internalMarket.payBankDesc", descDefault: "Transfer from your bank account" },
   { key: "credit_card", icon: "card-outline", title: "internalMarket.payCard", titleDefault: "Credit/Debit Card", desc: "internalMarket.payCardDesc", descDefault: "Pay with credit or debit card (PayPal)" },
   { key: "crypto", icon: "logo-bitcoin", title: "internalMarket.payCrypto", titleDefault: "Cryptocurrency", desc: "internalMarket.payCryptoDesc", descDefault: "Pay with crypto via NOWPayments" },
+  // Pronova (client request) — coming soon: no backend endpoint yet, so it can't be submitted.
+  { key: "pronova", icon: "planet-outline", title: "internalMarket.payPronova", titleDefault: "Pronova", desc: "internalMarket.payPronovaDesc", descDefault: "Coming soon", soon: true },
 ];
 
 export default function MarketBuyScreen() {
@@ -109,6 +111,7 @@ export default function MarketBuyScreen() {
   const chargeAmount = (purchaseResult && parseFloat(purchaseResult.amount)) || subtotal;
 
   const selectedBank = BANK_ACCOUNTS.find((b) => b.id === bankId) || BANK_ACCOUNTS[0];
+  const selectedSoon = !!METHODS.find((m) => m.key === method)?.soon;
 
   const fail = (msg) => { setSubmitting(false); setError(msg || t("internalMarket.purchaseError", "Purchase failed")); };
 
@@ -123,6 +126,7 @@ export default function MarketBuyScreen() {
 
   // ── Execute purchase (from the payment step) ───────────────────────────────────
   const completePurchase = async () => {
+    if (METHODS.find((m) => m.key === method)?.soon) return; // Pronova = coming soon (no endpoint)
     setSubmitting(true);
     setError("");
     try {
@@ -481,14 +485,23 @@ export default function MarketBuyScreen() {
                   <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t(m.title, m.titleDefault)}</Text>
                   <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left" }]}>{t(m.desc, m.descDefault)}</Text>
                 </View>
+                {m.soon ? (
+                  <View style={styles.soonPill}><Text style={styles.soonPillText}>{t("common.comingSoon", "Soon")}</Text></View>
+                ) : null}
               </Pressable>
             );
           })}
         </FadeInView>
+
+        {selectedSoon ? (
+          <FadeInView index={2}>
+            <Banner type="info" message={t("internalMarket.pronovaComingSoon", "Pronova payments are coming soon. Please choose another method to complete your purchase now.")} />
+          </FadeInView>
+        ) : null}
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
-        <AppButton title={t("internalMarket.completePurchase", "Complete Purchase")} icon="lock-closed" loading={submitting} onPress={completePurchase} />
+        <AppButton title={t("internalMarket.completePurchase", "Complete Purchase")} icon="lock-closed" loading={submitting} disabled={selectedSoon} onPress={completePurchase} />
       </View>
 
       {/* Gateway overlays */}
@@ -592,6 +605,8 @@ const makeStyles = (theme, radii, isRTL) =>
     methodActive: { borderColor: theme.primary, backgroundColor: theme.primary + "14" },
     radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: theme.borderStrong, alignItems: "center", justifyContent: "center" },
     radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: theme.primary },
+    soonPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: theme.textMuted + "22" },
+    soonPillText: { color: theme.textMuted, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.6 },
 
     bankChips: { flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: isRTL ? "flex-end" : "flex-start" },
     detailBox: {

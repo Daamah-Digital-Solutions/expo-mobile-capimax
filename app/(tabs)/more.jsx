@@ -81,10 +81,18 @@ export default function MoreTab() {
     }
   };
 
+  // Coming-soon support channels (WhatsApp number + Live Chat provider are pending from the owner).
+  const comingSoon = (label) => Alert.alert(label, t("common.comingSoonMsg", "This feature is coming soon."));
+
+  const CONTACT_LINKS = [
+    { icon: "chatbubbles-outline", label: t("contact.title", "Contact Us"), route: "/contact" },
+    { icon: "logo-whatsapp", label: t("more.whatsapp", "WhatsApp"), soon: true },
+    { icon: "chatbox-ellipses-outline", label: t("more.liveChat", "Live Chat"), soon: true },
+  ];
+
   const SUPPORT_LINKS = [
     { icon: "information-circle-outline", label: t("about.title", "About Us"), route: "/about" },
     { icon: "ribbon-outline", label: t("verification.title", "Verification"), route: "/verification" },
-    { icon: "chatbubbles-outline", label: t("contact.title", "Contact Us"), route: "/contact" },
     { icon: "help-circle-outline", label: t("sidebar.faq", "FAQ"), route: "/faq" },
     { icon: "folder-open-outline", label: t("documentCenter.title", "Document Center"), route: "/document-center" },
     { icon: "grid-outline", label: t("platforms.sectionTitle", "Our Platforms"), route: "/platforms" },
@@ -183,8 +191,30 @@ export default function MoreTab() {
           </FadeInView>
         ) : null}
 
-        {/* Support & Legal */}
+        {/* Contact & Support — Contact form (live) + WhatsApp / Live Chat (coming soon) */}
         <FadeInView index={2}>
+          <Card style={{ gap: 0 }}>
+            <Text style={[type.caption, styles.sectionLabel, { marginBottom: 4 }]}>{t("more.contactSupport", "Contact & Support")}</Text>
+            {CONTACT_LINKS.map((l, i) => (
+              <Row
+                key={l.label}
+                icon={l.icon}
+                label={l.label}
+                soon={l.soon}
+                soonLabel={t("common.comingSoon", "Soon")}
+                onPress={() => (l.soon ? comingSoon(l.label) : router.push(l.route))}
+                styles={styles}
+                theme={theme}
+                type={type}
+                isRTL={isRTL}
+                first={i === 0}
+              />
+            ))}
+          </Card>
+        </FadeInView>
+
+        {/* Support & Legal */}
+        <FadeInView index={3}>
           <Card style={{ gap: 0 }}>
             <Text style={[type.caption, styles.sectionLabel, { marginBottom: 4 }]}>{t("more.supportLegal", "Support & Legal")}</Text>
             {SUPPORT_LINKS.map((l, i) => (
@@ -194,7 +224,7 @@ export default function MoreTab() {
         </FadeInView>
 
         {/* Appearance */}
-        <FadeInView index={3}>
+        <FadeInView index={4}>
           <Card style={{ gap: 10 }}>
             <Text style={[type.caption, styles.sectionLabel]}>{t("theme", "Theme")}</Text>
             <SegmentedControl segments={themeSegments} value={mode} onChange={setMode} />
@@ -202,7 +232,7 @@ export default function MoreTab() {
         </FadeInView>
 
         {/* Language */}
-        <FadeInView index={4}>
+        <FadeInView index={5}>
           <Card style={{ gap: 10 }}>
             <Text style={[type.caption, styles.sectionLabel]}>{t("language", "Language")}</Text>
             <SegmentedControl segments={langSegments} value={language} onChange={setLanguage} />
@@ -210,7 +240,7 @@ export default function MoreTab() {
         </FadeInView>
 
         {/* About */}
-        <FadeInView index={5}>
+        <FadeInView index={6}>
           <Card style={styles.aboutCard}>
             <Ionicons name="information-circle-outline" size={18} color={theme.textMuted} />
             <Text style={[type.caption, { color: theme.textMuted, flex: 1, textAlign: isRTL ? "right" : "left" }]}>
@@ -223,12 +253,16 @@ export default function MoreTab() {
   );
 }
 
-function Row({ icon, label, onPress, styles, theme, type, isRTL, first }) {
+function Row({ icon, label, onPress, styles, theme, type, isRTL, first, soon, soonLabel }) {
   return (
     <Pressable style={[styles.row, first && { borderTopWidth: 0 }]} onPress={onPress}>
-      <Ionicons name={icon} size={20} color={theme.primary} />
+      <Ionicons name={icon} size={20} color={soon ? theme.textSecondary : theme.primary} />
       <Text style={[type.body, { color: theme.text, flex: 1, textAlign: isRTL ? "right" : "left" }]}>{label}</Text>
-      <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
+      {soon ? (
+        <View style={styles.soonPill}><Text style={styles.soonPillText}>{soonLabel}</Text></View>
+      ) : (
+        <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={18} color={theme.textMuted} />
+      )}
     </Pressable>
   );
 }
@@ -262,4 +296,6 @@ const makeStyles = (theme, radii, isRTL) =>
     exitHint: { color: theme.textMuted, fontSize: 12, lineHeight: 16, textAlign: isRTL ? "right" : "left", marginTop: 6, paddingHorizontal: 2 },
     aboutCard: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 10 },
     bioRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 12 },
+    soonPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: theme.textMuted + "22" },
+    soonPillText: { color: theme.textMuted, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.6 },
   });

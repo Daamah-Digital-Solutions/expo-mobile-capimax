@@ -117,7 +117,9 @@
     "all": "All",
     "viewDetails": "View Details",
     "continue": "Continue",
-    "retry": "Retry"
+    "retry": "Retry",
+    "comingSoon": "Soon",
+    "comingSoonMsg": "This feature is coming soon."
   },
   "opportunities": {
     "title": "Available Assets",
@@ -283,7 +285,18 @@
     "status_processing": "Processing",
     "insufficientBalance": "You don't have sufficient balance for this withdrawal",
     "withdrawSuccess": "Withdrawal request submitted",
-    "withdrawError": "Failed to process withdrawal request"
+    "withdrawError": "Failed to process withdrawal request",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "depositFunds": "Deposit Funds",
+    "depositComingSoon": "Deposits are coming soon. You'll soon be able to add funds via bank transfer, cryptocurrency, and more — right here in your wallet.",
+    "depositMethodBank": "Bank Transfer",
+    "depositMethodCrypto": "Cryptocurrency",
+    "depositMethodOther": "Other Methods",
+    "withdrawMethod": "Withdrawal Method",
+    "withdrawBank": "Bank",
+    "withdrawCrypto": "Crypto",
+    "cryptoWithdrawComingSoon": "Crypto withdrawals are coming soon. For now, you can withdraw securely to your bank account."
   },
   "account": {
     "title": "My Account",
@@ -577,7 +590,9 @@
     "novapayDetails": "NovaPay Payment Details",
     "novapayInstructions": "Complete your payment via NovaPay, then upload the transfer proof and reference number below.",
     "submitNovapayProof": "Submit NovaPay Proof",
-    "novapayError": "NovaPay submission failed. Please try again."
+    "novapayError": "NovaPay submission failed. Please try again.",
+    "pronovaTitle": "Pronova Pay",
+    "pronovaComingSoon": "Pronova payments are coming soon. You'll soon be able to pay through the Pronova ecosystem. For now, please choose another method above."
   },
   "investForm": {
     "createInvestment": "Create Purchase",
@@ -629,7 +644,8 @@
     "profession": "Profession",
     "loadingProfile": "Loading profile...",
     "completeProfileInfo": "Please complete your profile information",
-    "uploadDocuments": "Upload Documents"
+    "uploadDocuments": "Upload Documents",
+    "pronova": "Pronova"
   },
   "form": {
     "registration_success": "Registration successful",
@@ -737,7 +753,11 @@
     "signOutTitle": "Sign out completely?",
     "signOutMsg": "This removes your account and biometric sign-in from this device. You'll need your email & password to sign in again.",
     "lockHint": "Lock the app; reopen quickly with {{method}}. You stay signed in.",
-    "signOutHint": "Sign out and remove your account from this device. You will need your email & password next time."
+    "signOutHint": "Sign out and remove your account from this device. You will need your email & password next time.",
+    "contactSupport": "Contact & Support",
+    "whatsapp": "WhatsApp",
+    "liveChat": "Live Chat",
+    "channelComingSoon": "This support channel is coming soon."
   },
   "login": {
     "heading": "Log in or sign up",
@@ -876,7 +896,10 @@
     "platformFee": "Platform Fee",
     "walletBalanceAfter": "Remaining Wallet Balance",
     "completedAt": "Completed At",
-    "totalPaid": "Total Paid"
+    "totalPaid": "Total Paid",
+    "payPronova": "Pronova",
+    "payPronovaDesc": "Coming soon",
+    "pronovaComingSoon": "Pronova payments are coming soon. Please choose another method to complete your purchase now."
   },
   "tabs": {
     "home": "Home",

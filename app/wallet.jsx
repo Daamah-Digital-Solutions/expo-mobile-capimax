@@ -20,6 +20,7 @@ import AppButton from "../src/components/AppButton";
 import AnimatedNumber from "../src/components/motion/AnimatedNumber";
 import FadeInView from "../src/components/motion/FadeInView";
 import WithdrawSheet from "../src/components/wallet/WithdrawSheet";
+import DepositSheet from "../src/components/wallet/DepositSheet";
 import { useTheme } from "../src/context/ThemeContext";
 import { useLanguage } from "../src/context/LanguageContext";
 import { walletService } from "../src/api/services";
@@ -46,6 +47,7 @@ export default function WalletScreen() {
   const [error, setError] = useState("");
   const [tab, setTab] = useState("transactions");
   const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [depositOpen, setDepositOpen] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setError("");
@@ -143,9 +145,16 @@ export default function WalletScreen() {
           <BalanceTile label={t("wallet.profitBalance", "Profit Balance")} value={wallet?.profit_balance} theme={theme} type={type} isRTL={isRTL} accent />
         </FadeInView>
 
-        {/* Withdraw */}
+        {/* Deposit + Withdraw */}
         <FadeInView index={1}>
-          <AppButton title={t("wallet.withdrawFunds", "Withdraw Funds")} icon="cash-outline" onPress={() => setWithdrawOpen(true)} />
+          <View style={styles.actionsRow}>
+            <View style={{ flex: 1 }}>
+              <AppButton title={t("wallet.deposit", "Deposit")} icon="add-circle-outline" variant="secondary" onPress={() => setDepositOpen(true)} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppButton title={t("wallet.withdraw", "Withdraw")} icon="cash-outline" onPress={() => setWithdrawOpen(true)} />
+            </View>
+          </View>
         </FadeInView>
 
         {/* Tabs */}
@@ -222,6 +231,8 @@ export default function WalletScreen() {
           fetchAll().catch(() => {}).finally(() => setLoading(false));
         }}
       />
+
+      <DepositSheet visible={depositOpen} onClose={() => setDepositOpen(false)} />
     </Screen>
   );
 }
@@ -262,6 +273,7 @@ const makeStyles = (theme, radii, isRTL) =>
     heroLabel: { color: theme.textMuted, textTransform: "uppercase", letterSpacing: 0.5, textAlign: isRTL ? "right" : "left" },
     lastRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 5, marginTop: 2 },
     tilesRow: { flexDirection: isRTL ? "row-reverse" : "row", gap: 12 },
+    actionsRow: { flexDirection: isRTL ? "row-reverse" : "row", gap: 12 },
     rowCard: { gap: 8 },
     rowMain: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   });

@@ -1,5 +1,7 @@
-// Step 2 — Payment. All FIVE methods, matching the web dashboard exactly:
+// Step 2 — Payment. All the web dashboard's LIVE methods, matching it exactly:
 //   PayPal (WebView SDK) · Bank transfer · NovaPay · Crypto (manual / NOWPayments).
+// Plus Pronova (client request) shown as "coming soon" — there is no backend endpoint for it
+// yet, so it never submits and never invents one; the user picks another method to actually pay.
 // Exact payloads + response handling + transaction_id resolution per API_AND_FLOWS §2.4.
 //
 // LIVE PAYMENTS — every method moves real money / records a real pending payment.
@@ -281,6 +283,7 @@ export default function PaymentStep({ rail, opportunityId, shares, total, base, 
     { key: "bank", label: t("investForm.bankTransfer", "Bank Transfer"), icon: "business-outline" },
     { key: "novapay", label: t("investForm.novapay", "NovaPay"), icon: "card-outline" },
     { key: "crypto", label: t("investForm.crypto", "Crypto"), icon: "logo-bitcoin" },
+    { key: "pronova", label: `${t("investForm.pronova", "Pronova")} · ${t("common.comingSoon", "Soon")}`, icon: "planet-outline" },
   ];
 
   return (
@@ -402,6 +405,13 @@ export default function PaymentStep({ rail, opportunityId, shares, total, base, 
               </Text>
               <Text style={[type.label, { color: theme.text }]}>{t("payment.amountToPay", "Amount to Pay")}: {USD(total)}</Text>
               <AppButton title={t("payment.continueWithCrypto", "Continue with Crypto")} icon="logo-bitcoin" loading={submitting} onPress={startNowPayments} />
+            </Card>
+          ) : null}
+
+          {method === "pronova" ? (
+            <Card style={{ gap: 12 }}>
+              <PanelHeader icon="planet-outline" title={t("payment.pronovaTitle", "Pronova Pay")} theme={theme} type={type} isRTL={isRTL} />
+              <Banner type="info" message={t("payment.pronovaComingSoon", "Pronova payments are coming soon. For now, please choose another method above.")} />
             </Card>
           ) : null}
         </FadeInView>
