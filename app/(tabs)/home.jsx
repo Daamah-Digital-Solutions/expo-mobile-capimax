@@ -235,14 +235,15 @@ export default function HomeTab() {
                 <LinearGradient colors={["#1a2942", "#0f1830"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.platCard, { borderColor: p.accent + "55" }]}>
                   <View style={[styles.platAccent, { backgroundColor: p.accent }]} />
                   <View style={styles.platLogoBox}>
-                    <PlatformLogo logo={p.logo} boxW={168} boxH={44} />
+                    <PlatformLogo logo={p.logo} boxW={166} boxH={48} />
                   </View>
-                  <View style={styles.platNameRow}>
-                    <Text style={styles.platName} numberOfLines={1}>{p.name}</Text>
-                    <Ionicons name="open-outline" size={13} color="rgba(255,255,255,0.5)" />
+                  <View style={styles.platFooter}>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={styles.platName} numberOfLines={1}>{p.name}</Text>
+                      <Text style={[styles.platUrl, { color: p.accent }]} numberOfLines={1}>{p.url.replace(/^https?:\/\//, "")}</Text>
+                    </View>
+                    <Ionicons name="open-outline" size={16} color="rgba(255,255,255,0.55)" />
                   </View>
-                  <Text style={[styles.platUrl, { color: p.accent }]} numberOfLines={1}>{p.url.replace(/^https?:\/\//, "")}</Text>
-                  <Text style={styles.platDesc} numberOfLines={3}>{t(`platforms.descriptions.${p.key}`)}</Text>
                 </LinearGradient>
               </Pressable>
             )}
@@ -352,45 +353,44 @@ const makeStyles = (theme, radii, isRTL) =>
     pvTop: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12 },
     growthChip: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
 
-    grid: { flexDirection: "row", flexWrap: "wrap", gap: 12, justifyContent: "space-between" },
-    gridCellWrap: { width: "47%" },
+    grid: { flexDirection: "row", flexWrap: "wrap", rowGap: 12, justifyContent: "space-between" },
+    gridCellWrap: { width: "48%" },
     vpCard: {
+      flex: 1,
       alignItems: isRTL ? "flex-end" : "flex-start",
-      gap: 7,
-      padding: 12,
-      borderRadius: 14,
+      gap: 8,
+      padding: 13,
+      borderRadius: 16,
       backgroundColor: theme.surfaceAlt,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: theme.border,
-      minHeight: 118,
+      minHeight: 122,
     },
     vpCardHi: { backgroundColor: theme.primary + "18", borderColor: theme.primary + "55" },
     vpIcon: { width: 38, height: 38, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: theme.primary + "22" },
     vpIconHi: { backgroundColor: theme.primary },
 
     platCard: {
-      width: 212,
-      minHeight: 176,
+      width: 190,
       padding: 14,
       paddingTop: 16,
       borderRadius: 18,
-      gap: 8,
+      gap: 12,
       borderWidth: 1,
       overflow: "hidden",
     },
     platAccent: { position: "absolute", top: 0, left: 0, right: 0, height: 3, opacity: 0.75 },
     platLogoBox: {
-      height: 60,
+      height: 68,
       borderRadius: 12,
       backgroundColor: "rgba(255,255,255,0.05)",
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 10,
     },
-    platNameRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 2 },
-    platName: { color: "#FFFFFF", fontWeight: "700", fontSize: 15, flexShrink: 1, textAlign: isRTL ? "right" : "left" },
+    platFooter: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 8 },
+    platName: { color: "#FFFFFF", fontWeight: "700", fontSize: 14.5, textAlign: isRTL ? "right" : "left" },
     platUrl: { fontSize: 11, fontFamily: "monospace", letterSpacing: 0.2, textAlign: isRTL ? "right" : "left" },
-    platDesc: { color: "rgba(255,255,255,0.72)", fontSize: 11.5, lineHeight: 16, flex: 1, textAlign: isRTL ? "right" : "left" },
 
     partnersRow: { flexDirection: isRTL ? "row-reverse" : "row", gap: 10 },
     partnerChip: {

@@ -74,7 +74,7 @@ us** (owner reviews). Full analysis/plan was delivered in chat.
 - These 3 are **Phase C (need backend)** → surfaced as "coming soon" per owner.
 
 **Real data gathered (zero-mock):**
-- Platforms (3 real, in `src/constants/platforms.js`): Capimax RT `capimaxrt.tech` · Nova DeFi `novadf.com` · Pronova Crypto `pronovacrypto.tech`. Pronova ecosystem URL = `pronovacrypto.tech`. Client wants **5** (adds **Capimax BRX** + **Capimax PropShare** — NOT in web → need owner: name/url/desc/logo).
+- Platforms (5, in `src/constants/platforms.js`): Capimax RT `capimaxrt.tech` · Nova Digital Finance `novadf.com` · Pronova Crypto `pronovacrypto.com` · Capimax BRX `capimaxbrx.com` · Capimax PropShare `capimaxpropshare.com`. Pronova ecosystem URL = `pronovacrypto.com` (owner corrected `.tech`→`.com`; Nova renamed DeFi→Digital Finance). Real logos wired (see `0e30774`).
 - Contact (real, now live): USA `418 Broadway, Ste R, Albany, NY 12207` + `30 N Gould St Ste R, Sheridan, WY 82801` (ph `0012342795751`); UK `128 City Road, London, EC1V 2NX` + `167-169 Great Portland Street, 5th Floor, London, W1W 5PF` (ph `00447441358588`). Emails `info@capimaxinvestment.com` / `contact@capimaxinvestment.com`. **UAE removed.**
 - Verification/Partners: **no institutional CIN/links exist in web** → need owner data. `src/constants/accreditations.js` holds CIM/HCC/Assurax with `link/code = null` → UI shows "coming soon" until filled.
 - No Live Chat / WhatsApp in web → need WhatsApp number + Live Chat provider decision.
