@@ -62,7 +62,7 @@ Detailed per-phase "Ready prompts" + Definitions of Done are in `BUILD_PLAN.md`.
 
 ---
 
-### 1d) CLIENT HOMEPAGE REVAMP — IN PROGRESS (started 2026-06-06)
+### 1d) CLIENT HOMEPAGE REVAMP — PHASE A COMPLETE (started 2026-06-06)
 Client MD note requested homepage + More/Wallet/Opportunities changes. **Owner decisions:** backend-blocked
 features → show **"coming soon"** (don't invent endpoints); **start Phase A now**; **About Us copy written by
 us** (owner reviews). Full analysis/plan was delivered in chat.
@@ -79,11 +79,10 @@ us** (owner reviews). Full analysis/plan was delivered in chat.
 - Verification/Partners: **no institutional CIN/links exist in web** → need owner data. `src/constants/accreditations.js` holds CIM/HCC/Assurax with `link/code = null` → UI shows "coming soon" until filled.
 - No Live Chat / WhatsApp in web → need WhatsApp number + Live Chat provider decision.
 
-**Phase A — DONE (pushed):** `c943dae` home redesign (8 value tiles + Our Platforms + Access Pronova CTA + Featured moved up) · `84ef8bd` About Us (`app/about.jsx`) + Verification (`app/verification.jsx`) pages + More rows · contact USA/UK + opportunity external-verify link relabel (commits up to `ea78c96`).
-
-**Phase A — REMAINING (next up):**
-- More: **WhatsApp + Live Chat** rows as "coming soon" (Task #4c).
-- **Wallet Deposit** button (bank/crypto/other) + **Crypto withdraw** option + **Pronova payment** in the invest/market method lists — all as **"coming soon" UI only** (Task #5; NO endpoints).
+**Phase A — COMPLETE (pushed):**
+- `c943dae` home redesign (8 value tiles + Our Platforms + Access Pronova CTA + Featured moved up).
+- `84ef8bd` About Us (`app/about.jsx`) + Verification (`app/verification.jsx`) pages + More rows; contact USA/UK + opportunity external-verify link relabel (up to `ea78c96`).
+- `59ce53b` coming-soon surfaces (no invented endpoints): More **Contact & Support** (Contact Us live + **WhatsApp** + **Live Chat** "Soon" rows → info alert) · Wallet **Deposit** button → `DepositSheet` (bank/crypto/other, all coming-soon) · Withdraw **Bank \| Crypto** toggle (crypto = coming-soon panel, live bank flow unchanged) · **Pronova** payment method in invest `PaymentStep` + internal-market buy (coming-soon panel; guarded — `completePurchase` early-returns, Complete button disabled, so it never POSTs).
 
 **Phase B — BLOCKED ON OWNER DATA:** Partners section (logos CIM/HCC/Assurax) · Capimax BRX + PropShare platforms · real Verification codes+links (fill `accreditations.js`) · WhatsApp number + Live Chat provider · About Us copy review.
 **Phase C — BLOCKED ON BACKEND:** Deposit, Crypto withdraw, Pronova payment endpoints.
