@@ -90,7 +90,7 @@
     "accessPronova": "Access Pronova",
     "accessPronovaDesc": "Explore the Pronova ecosystem",
     "partnersTitle": "Strategic Partners",
-    "partnersDesc": "Backed by leading financial, insurance, and verification institutions.",
+    "partnersDesc": "Backed by leading global financial and insurance institutions.",
     "whySubtitle": "Eight reasons investors choose the Capimax ecosystem.",
     "featuredBadge": "Featured"
   },
@@ -1032,8 +1032,7 @@
     "code": "Code",
     "verifyLink": "Verify externally",
     "linkComingSoon": "Verification link coming soon",
-    "cim_desc": "Global custodian and verification partner for documents and assets.",
-    "hcc_desc": "Insurance coverage partner for assets and SPVs.",
-    "assurax_desc": "Strategic assurance & verification partner."
+    "cim_desc": "Global financial group — verify Capimax's registration and documents directly.",
+    "hcc_desc": "Insurance partner — confirm the coverage protecting Capimax's assets and SPVs."
   }
 }

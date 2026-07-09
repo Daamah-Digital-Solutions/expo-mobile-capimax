@@ -1,10 +1,10 @@
-// Platform-level accreditations / strategic partners shown on the Verification page and the Home
-// "Strategic Partners" section. Real brand logos live in src/constants/brandLogos.js (keyed by
-// `logo`) and render via <PartnerLogo>. The external verify LINKS and codes (e.g. CIN + official
-// verification URL) are still provided by the owner (Phase B); until then `link`/`code` stay null
-// and the Verification UI shows a "coming soon" note per item — we never invent a code or URL.
+// Strategic partners / accreditations shown on the Verification page and the Home "Strategic
+// Partners" section. Real brand logos live in src/constants/brandLogos.js (keyed by `logo`, rendered
+// via <PartnerLogo>). Owner confirmed TWO partners, each with an official external verification link:
+//   • CIM Global Financial (financial)   • CoverTech Insurance (insurance)
+// `code` stays null (optional — the link IS the verification). Assurax was dropped per the owner.
+// CoverTech reuses the `hcc` logo file for now — swap `logo` if a dedicated CoverTech asset arrives.
 export const ACCREDITATIONS = [
-  { key: "cim", name: "CIM Financial Group", icon: "shield-checkmark-outline", logo: "cim", link: null, code: null },
-  { key: "hcc", name: "HCC Insurance", icon: "umbrella-outline", logo: "hcc", link: null, code: null },
-  { key: "assurax", name: "Assurax", icon: "document-text-outline", logo: "assurax", link: null, code: null },
+  { key: "cim", name: "CIM Global Financial", icon: "shield-checkmark-outline", logo: "cim", link: "https://www.cimglobalfinancial.com/verification?tab=document", code: null },
+  { key: "hcc", name: "CoverTech Insurance", icon: "umbrella-outline", logo: "hcc", link: "https://www.covertechinsurance.com/capimax-ecosystem", code: null },
 ];
