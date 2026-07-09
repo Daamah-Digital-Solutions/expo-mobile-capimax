@@ -74,7 +74,8 @@ Keep it updated if you discover anything new. **Never call an endpoint that isn'
 | RTL | `I18nManager` + per-component handling | full Arabic support |
 | Charts | **`react-native-svg` custom** (`PerformanceChart`, `Sparkline`) — gifted-charts removed (React-19 peer conflict + not in Expo Go) | Portfolio/Home |
 | Downloads | `expo-file-system` (legacy API) + `expo-sharing` | save contract/document PDFs |
-| Biometric (next) | `expo-local-authentication` | local convenience unlock only |
+| Biometric (shipped) | `expo-local-authentication` | local convenience lock over the secure-store session (not backend auth); Lock vs Sign-out-completely |
+| Google Sign-In (shipped) | **native `@react-native-google-signin/google-signin`** | `webClientId` as server client id; needs a dev/EAS build, not Expo Go |
 | File upload | `expo-image-picker` + `expo-document-picker` | passport_scan upload |
 | Contracts / payment WebView | `react-native-webview` | render contract HTML + checkout |
 | Contract signing | signature pad inside WebView → base64 image | matches web signing flow |
@@ -121,7 +122,8 @@ src/
 - Response interceptor: on 401/403 for a **non-public** endpoint → clear tokens and redirect to
   login (via AuthContext, not `window.location`).
 - Token comes from `SecureStore.getItemAsync('access')`.
-- Implement refresh-token logic via `/api/token/refresh/` before forcing logout when possible.
+- Implement refresh-token logic via **`/api/user/token/refresh/`** before forcing logout when possible.
+  (The old `/api/token/refresh/` returns **404** — reconciled 2026-06-06; see `API_AND_FLOWS.md`.)
 
 ---
 
@@ -135,8 +137,8 @@ src/
 | `<img src={cover_image_url}>` | `<Image source={{uri: cover_image_url}}>` |
 | MUI Dialog | React Native Modal / bottom sheet |
 | MUI Tabs | simple stateful tab bar |
-| react-apexcharts | victory-native / gifted-charts |
-| Google `<GoogleLogin>` | `expo-auth-session` Google → send `idToken` as `credential` to `/api/auth/google/` |
+| react-apexcharts | `react-native-svg` custom charts (`PerformanceChart`, `Sparkline`) |
+| Google `<GoogleLogin>` | **native `@react-native-google-signin/google-signin`** — `webClientId` as the server client id (so the id_token `aud` = the web client id the backend verifies) → send `idToken` as `credential` to `/api/auth/google/`. (Was `expo-auth-session`; abandoned — Google returns `invalid_request` for native clients + wrong audience. Native module → needs a dev/EAS build, not Expo Go.) |
 | PayPal JS SDK | WebView hosting PayPal SDK, or open checkout via `expo-web-browser` (see §7) |
 | file input (passport) | `expo-image-picker` → FormData `{ uri, name, type }` |
 | render/sign contract HTML | `react-native-webview` (render `contract_html` + signature pad) |
@@ -218,6 +220,12 @@ gradient brand: [#2ead6f → #1f8a54]
 shadow). Flat fills — depth from elevation, not gradients (except the one brand gradient for
 hero/CTA). Radii: card 20 · button/input 14 · pill 999 · sheet 28 · badge 8. Splash/adaptive-icon
 background `#121c30`.
+
+> **Native splash is configured via the `expo-splash-screen` plugin** in `app.json` (with
+> `backgroundColor #121c30` + an `image` + `resizeMode`), **not** the legacy top-level `splash` key.
+> The plugin always emits the Android-12 `windowSplashScreenAnimatedIcon`, so it needs a PNG `image`
+> — an imageless/legacy config makes the EAS gradle build fail with `resource drawable/splashscreen_logo
+> not found`. (The app's own animated Lottie/SVG splash then plays over the native one on launch.)
 
 ---
 
