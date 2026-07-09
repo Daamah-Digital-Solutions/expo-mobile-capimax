@@ -15,13 +15,24 @@ import { Pressable, Text, StyleSheet, View, ActivityIndicator } from "react-nati
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import Constants, { ExecutionEnvironment } from "expo-constants";
-import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { isGoogleConfigured, googleClientIds } from "../auth/googleConfig";
 
 // Native modules are unavailable in Expo Go (StoreClient) — gate the active button to real builds.
 const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
+// The native Google module runs TurboModuleRegistry.getEnforcing('RNGoogleSignin') at load time,
+// which THROWS in Expo Go (its binary lacks the module). A static `import` would execute that on
+// file load and crash the whole screen before any guard runs — so we load it lazily via require()
+// only outside Expo Go. In a real dev/EAS build the module exists and this resolves normally.
+let GoogleSignin = null;
+let statusCodes = {};
+if (!isExpoGo) {
+  const gsi = require("@react-native-google-signin/google-signin");
+  GoogleSignin = gsi.GoogleSignin;
+  statusCodes = gsi.statusCodes || {};
+}
 
 // Map a raw backend Google error to a friendly, localized message.
 function friendlyGoogleError(raw, t) {
