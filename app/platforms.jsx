@@ -1,16 +1,17 @@
 // Our Platforms (Phase 9) — sister platforms in the Capimax ecosystem (web components/
-// platforms/OurPlatforms). Real names/URLs/descriptions (verbatim); each card opens the
-// platform site externally. Logos are web-only assets → an accent icon is used instead.
+// platforms/OurPlatforms). Real names/URLs/descriptions; each card opens the platform site
+// externally. Mirrors the web: a dark branded card holding the platform's real logo.
 import React, { useMemo } from "react";
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import * as WebBrowser from "expo-web-browser";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Screen from "../src/components/Screen";
-import Card from "../src/components/Card";
+import PlatformLogo from "../src/components/PlatformLogo";
 import FadeInView from "../src/components/motion/FadeInView";
 import { useTheme } from "../src/context/ThemeContext";
 import { useLanguage } from "../src/context/LanguageContext";
@@ -45,21 +46,18 @@ export default function PlatformsScreen() {
         {PLATFORMS.map((p, i) => (
           <FadeInView key={p.key} index={i}>
             <Pressable onPress={() => open(p.url)}>
-              <Card style={{ gap: 12 }}>
-                <View style={styles.platHead}>
-                  <View style={[styles.platIcon, { backgroundColor: p.accent + "22" }]}>
-                    <Ionicons name={p.icon} size={22} color={p.accent} />
-                  </View>
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text style={[type.h2, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{p.name}</Text>
-                    <Text style={[type.caption, { color: p.accent, textAlign: isRTL ? "right" : "left" }]}>{p.url.replace(/^https?:\/\//, "")}</Text>
-                  </View>
-                  <Ionicons name="open-outline" size={18} color={theme.textMuted} />
+              <LinearGradient colors={["#1a2942", "#0f1830"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.card, { borderColor: p.accent + "55" }]}>
+                <View style={[styles.accent, { backgroundColor: p.accent }]} />
+                <View style={styles.logoBox}>
+                  <PlatformLogo logo={p.logo} boxW={220} boxH={52} />
                 </View>
-                <Text style={[type.body, { color: theme.textSecondary, textAlign: isRTL ? "right" : "left", lineHeight: 22 }]}>
-                  {t(`platforms.descriptions.${p.key}`)}
-                </Text>
-              </Card>
+                <View style={styles.nameRow}>
+                  <Text style={styles.name} numberOfLines={1}>{p.name}</Text>
+                  <Ionicons name="open-outline" size={16} color="rgba(255,255,255,0.5)" />
+                </View>
+                <Text style={[styles.url, { color: p.accent }]} numberOfLines={1}>{p.url.replace(/^https?:\/\//, "")}</Text>
+                <Text style={styles.desc}>{t(`platforms.descriptions.${p.key}`)}</Text>
+              </LinearGradient>
             </Pressable>
           </FadeInView>
         ))}
@@ -72,6 +70,11 @@ const makeStyles = (theme, radii, isRTL) =>
   StyleSheet.create({
     header: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingBottom: 8 },
     headerBack: { width: 38, height: 38, alignItems: "center", justifyContent: "center" },
-    platHead: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 12 },
-    platIcon: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+    card: { borderRadius: radii.card, padding: 18, paddingTop: 20, gap: 10, borderWidth: 1, overflow: "hidden" },
+    accent: { position: "absolute", top: 0, left: 0, right: 0, height: 3, opacity: 0.75 },
+    logoBox: { height: 76, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center", paddingHorizontal: 14 },
+    nameRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 2 },
+    name: { color: "#FFFFFF", fontWeight: "700", fontSize: 17, flexShrink: 1, textAlign: isRTL ? "right" : "left" },
+    url: { fontSize: 12, fontFamily: "monospace", letterSpacing: 0.3, textAlign: isRTL ? "right" : "left" },
+    desc: { color: "rgba(255,255,255,0.72)", fontSize: 13, lineHeight: 20, textAlign: isRTL ? "right" : "left" },
   });

@@ -25,6 +25,7 @@ import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { userService, walletService, portfolioService, opportunityService, internalMarketService } from "../../src/api/services";
 import PartnerLogo from "../../src/components/PartnerLogo";
+import PlatformLogo from "../../src/components/PlatformLogo";
 import { PLATFORMS, PRONOVA_URL } from "../../src/constants/platforms";
 import { ACCREDITATIONS } from "../../src/constants/accreditations";
 
@@ -197,7 +198,7 @@ export default function HomeTab() {
 
         {/* ── Why Capimax → 8 competitive-advantage tiles (Nova integration highlighted) ── */}
         <View style={{ paddingHorizontal: spacing.xl, gap: 12 }}>
-          <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("home.whyTitle", "Why Capimax")}</Text>
+          <SectionHead title={t("home.whyTitle", "Why Capimax")} t={t} theme={theme} type={type} isRTL={isRTL} styles={styles} inset />
           <View style={styles.grid}>
             {VALUE_PROPS.map((vp, i) => {
               const hi = vp.key === "nova";
@@ -230,18 +231,19 @@ export default function HomeTab() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: 12 }}
             renderItem={({ item: p }) => (
-              <Pressable onPress={() => openUrl(p.url)} style={[styles.platCard, { borderColor: p.accent + "40" }]}>
-                <View style={[styles.platCardIcon, { backgroundColor: p.accent + "22" }]}>
-                  <Ionicons name={p.icon} size={20} color={p.accent} />
-                </View>
-                <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{p.name}</Text>
-                <Text style={[type.micro, { color: theme.textMuted, textAlign: isRTL ? "right" : "left", lineHeight: 15, flex: 1 }]} numberOfLines={3}>
-                  {t(`platforms.descriptions.${p.key}`)}
-                </Text>
-                <View style={styles.platOpen}>
-                  <Text style={[type.micro, { color: p.accent, fontWeight: "700" }]}>{t("home.openPlatform", "Open")}</Text>
-                  <Ionicons name="open-outline" size={12} color={p.accent} />
-                </View>
+              <Pressable onPress={() => openUrl(p.url)}>
+                <LinearGradient colors={["#1a2942", "#0f1830"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.platCard, { borderColor: p.accent + "55" }]}>
+                  <View style={[styles.platAccent, { backgroundColor: p.accent }]} />
+                  <View style={styles.platLogoBox}>
+                    <PlatformLogo logo={p.logo} boxW={168} boxH={44} />
+                  </View>
+                  <View style={styles.platNameRow}>
+                    <Text style={styles.platName} numberOfLines={1}>{p.name}</Text>
+                    <Ionicons name="open-outline" size={13} color="rgba(255,255,255,0.5)" />
+                  </View>
+                  <Text style={[styles.platUrl, { color: p.accent }]} numberOfLines={1}>{p.url.replace(/^https?:\/\//, "")}</Text>
+                  <Text style={styles.platDesc} numberOfLines={3}>{t(`platforms.descriptions.${p.key}`)}</Text>
+                </LinearGradient>
               </Pressable>
             )}
           />
@@ -263,7 +265,7 @@ export default function HomeTab() {
 
         {/* ── Strategic Partners — CIM / HCC / Assurax (real brand logos on light chips) ── */}
         <View style={{ paddingHorizontal: spacing.xl, gap: 10 }}>
-          <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("home.partnersTitle", "Strategic Partners")}</Text>
+          <SectionHead title={t("home.partnersTitle", "Strategic Partners")} t={t} theme={theme} type={type} isRTL={isRTL} styles={styles} inset />
           <Text style={[type.caption, { color: theme.textMuted, textAlign: isRTL ? "right" : "left", lineHeight: 18 }]}>
             {t("home.partnersDesc", "Backed by leading financial, insurance, and verification institutions.")}
           </Text>
@@ -316,11 +318,16 @@ export default function HomeTab() {
 function SectionHead({ title, onSeeAll, t, theme, type, isRTL, styles, inset }) {
   return (
     <View style={[styles.sectionHead, !inset && { paddingHorizontal: 20 }]}>
-      <Text style={[type.label, { color: theme.text }]}>{title}</Text>
-      <Pressable onPress={onSeeAll} hitSlop={6} style={styles.seeAll}>
-        <Text style={[type.caption, { color: theme.primaryDark, fontWeight: "700" }]}>{t("home.seeAll", "See all")}</Text>
-        <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={14} color={theme.primaryDark} />
-      </Pressable>
+      <View style={styles.sectionTitleWrap}>
+        <View style={styles.sectionBar} />
+        <Text style={styles.sectionTitle} numberOfLines={1}>{title}</Text>
+      </View>
+      {onSeeAll ? (
+        <Pressable onPress={onSeeAll} hitSlop={6} style={styles.seeAll}>
+          <Text style={[type.caption, { color: theme.primaryDark, fontWeight: "700" }]}>{t("home.seeAll", "See all")}</Text>
+          <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={14} color={theme.primaryDark} />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -362,17 +369,28 @@ const makeStyles = (theme, radii, isRTL) =>
     vpIconHi: { backgroundColor: theme.primary },
 
     platCard: {
-      width: 190,
-      minHeight: 150,
+      width: 212,
+      minHeight: 176,
       padding: 14,
-      borderRadius: 16,
-      gap: 6,
-      backgroundColor: theme.card,
+      paddingTop: 16,
+      borderRadius: 18,
+      gap: 8,
       borderWidth: 1,
-      alignItems: isRTL ? "flex-end" : "flex-start",
+      overflow: "hidden",
     },
-    platCardIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-    platOpen: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4 },
+    platAccent: { position: "absolute", top: 0, left: 0, right: 0, height: 3, opacity: 0.75 },
+    platLogoBox: {
+      height: 60,
+      borderRadius: 12,
+      backgroundColor: "rgba(255,255,255,0.05)",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 10,
+    },
+    platNameRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 2 },
+    platName: { color: "#FFFFFF", fontWeight: "700", fontSize: 15, flexShrink: 1, textAlign: isRTL ? "right" : "left" },
+    platUrl: { fontSize: 11, fontFamily: "monospace", letterSpacing: 0.2, textAlign: isRTL ? "right" : "left" },
+    platDesc: { color: "rgba(255,255,255,0.72)", fontSize: 11.5, lineHeight: 16, flex: 1, textAlign: isRTL ? "right" : "left" },
 
     partnersRow: { flexDirection: isRTL ? "row-reverse" : "row", gap: 10 },
     partnerChip: {
@@ -397,8 +415,11 @@ const makeStyles = (theme, radii, isRTL) =>
     },
     pronovaIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.18)" },
 
-    sectionHead: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between" },
-    seeAll: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 2 },
+    sectionHead: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+    sectionTitleWrap: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 9, flexShrink: 1 },
+    sectionBar: { width: 4, height: 18, borderRadius: 2, backgroundColor: theme.primary },
+    sectionTitle: { color: theme.text, fontSize: 17, fontWeight: "800", letterSpacing: 0.2, flexShrink: 1 },
+    seeAll: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 2, backgroundColor: theme.primary + "14", paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999 },
     sliderRow: { flexDirection: "row", gap: 12 },
 
     listRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 12 },
