@@ -84,7 +84,12 @@ us** (owner reviews). Full analysis/plan was delivered in chat.
 - `84ef8bd` About Us (`app/about.jsx`) + Verification (`app/verification.jsx`) pages + More rows; contact USA/UK + opportunity external-verify link relabel (up to `ea78c96`).
 - `59ce53b` coming-soon surfaces (no invented endpoints): More **Contact & Support** (Contact Us live + **WhatsApp** + **Live Chat** "Soon" rows → info alert) · Wallet **Deposit** button → `DepositSheet` (bank/crypto/other, all coming-soon) · Withdraw **Bank \| Crypto** toggle (crypto = coming-soon panel, live bank flow unchanged) · **Pronova** payment method in invest `PaymentStep` + internal-market buy (coming-soon panel; guarded — `completePurchase` early-returns, Complete button disabled, so it never POSTs).
 
-**Phase B — BLOCKED ON OWNER DATA:** Partners section (logos CIM/HCC/Assurax) · Capimax BRX + PropShare platforms · real Verification codes+links (fill `accreditations.js`) · WhatsApp number + Live Chat provider · About Us copy review.
+**Phase B — IN PROGRESS (owner sent logos + platform domains):**
+- `b5d76e6` **DONE**: Partner brand logos (CIM/HCC/Assurax) generated from source SVGs → `src/constants/brandLogos.js` (each `.stN` class resolved to explicit fill/clip-path at generation time; metadata/style/entity-ns stripped; well-formed per xmldom) rendered by `src/components/PartnerLogo.jsx` (`SvgXml`). New Home **"Strategic Partners"** section + real logos on the **Verification** page (`accreditations.js` gained a `logo` key). Added **Capimax BRX** (`capimaxbrx.com`) + **Capimax PropShare** (`capimaxpropshare.com`) → **5 platforms** with en/ar descriptions.
+  - Regenerate logos: `node <scratchpad>/gen_partner_logos.js` (source: `E:/Work/capimax-group/src/assets/logos-needded/{cim ,hcc,assurax}.svg`).
+  - ⚠️ **On-device QA:** HCC/CIM are gradient-mesh logos (clipPath+use, 180–230 polygons) rendered as vector — verify they render cleanly on a device; if not, ask owner for flat PNG exports. Assurax is flat (22 paths).
+  - ⚠️ BRX/PropShare **descriptions** are placeholder (PropShare name-derived, BRX neutral) → owner to confirm official copy.
+- **STILL BLOCKED ON OWNER DATA:** real Verification codes+links (fill `accreditations.js` `link`/`code`) · WhatsApp number + Live Chat provider · About Us copy review.
 **Phase C — BLOCKED ON BACKEND:** Deposit, Crypto withdraw, Pronova payment endpoints.
 
 Conventions kept: zero-mock, no invented endpoints, brand "Capimax", both themes + RTL, `expo export` + `expo-doctor 18/18` gate, commit per logical step.
