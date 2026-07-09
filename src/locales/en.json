@@ -974,5 +974,30 @@
     "errGeneric": "Google sign-in failed. Please try again.",
     "errPlayServices": "Google Play services are unavailable or need an update.",
     "expoGoNote": "Google sign-in works in the installed app (not Expo Go)."
+  },
+  "about": {
+    "title": "About Us",
+    "headline": "A global investment ecosystem",
+    "intro": "Capimax is a global, integrated investment ecosystem — not just a real-estate platform. We bring together investment, financing, insurance, verification, digital assets, and modern payment technology in one connected system.",
+    "diversified_title": "Diversified global assets",
+    "diversified_body": "We build and operate vetted assets across multiple sectors and countries, and let you own them through small, tradable shares.",
+    "ecosystem_title": "An integrated ecosystem",
+    "ecosystem_body": "Sister platforms cover tokenization (Capimax RT), decentralized finance (Nova DeFi), and digital currency (Pronova) — working together as one group.",
+    "trust_title": "Trust by design",
+    "trust_body": "Every asset is independently valued, insured, and verified, with transparent documentation you can check yourself.",
+    "financing_title": "Financing via Nova",
+    "financing_body": "Through Nova Digital Finance, investors can access interest-free financing to grow within the ecosystem.",
+    "mission_title": "Our mission",
+    "mission_body": "To make institutional-grade investing accessible, transparent, and global — one connected ecosystem for investment, finance, insurance, and digital assets."
+  },
+  "verification": {
+    "title": "Verification",
+    "subtitle": "Verify Capimax's institutional accreditations and partners yourself, through direct external links.",
+    "code": "Code",
+    "verifyLink": "Verify externally",
+    "linkComingSoon": "Verification link coming soon",
+    "cim_desc": "Global custodian and verification partner for documents and assets.",
+    "hcc_desc": "Insurance coverage partner for assets and SPVs.",
+    "assurax_desc": "Strategic assurance & verification partner."
   }
 }

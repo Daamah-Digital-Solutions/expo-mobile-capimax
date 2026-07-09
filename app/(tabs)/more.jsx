@@ -82,6 +82,8 @@ export default function MoreTab() {
   };
 
   const SUPPORT_LINKS = [
+    { icon: "information-circle-outline", label: t("about.title", "About Us"), route: "/about" },
+    { icon: "ribbon-outline", label: t("verification.title", "Verification"), route: "/verification" },
     { icon: "chatbubbles-outline", label: t("contact.title", "Contact Us"), route: "/contact" },
     { icon: "help-circle-outline", label: t("sidebar.faq", "FAQ"), route: "/faq" },
     { icon: "folder-open-outline", label: t("documentCenter.title", "Document Center"), route: "/document-center" },
