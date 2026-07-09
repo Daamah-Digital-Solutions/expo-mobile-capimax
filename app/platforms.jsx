@@ -14,12 +14,7 @@ import Card from "../src/components/Card";
 import FadeInView from "../src/components/motion/FadeInView";
 import { useTheme } from "../src/context/ThemeContext";
 import { useLanguage } from "../src/context/LanguageContext";
-
-const PLATFORMS = [
-  { key: "capimaxrt", name: "Capimax RT", url: "https://capimaxrt.tech", accent: "#818cf8", icon: "business-outline" },
-  { key: "novadf", name: "Nova DeFi", url: "https://novadf.com", accent: "#22d3ee", icon: "git-network-outline" },
-  { key: "pronovacrypto", name: "Pronova Crypto", url: "https://pronovacrypto.tech", accent: "#f59e0b", icon: "logo-bitcoin" },
-];
+import { PLATFORMS } from "../src/constants/platforms";
 
 export default function PlatformsScreen() {
   const router = useRouter();

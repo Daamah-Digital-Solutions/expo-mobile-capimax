@@ -9,6 +9,8 @@ import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import * as WebBrowser from "expo-web-browser";
 
 import Screen from "../../src/components/Screen";
 import Logo from "../../src/components/Logo";
@@ -22,19 +24,23 @@ import FeaturedAssetCard from "../../src/components/home/FeaturedAssetCard";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useLanguage } from "../../src/context/LanguageContext";
 import { userService, walletService, portfolioService, opportunityService, internalMarketService } from "../../src/api/services";
+import { PLATFORMS, PRONOVA_URL } from "../../src/constants/platforms";
 
 const USD = (v) => `$${(parseFloat(v) || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const num = (v) => parseFloat(v) || 0;
 const PCT = (v) => { const n = parseFloat(v) || 0; return `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`; };
 
-// Static value props (same concepts as onboarding) — no live numbers, icons only.
+// "Why Capimax" — the 8 competitive advantages requested by the client (icon-led, no live numbers).
+// `nova` is the strategic Nova-financing integration → rendered highlighted.
 const VALUE_PROPS = [
-  { icon: "shield-checkmark-outline", key: "spv" },
-  { icon: "pie-chart-outline", key: "diversified" },
-  { icon: "ribbon-outline", key: "rating" },
-  { icon: "umbrella-outline", key: "insured" },
-  { icon: "sparkles-outline", key: "bonus" },
-  { icon: "cash-outline", key: "financing" },
+  { icon: "earth-outline", key: "globalAssets" },
+  { icon: "people-outline", key: "globalInvest" },
+  { icon: "shield-checkmark-outline", key: "insured" },
+  { icon: "swap-horizontal-outline", key: "exit" },
+  { icon: "checkmark-done-circle-outline", key: "verify" },
+  { icon: "card-outline", key: "payments" },
+  { icon: "pulse-outline", key: "realtime" },
+  { icon: "git-network-outline", key: "nova" },
 ];
 
 export default function HomeTab() {
@@ -102,6 +108,8 @@ export default function HomeTab() {
       },
     });
 
+  const openUrl = async (url) => { try { await WebBrowser.openBrowserAsync(url); } catch {} };
+
   // ── Header: centered logo on top; greeting (start) + wallet (end) below ──────
   const Header = (
     <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
@@ -159,24 +167,7 @@ export default function HomeTab() {
           </FadeInView>
         </View>
 
-        {/* ── 3) Value-prop grid (static) ── */}
-        <View style={{ paddingHorizontal: spacing.xl, gap: 10 }}>
-          <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("home.whyTitle", "Why Capimax")}</Text>
-          <View style={styles.grid}>
-            {VALUE_PROPS.map((vp, i) => (
-              <FadeInView key={vp.key} index={Math.min(i, 5)} style={styles.gridCellWrap}>
-                <View style={styles.gridCell}>
-                  <View style={styles.vpIcon}><Ionicons name={vp.icon} size={22} color={theme.primary} /></View>
-                  <Text style={[type.caption, { color: theme.text, textAlign: isRTL ? "right" : "left", fontWeight: "600" }]} numberOfLines={2}>
-                    {t(`home.vp_${vp.key}`)}
-                  </Text>
-                </View>
-              </FadeInView>
-            ))}
-          </View>
-        </View>
-
-        {/* ── 4) Featured assets slider ── */}
+        {/* ── Featured assets (kept, moved up) ── */}
         <View style={{ gap: 10 }}>
           <SectionHead title={t("home.featured", "Featured assets")} onSeeAll={() => router.push("/(tabs)/funds")} t={t} theme={theme} type={type} isRTL={isRTL} styles={styles} />
           {loading ? (
@@ -200,6 +191,72 @@ export default function HomeTab() {
               <Card style={styles.emptyMini}><Text style={[type.caption, { color: theme.textMuted, textAlign: "center" }]}>{t("home.featuredEmpty", "No featured assets right now.")}</Text></Card>
             </View>
           )}
+        </View>
+
+        {/* ── Why Capimax → 8 competitive-advantage tiles (Nova integration highlighted) ── */}
+        <View style={{ paddingHorizontal: spacing.xl, gap: 12 }}>
+          <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]}>{t("home.whyTitle", "Why Capimax")}</Text>
+          <View style={styles.grid}>
+            {VALUE_PROPS.map((vp, i) => {
+              const hi = vp.key === "nova";
+              return (
+                <FadeInView key={vp.key} index={Math.min(i, 7)} style={styles.gridCellWrap}>
+                  <View style={[styles.vpCard, hi && styles.vpCardHi]}>
+                    <View style={[styles.vpIcon, hi && styles.vpIconHi]}>
+                      <Ionicons name={vp.icon} size={20} color={hi ? theme.onPrimary : theme.primary} />
+                    </View>
+                    <Text style={[type.caption, { color: theme.text, fontWeight: "700", textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>
+                      {t(`home.vp_${vp.key}`)}
+                    </Text>
+                    <Text style={[type.micro, { color: theme.textMuted, textAlign: isRTL ? "right" : "left", lineHeight: 15 }]} numberOfLines={3}>
+                      {t(`home.vpd_${vp.key}`)}
+                    </Text>
+                  </View>
+                </FadeInView>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* ── Our Platforms — the wider Capimax ecosystem ── */}
+        <View style={{ gap: 10 }}>
+          <SectionHead title={t("platforms.sectionTitle", "Our Platforms")} onSeeAll={() => router.push("/platforms")} t={t} theme={theme} type={type} isRTL={isRTL} styles={styles} />
+          <FlatList
+            data={PLATFORMS}
+            keyExtractor={(p) => p.key}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: 12 }}
+            renderItem={({ item: p }) => (
+              <Pressable onPress={() => openUrl(p.url)} style={[styles.platCard, { borderColor: p.accent + "40" }]}>
+                <View style={[styles.platCardIcon, { backgroundColor: p.accent + "22" }]}>
+                  <Ionicons name={p.icon} size={20} color={p.accent} />
+                </View>
+                <Text style={[type.label, { color: theme.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{p.name}</Text>
+                <Text style={[type.micro, { color: theme.textMuted, textAlign: isRTL ? "right" : "left", lineHeight: 15, flex: 1 }]} numberOfLines={3}>
+                  {t(`platforms.descriptions.${p.key}`)}
+                </Text>
+                <View style={styles.platOpen}>
+                  <Text style={[type.micro, { color: p.accent, fontWeight: "700" }]}>{t("home.openPlatform", "Open")}</Text>
+                  <Ionicons name="open-outline" size={12} color={p.accent} />
+                </View>
+              </Pressable>
+            )}
+          />
+        </View>
+
+        {/* ── Access Pronova ecosystem CTA ── */}
+        <View style={{ paddingHorizontal: spacing.xl }}>
+          <Pressable onPress={() => openUrl(PRONOVA_URL)}>
+            <LinearGradient colors={["#2ead6f", "#1f8a54"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.pronovaCta}>
+              <View style={styles.pronovaIcon}><Ionicons name="sparkles-outline" size={22} color={theme.onPrimary} /></View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={[type.label, { color: theme.onPrimary, textAlign: isRTL ? "right" : "left" }]}>{t("home.accessPronova", "Access Pronova")}</Text>
+                <Text style={[type.caption, { color: theme.onPrimary, opacity: 0.85, textAlign: isRTL ? "right" : "left" }]}>{t("home.accessPronovaDesc", "Explore the Pronova ecosystem")}</Text>
+              </View>
+              <Ionicons name={isRTL ? "arrow-back" : "arrow-forward"} size={20} color={theme.onPrimary} />
+            </LinearGradient>
+          </Pressable>
         </View>
 
         {/* ── 5) Secondary market ── */}
@@ -273,18 +330,41 @@ const makeStyles = (theme, radii, isRTL) =>
 
     grid: { flexDirection: "row", flexWrap: "wrap", gap: 12, justifyContent: "space-between" },
     gridCellWrap: { width: "47%" },
-    gridCell: {
-      flexDirection: isRTL ? "row-reverse" : "row",
-      alignItems: "center",
-      gap: 10,
+    vpCard: {
+      alignItems: isRTL ? "flex-end" : "flex-start",
+      gap: 7,
       padding: 12,
       borderRadius: 14,
       backgroundColor: theme.surfaceAlt,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: theme.border,
-      minHeight: 64,
+      minHeight: 118,
     },
+    vpCardHi: { backgroundColor: theme.primary + "18", borderColor: theme.primary + "55" },
     vpIcon: { width: 38, height: 38, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: theme.primary + "22" },
+    vpIconHi: { backgroundColor: theme.primary },
+
+    platCard: {
+      width: 190,
+      minHeight: 150,
+      padding: 14,
+      borderRadius: 16,
+      gap: 6,
+      backgroundColor: theme.card,
+      borderWidth: 1,
+      alignItems: isRTL ? "flex-end" : "flex-start",
+    },
+    platCardIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+    platOpen: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4 },
+
+    pronovaCta: {
+      flexDirection: isRTL ? "row-reverse" : "row",
+      alignItems: "center",
+      gap: 12,
+      padding: 16,
+      borderRadius: radii.card,
+    },
+    pronovaIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.18)" },
 
     sectionHead: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between" },
     seeAll: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 2 },
