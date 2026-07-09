@@ -46,16 +46,16 @@ export default function PlatformsScreen() {
         {PLATFORMS.map((p, i) => (
           <FadeInView key={p.key} index={i}>
             <Pressable onPress={() => open(p.url)}>
-              <LinearGradient colors={["#1c2a48", "#0e1626"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.card, { borderColor: p.accent + "55" }]}>
-                <LinearGradient colors={[p.accent + "30", "transparent"]} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.glow} pointerEvents="none" />
+              <LinearGradient colors={[theme.surfaceAlt, theme.card]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.card, { borderColor: p.accent + "55" }]}>
+                <LinearGradient colors={[p.accent + "2E", "transparent"]} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.glow} pointerEvents="none" />
                 <View style={styles.topRow}>
                   <View style={[styles.tag, { backgroundColor: p.accent + "1F", borderColor: p.accent + "44" }]}>
                     <Text style={[styles.tagText, { color: p.accent }]} numberOfLines={1}>{t(`platforms.tags.${p.key}`)}</Text>
                   </View>
-                  <Ionicons name="open-outline" size={18} color="rgba(255,255,255,0.5)" />
+                  <Ionicons name="open-outline" size={18} color={theme.textMuted} />
                 </View>
                 <View style={styles.logoBox}>
-                  <PlatformLogo logo={p.logo} boxW={220} boxH={54} />
+                  <PlatformLogo logo={p.logo} boxW={200} boxH={54} />
                 </View>
                 <Text style={styles.name} numberOfLines={1}>{p.name}</Text>
                 <Text style={[styles.url, { color: p.accent }]} numberOfLines={1}>{p.url.replace(/^https?:\/\//, "")}</Text>
@@ -78,8 +78,8 @@ const makeStyles = (theme, radii, isRTL) =>
     topRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between" },
     tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1 },
     tagText: { fontSize: 11, fontWeight: "800", letterSpacing: 0.4, textTransform: "uppercase" },
-    logoBox: { height: 78, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.045)", borderWidth: 1, borderColor: "rgba(255,255,255,0.06)", alignItems: "center", justifyContent: "center", paddingHorizontal: 16 },
-    name: { color: "#FFFFFF", fontWeight: "800", fontSize: 18, textAlign: isRTL ? "right" : "left" },
+    logoBox: { height: 82, borderRadius: 16, backgroundColor: "#121c30", borderWidth: 1, borderColor: "rgba(255,255,255,0.10)", alignItems: "center", justifyContent: "center", paddingHorizontal: 18 },
+    name: { color: theme.text, fontWeight: "800", fontSize: 18, textAlign: isRTL ? "right" : "left" },
     url: { fontSize: 12, fontFamily: "monospace", letterSpacing: 0.3, textAlign: isRTL ? "right" : "left", marginTop: -6 },
-    desc: { color: "rgba(255,255,255,0.72)", fontSize: 13, lineHeight: 20, textAlign: isRTL ? "right" : "left" },
+    desc: { color: theme.textSecondary, fontSize: 13, lineHeight: 20, textAlign: isRTL ? "right" : "left" },
   });

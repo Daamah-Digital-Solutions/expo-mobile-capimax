@@ -243,15 +243,15 @@ export default function HomeTab() {
             contentContainerStyle={{ paddingHorizontal: spacing.xl, gap: 12 }}
             renderItem={({ item: p }) => (
               <Pressable onPress={() => openUrl(p.url)}>
-                <LinearGradient colors={["#1c2a48", "#0e1626"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.platCard, { borderColor: p.accent + "55" }]}>
-                  <LinearGradient colors={[p.accent + "33", "transparent"]} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.platGlow} pointerEvents="none" />
+                <LinearGradient colors={[theme.surfaceAlt, theme.card]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.platCard, { borderColor: p.accent + "55" }]}>
+                  <LinearGradient colors={[p.accent + "2E", "transparent"]} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.platGlow} pointerEvents="none" />
                   <View style={styles.platTagRow}>
                     <View style={[styles.platTag, { backgroundColor: p.accent + "1F", borderColor: p.accent + "44" }]}>
                       <Text style={[styles.platTagText, { color: p.accent }]} numberOfLines={1}>{t(`platforms.tags.${p.key}`)}</Text>
                     </View>
                   </View>
                   <View style={styles.platLogoBox}>
-                    <PlatformLogo logo={p.logo} boxW={162} boxH={46} />
+                    <PlatformLogo logo={p.logo} boxW={130} boxH={42} />
                   </View>
                   <Text style={styles.platName} numberOfLines={1}>{p.name}</Text>
                   <View style={styles.platVisitRow}>
@@ -404,14 +404,14 @@ const makeStyles = (theme, radii, isRTL) =>
     platLogoBox: {
       height: 74,
       borderRadius: 16,
-      backgroundColor: "rgba(255,255,255,0.045)",
+      backgroundColor: "#121c30",
       borderWidth: 1,
-      borderColor: "rgba(255,255,255,0.06)",
+      borderColor: "rgba(255,255,255,0.10)",
       alignItems: "center",
       justifyContent: "center",
-      paddingHorizontal: 12,
+      paddingHorizontal: 16,
     },
-    platName: { color: "#FFFFFF", fontWeight: "800", fontSize: 16, textAlign: isRTL ? "right" : "left" },
+    platName: { color: theme.text, fontWeight: "800", fontSize: 16, textAlign: isRTL ? "right" : "left" },
     platVisitRow: { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4, marginTop: -4 },
     platUrl: { fontSize: 11.5, fontFamily: "monospace", letterSpacing: 0.2, textAlign: isRTL ? "right" : "left" },
 
