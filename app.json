@@ -44,7 +44,7 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.1044086354511-hgope6us8jjava85o69p31n4rbkasefh"
+          "iosUrlScheme": "com.googleusercontent.apps.456574106712-m6f6jb6r50s3vb9mb0ks3jsvv579gua2"
         }
       ]
     ],
@@ -53,14 +53,14 @@
     },
     "extra": {
       "apiUrl": "https://api.capimaxinvestment.com/",
+      "chatUrl": "https://ai.capimaxgroup.com/webhook/capimax-assets/chat",
       "paypalClientId": "AZHEGDb90rDEPUTjBV5cssSfewEAQrwG8cMy0W6NUdj8hLk_XPedJ_hhsJ0m9AG07AfsbBMbkTKhtwyw",
       "paypalEnv": "live",
       "paypalCurrency": "USD",
       "webOrigin": "https://capimaxinvestment.com",
       "google": {
-        "webClientId": "2857014122-atnfes15aq8irqnldfnpqq9nr285phka.apps.googleusercontent.com",
-        "iosClientId": "1044086354511-hgope6us8jjava85o69p31n4rbkasefh.apps.googleusercontent.com",
-        "androidClientId": "1044086354511-6k08oi5ifn2l9f1t9koqt7c9go5vercv.apps.googleusercontent.com"
+        "webClientId": "456574106712-12r77cu6ft5jsmqfom0dcsom8bv6au4d.apps.googleusercontent.com",
+        "iosClientId": "456574106712-m6f6jb6r50s3vb9mb0ks3jsvv579gua2.apps.googleusercontent.com"
       },
       "router": {},
       "eas": {

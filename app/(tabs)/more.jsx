@@ -87,7 +87,7 @@ export default function MoreTab() {
   const CONTACT_LINKS = [
     { icon: "chatbubbles-outline", label: t("contact.title", "Contact Us"), route: "/contact" },
     { icon: "logo-whatsapp", label: t("more.whatsapp", "WhatsApp"), soon: true },
-    { icon: "chatbox-ellipses-outline", label: t("more.liveChat", "Live Chat"), soon: true },
+    { icon: "chatbox-ellipses-outline", label: t("more.liveChat", "Live Chat"), route: "/chat" },
   ];
 
   const SUPPORT_LINKS = [

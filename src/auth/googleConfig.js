@@ -17,11 +17,13 @@ export const googleClientIds = {
   expoClientId: cfg.expoClientId || undefined,
 };
 
-// Active only when we have the web client id (audience) AND the native client id for THIS platform.
+// Active when we have the web client id (= serverClientId, the audience the backend verifies) plus,
+// on iOS, the iOS client id. Android needs no client id in JS — the native SDK signs in with
+// webClientId (serverClientId) and matches the app by package name + SHA-1 registered in the project.
 export function isGoogleConfigured() {
   if (!googleClientIds.webClientId) return false;
   if (Platform.OS === "ios") return Boolean(googleClientIds.iosClientId);
-  if (Platform.OS === "android") return Boolean(googleClientIds.androidClientId);
+  if (Platform.OS === "android") return true;
   // web/other: the web client id is sufficient.
   return Boolean(googleClientIds.webClientId);
 }

@@ -396,13 +396,15 @@ Components mirror via the language-derived `isRTL` from `useLanguage()`. **Verif
   — returns an id_token whose **`aud` = the WEB client id** (what the backend verifies). Flow unchanged:
   `idToken` → `signInWithGoogle` → `POST /api/auth/google/ { credential: idToken }` →
   `data.data.{access,refresh,email,username,is_new_user}` → tokens via `applyTokens` (fires biometric enroll).
-  - Client IDs (Google Cloud project `2857014122`) in `app.json extra.google`: **webClientId** =
-    `2857014122-atnfes15aq8irqnldfnpqq9nr285phka` (server/audience), **androidClientId** =
-    `1044086354511-6k08oi5ifn2l9f1t9koqt7c9go5vercv`, **iosClientId** =
-    `1044086354511-hgope6us8jjava85o69p31n4rbkasefh`.
-  - Config plugin `@react-native-google-signin/google-signin` added with
-    `iosUrlScheme: com.googleusercontent.apps.1044086354511-hgope6us8jjava85o69p31n4rbkasefh` (the plugin now
-    owns the iOS URL scheme; the manual `ios.infoPlist.CFBundleURLTypes` entry was removed).
+  - Client IDs — **all in ONE Google Cloud project `456574106712`** (owner rebuilt the OAuth clients here
+    2026-07-11 to fix a project mismatch: the web client had been in `2857014122` while android/ios were in
+    `1044086354511`, which broke sign-in). In `app.json extra.google`: **webClientId (= serverClientId)** =
+    `456574106712-12r77cu6ft5jsmqfom0dcsom8bv6au4d` (server/audience), **iosClientId** =
+    `456574106712-m6f6jb6r50s3vb9mb0ks3jsvv579gua2`. No `androidClientId` in the app — Android is matched by
+    package (`com.capimax.mobile`) + SHA-1 in the project; `isGoogleConfigured()` on Android needs only webClientId.
+  - Config plugin `@react-native-google-signin/google-signin` with
+    `iosUrlScheme: com.googleusercontent.apps.456574106712-m6f6jb6r50s3vb9mb0ks3jsvv579gua2` (plugin owns the iOS
+    URL scheme). Backend now accepts web+android+ios ids from project 456574106712.
   - ⚠️ **Native module → dev/EAS build only, NOT Expo Go** (button shows a disabled note in Expo Go via
     `Constants.executionEnvironment === StoreClient`).
   - **EAS upload-key SHA-1** (in the Android OAuth client): `9F:D6:1E:74:F4:E1:52:20:E7:E5:43:9B:6E:D3:DF:4B:41:87:B7:0D`.
